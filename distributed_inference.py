@@ -7,6 +7,7 @@ import time
 import json
 from collections import deque
 import argparse
+from pathlib import Path
 
 from huggingface_hub import login
 from transformers import AutoModelForCausalLM, AutoConfig, AutoTokenizer
@@ -138,7 +139,7 @@ if __name__ == "__main__":
     prefix_length  = 500  # Specify your prefix length
     suffix_length  = 500  # Specify your suffix length
     batch_size     = 500
-    experiment_id = f"llama_{llama_size}_Standard_GBS_120_EPOCH_75"
+    experiment_id = f"llama_{llama_size}_Goldfish_H_13_K_21_GBS_120_EPOCH_75"
 
     parser = argparse.ArgumentParser(description='Run inference with specified parameters')
     
@@ -181,7 +182,7 @@ if __name__ == "__main__":
     offset         = args.seq_offset
     batch_size     = args.batch_size
     experiment_id  = args.experiment
-    ckpt_id       = f"step={step}-consumed={consumed}"
+    ckpt_id        = f"step={step}-consumed={consumed}"
     
 
     login(token=hf_login_token)
@@ -192,8 +193,10 @@ if __name__ == "__main__":
     
     # Load the model and tokenizer 
     if not model_path:
-        model_path = f"/store/swissai/a06/.NeMo/Goldfish_Llama3/{llama_size}/{experiment_id}/results/NeMo2HF/{ckpt_id}.bin"
-    model = load_model(config, model_path)
+        model_path = f"/store/swissai/a06/.NeMo/Goldfish_Llama3/{llama_size}/{experiment_id}/results/NeMo2HF"
+    model_path = Path(model_path)
+    model_file = model_path / f"{ckpt_id}.bin"
+    model = load_model(config, model_file) 
     # tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
     
     # Load and process data
@@ -210,4 +213,4 @@ if __name__ == "__main__":
         }
     )['prefix_suffix']
     
-    run(model, dataset, prefix_length, suffix_length, experiment_id, ckpt_id, batch_size)    
+    run(model, dataset, prefix_length, suffix_length, experiment_id, ckpt_id, batch_size)

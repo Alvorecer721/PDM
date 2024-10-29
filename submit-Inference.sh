@@ -17,7 +17,7 @@ echo "Step: ${STEP}"
 echo "Consumed: ${CONSUMED}"
 echo "Experiment: ${EXPERIMENT}"
 
-python distributed_inference.py \
+torchrun --nproc_per_node=1 distributed_inference.py \
     --data-path "${DATA_PATH}" \
     --hf-token "${HF_TOKEN}" \
     --step ${STEP} \
