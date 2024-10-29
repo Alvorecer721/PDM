@@ -138,6 +138,7 @@ if __name__ == "__main__":
     prefix_length  = 500  # Specify your prefix length
     suffix_length  = 500  # Specify your suffix length
     batch_size     = 500
+    experiment_id = f"llama_{llama_size}_Standard_GBS_120_EPOCH_75"
 
     parser = argparse.ArgumentParser(description='Run inference with specified parameters')
     
@@ -163,6 +164,8 @@ if __name__ == "__main__":
                         help='Batch size for processing')
     parser.add_argument('--hf-model-path', type=str, default=None,
                         help='Path to the huggingface model checkpoint')
+    parser.add_argument('--experiment', type=str, required=True,
+                        help='Experiment ID, e.g. llama_1.5b_Standard_GBS_120_EPOCH_75')
     
     args = parser.parse_args()
 
@@ -177,16 +180,14 @@ if __name__ == "__main__":
     suffix_length  = args.suffix_length
     offset         = args.seq_offset
     batch_size     = args.batch_size
+    experiment_id  = args.experiment
+    ckpt_id       = f"step={step}-consumed={consumed}"
     
 
     login(token=hf_login_token)
     
     world_size = int(os.environ["WORLD_SIZE"])  # Number of GPUs
     config = AutoConfig.from_pretrained(llama_config)
-
-
-    experiment_id = f"llama_{llama_size}_Standard_GBS_120_EPOCH_75"
-    ckpt_id       = f"step={step}-consumed={consumed}"
 
     
     # Load the model and tokenizer 
