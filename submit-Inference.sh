@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set your variables
-STEP=5925
-CONSUMED=711000
+STEP=1200
+CONSUMED=$((STEP * 120))
 LLAMA_SIZE="1.5B"
 HF_TOKEN="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"
 DATA_PATH="/mloscratch/homes/yixuan/gutenberg_en_8k_token.jsonl"
