@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Set your variables
-STEP=75
-CONSUMED=9000
+STEP=5925
+CONSUMED=711000
 LLAMA_SIZE="1.5B"
 HF_TOKEN="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"
-DATA_PATH="/mloscratch/homes/yixuan/PDM"
-LLAMA_CONFIG="/Users/xuyixuan/Downloads/Project/PDM/PDM/config/llama3_1.5B_config.json"
+DATA_PATH="/mloscratch/homes/yixuan/gutenberg_en_8k_token.jsonl"
+LLAMA_CONFIG="/mloscratch/homes/yixuan/PDM/config/llama3_1.5B_config.json"
 EXPERIMENT="llama_1.5B_Goldfish_K_21_H_13_GBS_120_EPOCH_79"
-HF_MODEL_PATH="/mloscratch/homes/yixuan/"
+HF_MODEL_PATH="/mloscratch/homes/yixuan/goldfish_ckpts/1b/k_21_h_13"
 
 
 # Run the inference script
@@ -17,7 +17,7 @@ echo "Step: ${STEP}"
 echo "Consumed: ${CONSUMED}"
 echo "Experiment: ${EXPERIMENT}"
 
-torchrun --nproc_per_node=1 distributed_inference.py \
+python -m torch.distributed.launch --nproc_per_node=1 --use-env distributed_inference.py \
     --data-path "${DATA_PATH}" \
     --hf-token "${HF_TOKEN}" \
     --step ${STEP} \
