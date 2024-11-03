@@ -107,9 +107,9 @@ def run(model, dataset, prefix_length, suffix_length, experiment_id, ckpt_id, ba
         if local_rank == 0:
             tqdm.write(f"Time per sequence: {time_per_seq:.3f} seconds")
 
-    inference_folder = f"inference/{experiment_id}"
+    inference_folder = f"inference/{experiment_id}/{ckpt_id}"
     os.makedirs(inference_folder, exist_ok=True)
-    filename = os.path.join(inference_folder, f"{ckpt_id}_rank{local_rank}.jsonl")
+    filename = os.path.join(inference_folder, f"rank{local_rank}.jsonl")
 
     with open(filename, "w") as jsonl_file:
         for outputs, batch_tensor in tqdm(zip(all_outputs, all_batch_tensors), desc="Processing and writing data", total=len(all_outputs)):
