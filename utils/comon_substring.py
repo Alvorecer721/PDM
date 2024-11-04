@@ -151,6 +151,29 @@ def _filter_overlapping_matches(lengths: np.ndarray, starts1: np.ndarray,
             ends1[valid_indices], starts2[valid_indices])
 
 
+@jit(nopython=True)
+def _find_longest_match(dp: np.ndarray) -> Tuple[int, int, int, int, int]:
+    """
+    Find the single longest match from the DP matrix directly.
+    Returns (length, start_pos1, end_pos1, start_pos2, end_pos2)
+    """
+    m, n = dp.shape
+    max_length = 0
+    start_pos1 = end_pos1 = start_pos2 = end_pos2 = 0
+    
+    for i in range(1, m):
+        for j in range(1, n):
+            length = dp[i, j]
+            if length > max_length:
+                max_length = length
+                end_pos1 = i
+                end_pos2 = j
+                start_pos1 = i - length
+                start_pos2 = j - length
+    
+    return max_length, start_pos1, end_pos1, start_pos2, end_pos2
+
+
 class CommonSubstringMatcher:
     def __init__(self, s1_batch, s2_batch):
         self.s1_batch = np.array(s1_batch)
@@ -213,10 +236,27 @@ class CommonSubstringMatcher:
     
     def get_longest_matches(self) -> List[Optional[Match]]:
         """Get longest match for each sequence in the batch."""
-        if self._matches is None:
-            self.get_all_matches()
+        longest_matches = []
         
-        return [replace(matches[0], values=None) if matches else None for matches in self._matches]
+        for seq_idx in tqdm(range(self.num_seq), desc="Finding matches", unit="sequence"):
+            dp = self.dp_matrices[seq_idx]
+            length, start1, end1, start2, end2 = _find_longest_match(dp)
+            
+            if length >= 2:  # Only create match if length meets minimum threshold
+                match = Match(
+                    idx=seq_idx,
+                    length=length,
+                    start_pos1=start1,
+                    end_pos1=end1,
+                    start_pos2=start2,
+                    end_pos2=end2,
+                    values=None  # Skip values as requested
+                )
+                longest_matches.append(match)
+            else:
+                longest_matches.append(None)
+                
+        return longest_matches
     
     def get_match_sequences(self, min_length: int = 2) -> List[List[np.ndarray]]:
         """Get matching sequences for all matches in the batch."""

@@ -1,18 +1,27 @@
 #!/bin/bash
 
-K=10
+K=21
 H=13
+GBS=120
+NUM_EPOCHS=79
 
 # Get number of GPUs per node 
 NUM_GPUS=$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader | wc -l)
 
 # Set your variables
 LLAMA_SIZE="1.5B"
-HF_TOKEN="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"
 DATA_PATH="/mloscratch/homes/yixuan/gutenberg_en_8k_token.jsonl"
 LLAMA_CONFIG="/mloscratch/homes/yixuan/PDM/config/llama3_1.5B_config.json"
-EXPERIMENT="llama_1.5B_Goldfish_K_${K}_H_${H}_GBS_120_EPOCH_83"
+
+# goldfish loss
+EXPERIMENT="llama_1.5B_Goldfish_K_${K}_H_${H}_GBS_${GBS}_EPOCH_${NUM_EPOCHS}"
 HF_MODEL_PATH="/mloscratch/homes/yixuan/goldfish_ckpts/1b/k_${K}_h_${H}"
+
+# standard loss
+# EXPERIMENT="llama_1.5B_Standard_GBS_${GBS}_EPOCH_${NUM_EPOCHS}"
+# HF_MODEL_PATH="/mloscratch/homes/yixuan/goldfish_ckpts/1b/standard"
+
+export HUGGING_FACE_HUB_TOKEN="${HF_TOKEN}"
 
 for checkpoint in ${HF_MODEL_PATH}/*.bin; do
     checkpoint_name=$(basename ${checkpoint} .bin)
@@ -42,7 +51,6 @@ for checkpoint in ${HF_MODEL_PATH}/*.bin; do
 
     python -m torch.distributed.launch --nproc_per_node=${NUM_GPUS} --use-env distributed_inference.py \
         --data-path "${DATA_PATH}" \
-        --hf-token "${HF_TOKEN}" \
         --step ${step} \
         --consumed ${consumed} \
         --llama-size "${LLAMA_SIZE}" \
@@ -52,7 +60,7 @@ for checkpoint in ${HF_MODEL_PATH}/*.bin; do
         --seq-offset 0 \
         --batch-size 500 \
         --experiment "${EXPERIMENT}" \
-        --hf-model-path "${checkpoint}"
+        --hf-model-path "${HF_MODEL_PATH}"
 
     echo "Completed inference for ${checkpoint_name}"
     echo "----------------------------------------"

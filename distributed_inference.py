@@ -10,7 +10,7 @@ import argparse
 from pathlib import Path
 
 from huggingface_hub import login
-from transformers import AutoModelForCausalLM, AutoConfig, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoConfig
 from datasets import load_dataset
 
 
@@ -130,23 +130,10 @@ def run(model, dataset, prefix_length, suffix_length, experiment_id, ckpt_id, ba
 
 
 if __name__ == "__main__":
-    data_path      = '/store/swissai/a06/.NeMo/Goldfish_Llama3/data/gutenberg_en_8k_token.jsonl'
-    llama_config   = '/store/swissai/a06/.NeMo/Goldfish_Llama3/hf_llama_config/llama3_1b_config.json'
-    hf_login_token = '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'
-    step           = 75
-    consumed       = 9000
-    llama_size     = '1.5B'
-    prefix_length  = 500  # Specify your prefix length
-    suffix_length  = 500  # Specify your suffix length
-    batch_size     = 500
-    experiment_id = f"llama_{llama_size}_Goldfish_H_13_K_21_GBS_120_EPOCH_75"
-
     parser = argparse.ArgumentParser(description='Run inference with specified parameters')
     
     parser.add_argument('--data-path', type=str, required=True,
                         help='Path to the tokenised jsonl file')
-    parser.add_argument('--hf-token', type=str, required=True,
-                        help='HuggingFace login token')
     parser.add_argument('--step', type=int, default=75,
                         help='Training step number')
     parser.add_argument('--consumed', type=int, default=9000,
@@ -173,7 +160,6 @@ if __name__ == "__main__":
     data_file      = args.data_path
     model_path     = args.hf_model_path
     llama_config   = args.llama_config
-    hf_login_token = args.hf_token
     step           = args.step
     consumed       = args.consumed
     llama_size     = args.llama_size
@@ -185,7 +171,7 @@ if __name__ == "__main__":
     ckpt_id        = f"step={step}-consumed={consumed}"
     
 
-    login(token=hf_login_token)
+    # login(token=hf_login_token)
     
     world_size = int(os.environ["WORLD_SIZE"])  # Number of GPUs
     config = AutoConfig.from_pretrained(llama_config)
