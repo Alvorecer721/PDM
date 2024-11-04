@@ -42,7 +42,9 @@ USER root
 RUN pip install --no-cache-dir \
     transformers \
     datasets \
-    tqdm
+    tqdm \
+    numba \
+    pandas
 
 # Set working directory
 WORKDIR /workspace
