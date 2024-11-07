@@ -9,7 +9,6 @@ from collections import deque
 import argparse
 from pathlib import Path
 
-from huggingface_hub import login
 from transformers import AutoModelForCausalLM, AutoConfig
 from datasets import load_dataset
 
@@ -191,7 +190,7 @@ if __name__ == "__main__":
         batch_processing_gutenberg,
         batched=True,
         desc="Generating prefix and suffix pairs",
-        num_proc=world_size,
+        num_proc=os.cpu_count(),
         fn_kwargs={
             '_prefix_len': prefix_length,
             '_suffix_len': suffix_length, 
