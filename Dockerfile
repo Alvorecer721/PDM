@@ -18,7 +18,7 @@ LABEL description="Goldfish docker image v1: only support distributed inference"
 
 # Install system packages
 RUN apt-get update && \
-    apt-get install -y zsh wget git sudo && \
+    apt-get install -y zsh wget git sudo htop && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
