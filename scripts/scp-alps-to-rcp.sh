@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the last step
-LAST_STEP=6225
+LAST_STEP=6925
 STEP_INTERVAL=300
 GLOBAL_BATCH_SIZE=120
 
@@ -11,8 +11,8 @@ total_files=$(( (LAST_STEP + STEP_INTERVAL - 1) / STEP_INTERVAL ))
 # Base paths
 SOURCE_HOST="bristen"
 DEST_HOST="rcp"
-SOURCE_BASE="${SOURCE_HOST}:/capstor/store/cscs/swissai/a06/.NeMo/Goldfish_Llama3/1.5B/llama_1.5B_Goldfish_K_10_H_13_GBS_120_EPOCH_83/results/NeMo2HF"
-DEST_BASE="${DEST_HOST}:/mnt/mlo/scratch/homes/yixuan/goldfish_ckpts/1b/k_10_h_13"
+SOURCE_BASE="${SOURCE_HOST}:/capstor/store/cscs/swissai/a06/.NeMo/Goldfish_Llama3/1.5B/llama_1.5B_Goldfish_K_5_H_13_GBS_120_EPOCH_93/results/NeMo2HF"
+DEST_BASE="${DEST_HOST}:/mnt/mlo/scratch/homes/yixuan/goldfish_ckpts/1b/k_5_h_13"
 
 # Create destination directory first
 DEST_PATH=$(echo "$DEST_BASE" | cut -d':' -f2)
