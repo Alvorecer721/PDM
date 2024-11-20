@@ -106,18 +106,21 @@ def _find_match_with_edits(
 
 @njit
 def find_all_potential_matches(
-    s1: np.ndarray, s2: np.ndarray, min_length: int = 3, max_edits: int = 1
+    s1: np.ndarray, s2: np.ndarray, min_length: int = 3, max_edits: int = 1, min_consecutive: int = 2
 ) -> list:
     """Find all potential relaxed matches between s1 and s2."""
     matches = []
     m, n = len(s1), len(s2)  # Get lengths of input sequences
 
+    # Calculate minimum possible window size that could contain a valid match
+    min_window = max(min_length, 2 * min_consecutive + max_edits)
+
     # Try all possible window sizes from min_length up to max sequence length
-    for window in range(min_length, max(m, n) + 1):
+    for window in range(min_window, max(m, n) + 1):
         # Slide window over first sequence
-        for i in range(m - min_length + 1):
+        for i in range(m - min_window + 1):
             # Slide window over second sequence
-            for j in range(n - min_length + 1):
+            for j in range(n - min_window + 1):
                 # Calculate end positions, capped by sequence lengths
                 end1 = min(i + window, m)
                 end2 = min(j + window, n)
@@ -209,24 +212,25 @@ if __name__ == "__main__":
 
     # First run (includes compilation time)
     start = time()
-    result = find_relaxed_matches(s1, s2, min_length=10, max_edits=2)
+    result = find_relaxed_matches(s1, s2, min_length=10, max_edits=4)
     print(f"First run (warmup with compilation): {time() - start:.2f}s")
 
-    # # # # Load the JSONL file
-    # dataset = load_dataset(
-    #     "json",
-    #     data_files="/mloscratch/homes/yixuan/PDM/inference/llama_1.5B_Standard_GBS_120_EPOCH_75/step=2400-consumed=288000/rank0.jsonl",  
-    #     # data_files='/mloscratch/homes/yixuan/PDM/inference/llama_1.5B_Goldfish_K_5_H_13_GBS_120_EPOCH_93/step=6900-consumed=828000/rank0.jsonl',
-    #     split="train",
-    # )
+    # Load the JSONL file
+    dataset = load_dataset(
+        "json",
+        # data_files="/mloscratch/homes/yixuan/PDM/inference/llama_1.5B_Standard_GBS_120_EPOCH_75/step=2400-consumed=288000/rank0.jsonl",  
+        data_files='/mloscratch/homes/yixuan/PDM/inference/llama_1.5B_Goldfish_K_5_H_13_GBS_120_EPOCH_93/step=6900-consumed=828000/rank0.jsonl',
+        split="train",
+    )
 
-    # s1 = dataset[0]["true_suffix"][:200]
-    # s2 = dataset[0]["generated_suffix"][:200]
+    s1 = dataset[0]["true_suffix"][:200]
+    s2 = dataset[0]["generated_suffix"][:200]
 
-    # # Second run (actual runtime)
-    # start = time()
-    # result = find_relaxed_matches(s1, s2, min_length=4, max_edits=2)
-    # end = time()
+    # Second run (actual runtime)
+    start = time()
+    result = find_relaxed_matches(s1, s2, min_length=4, max_edits=2)
+    end = time()
+    print(f"Second run (actual runtime): {end - start:.2f}s")
 
     # Print results
     for match in result:
@@ -235,5 +239,3 @@ if __name__ == "__main__":
             f"s1[{match.start_pos1}:{match.end_pos1}]={match.values1}, "
             f"s2[{match.start_pos2}:{match.end_pos2}]={match.values2})"
         )
-
-    print(f"Found {len(result)} relaxed matches in {end - start:.2f}s")
