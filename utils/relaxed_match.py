@@ -71,13 +71,24 @@ def _find_match_with_edits(s1: np.ndarray, s2: np.ndarray, max_edits: int) -> Tu
         
     return max(m, n), edits
 
-def find_relaxed_matches(
+
+def find_all_potential_matches(
     s1: np.ndarray,
     s2: np.ndarray,
     min_length: int = 3,
     max_edits: int = 1
 ) -> List[RelaxedMatch]:
-    """Find all relaxed matches between s1 and s2."""
+    """Find all potential relaxed matches between s1 and s2.
+    
+    Args:
+        s1: First sequence
+        s2: Second sequence
+        min_length: Minimum length of a match
+        max_edits: Maximum number of edits allowed
+        
+    Returns:
+        List of potential matches, sorted by length (descending) and edits (ascending)
+    """
     matches = []
     m, n = len(s1), len(s2)
     
@@ -112,8 +123,17 @@ def find_relaxed_matches(
     
     # Sort matches by length (descending) and edits (ascending)
     matches.sort(key=lambda m: (-m.length, m.edits))
+    return matches
+
+def filter_contained_matches(matches: List[RelaxedMatch]) -> List[RelaxedMatch]:
+    """Filter out matches that are contained within longer matches with fewer or equal edits.
     
-    # Filter out contained matches
+    Args:
+        matches: List of matches, should be sorted by length (descending) and edits (ascending)
+        
+    Returns:
+        Filtered list of matches with contained matches removed
+    """
     final_matches = []
     for match in matches:
         # Check if this match is contained in any longer match
@@ -130,10 +150,33 @@ def find_relaxed_matches(
     
     return final_matches
 
+def find_relaxed_matches(
+    s1: np.ndarray,
+    s2: np.ndarray,
+    min_length: int = 3,
+    max_edits: int = 1
+) -> List[RelaxedMatch]:
+    """Find all relaxed matches between s1 and s2.
+    
+    This function combines find_all_potential_matches() and filter_contained_matches()
+    to find all valid matches and remove those contained in longer matches.
+    
+    Args:
+        s1: First sequence
+        s2: Second sequence
+        min_length: Minimum length of a match
+        max_edits: Maximum number of edits allowed
+        
+    Returns:
+        List of filtered matches, sorted by length (descending) and edits (ascending)
+    """
+    potential_matches = find_all_potential_matches(s1, s2, min_length, max_edits)
+    return filter_contained_matches(potential_matches)
 
 
 if __name__ == "__main__":
     from datasets import load_dataset
+    from time import time
 
     # Load the JSONL file
     # dataset = load_dataset('json', 
@@ -142,11 +185,14 @@ if __name__ == "__main__":
 
     # s1 = dataset[0]['true_suffix']
     # s2 = dataset[0]['generated_suffix']
+
     
     s1 = np.array([1, 2, 4, 3, 5, 6, 7, 11, 9, 10, 12, 13, 15, 14, 16, 17, 18, 20, 19])
     s2 = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 16, 17, 18, 19, 20])
 
-    result = find_relaxed_matches(s1, s2, max_edits=4)
+    start = time()
+    result = find_relaxed_matches(s1, s2, min_length=10, max_edits=2)
+    print(f"Found {len(result)} matches in {time() - start:.2f}s")
 
     for res in result:
         print(res)
