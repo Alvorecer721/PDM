@@ -7,112 +7,121 @@ from dataclasses import dataclass
 
 
 @dataclass
-class RelaxedMatch(Match):
-    """Extends Match to include edit count information."""
-    edits: int = 0
+class RelaxedMatch:
+    length: int
+    edits: int
+    start_pos1: int
+    end_pos1: int
+    start_pos2: int
+    end_pos2: int
+    values1: np.ndarray
+    values2: np.ndarray
 
     def __repr__(self):
         return (
-            f"RelaxedMatch(idx={self.idx}, "
-            f"length={self.length}, "
+            f"RelaxedMatch(length={self.length}, "
             f"edits={self.edits}, "
-            f"s1[{self.start_pos1}:{self.end_pos1}], "
-            f"s2[{self.start_pos2}:{self.end_pos2}]), "
-            f"values={self.values})"
+            f"s1[{self.start_pos1}:{self.end_pos1}]={self.values1}, "
+            f"s2[{self.start_pos2}:{self.end_pos2}]={self.values2})"
         )
 
 
-@jit(nopython=True)
-def _compute_relaxed_dp(
-    s1: np.ndarray, s2: np.ndarray, max_edits: int = 1
-) -> np.ndarray:
+def _find_match_with_edits(
+    s1: np.ndarray, s2: np.ndarray, allowed_edits: int
+) -> Tuple[int, List[int]]:
     """
-    Compute DP matrix allowing for edits:
-    - Substitution: replace one token with another
-    - Deletion: remove a token from s1
-    - Insertion: add a token to s1 (remove from s2)
-    - Transposition: swap adjacent tokens
+    Find the longest match with exactly allowed_edits edits.
+    Returns the length of match and list of edit positions.
+    """
+    edits = 0
+    i = 0
+    edit_positions = []
     
-    Returns dp[num_edits, i, j] representing match ending at i,j
-    """
+    while i < len(s1) and i < len(s2):
+        if s1[i] == s2[i]:
+            i += 1
+            continue
+            
+        # We've found a mismatch
+        current_edit_start = i
+        
+        # Check for transposition
+        if (i + 1 < len(s1) and i + 1 < len(s2) and 
+            s1[i] == s2[i + 1] and s1[i + 1] == s2[i]):
+            edits += 1
+            edit_positions.append(i)
+            i += 2  # Skip both transposed elements
+        else:
+            # Single substitution
+            edits += 1
+            edit_positions.append(i)
+            i += 1
+                
+        if edits > allowed_edits:
+            # If we exceed allowed edits, backtrack to last valid position
+            return current_edit_start, edit_positions[:-1]
+            
+    return i, edit_positions
+
+
+def find_relaxed_matches(
+    s1: np.ndarray,
+    s2: np.ndarray,
+    min_length: int = 3,
+    max_edits: int = 1
+) -> List[RelaxedMatch]:
+    """Find all relaxed matches between s1 and s2."""
+    matches = []
     m, n = len(s1), len(s2)
+    
+    # For each edit distance
+    for allowed_edits in range(max_edits + 1):
+        # Try all possible starting positions
+        for i in range(m):
+            for j in range(n):
+                seq1 = s1[i:]
+                seq2 = s2[j:]
+                
+                match_length, edit_positions = _find_match_with_edits(seq1, seq2, allowed_edits)
+                
+                if match_length >= min_length and len(edit_positions) == allowed_edits:
+                    matches.append(RelaxedMatch(
+                        length=match_length,
+                        edits=allowed_edits,
+                        start_pos1=i,
+                        end_pos1=i + match_length,
+                        start_pos2=j,
+                        end_pos2=j + match_length,
+                        values1=s1[i:i + match_length],
+                        values2=s2[j:j + match_length]
+                    ))
+    
+    # Sort matches by length (descending) and edits (ascending)
+    matches.sort(key=lambda m: (-m.length, m.edits))
+    
+    # Filter out contained matches
+    final_matches = []
+    for match in matches:
+        # Check if this match is contained in any longer match
+        is_contained = False
+        for longer_match in final_matches:
+            if (match.start_pos1 >= longer_match.start_pos1 and 
+                match.end_pos1 <= longer_match.end_pos1):
+                is_contained = True
+                break
+        
+        if not is_contained:
+            final_matches.append(match)
+    
+    return final_matches
 
-    # Initialize dp matrix with exact matches
-    dp = np.zeros((max_edits + 1, m + 1, n + 1), dtype=np.int32)
-    dp[0] = _compute_dp_matrix_2d(s1, s2)
-
-    # Build matches with edits
-    for e in range(1, max_edits + 1):
-        for i in range(1, m + 1):
-            for j in range(1, n + 1):
-                if s1[i-1] == s2[j-1]:
-                    # Exact match - extend from same or previous edit level
-                    dp[e, i, j] = max(
-                        dp[e, i-1, j-1] + 1,     # Extend current match
-                        dp[e-1, i-1, j-1] + 1    # Start from previous edit level
-                    )
-                else:
-                    # Try all possible edit operations and take max:
-                    
-                    # 1. Substitution
-                    curr_len = dp[e-1, i-1, j-1] + 1
-                    
-                    # 2. Deletion (skip char in s1)
-                    curr_len = max(curr_len, dp[e-1, i-1, j] + 1)
-                    
-                    # 3. Insertion (skip char in s2)
-                    curr_len = max(curr_len, dp[e-1, i, j-1] + 1)
-                    
-                    # 4. Transposition
-                    if (
-                        i > 1
-                        and j > 1
-                        and s1[i-1] == s2[j-2]
-                        and s1[i-2] == s2[j-1]
-                    ):
-                        curr_len = max(curr_len, dp[e-1, i-2, j-2] + 2)
-                    
-                    dp[e, i, j] = curr_len
-
-    return dp
 
 
-@jit(nopython=True)
-def _find_potential_relaxed_matches(
-    dp: np.ndarray, min_length: int
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Find all potential matches from the relaxed DP matrix.
-    Returns arrays of lengths, positions, and edit counts for matches.
-    """
-    max_edits, m, n = dp.shape
-    max_matches = (m - 1) * (n - 1) * max_edits
+if __name__ == "__main__":
+    s1 = np.array([1, 2, 4, 3, 5, 6, 7, 11, 9, 10, 12, 13, 15, 14, 16, 17, 18, 20, 19])
+    s2 = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 16, 17, 18, 19, 20])
 
-    lengths = np.zeros(max_matches, dtype=np.int32)
-    starts1 = np.zeros(max_matches, dtype=np.int32)
-    ends1 = np.zeros(max_matches, dtype=np.int32)
-    starts2 = np.zeros(max_matches, dtype=np.int32)
-    edit_counts = np.zeros(max_matches, dtype=np.int32)
+    result = find_relaxed_matches(s1, s2, max_edits=3)
 
-    match_idx = 0
-    for e in range(max_edits):
-        for i in range(1, m):
-            for j in range(1, n):
-                length = dp[e, i, j]
-                if length >= min_length:
-                    # For non-exact matches (e>0), verify they're genuine
-                    if e == 0 or length > dp[0, i, j]:
-                        lengths[match_idx] = length
-                        starts1[match_idx] = i - length
-                        ends1[match_idx] = i
-                        starts2[match_idx] = j - length
-                        edit_counts[match_idx] = e
-                        match_idx += 1
-
-    return (
-        lengths[:match_idx],
-        starts1[:match_idx],
-        ends1[:match_idx],
-        starts2[:match_idx],
-        edit_counts[:match_idx],
-    )
+    for res in result:
+        print(res)
