@@ -3,26 +3,40 @@ from numba import njit
 from enum import Enum
 from typing import List, Tuple
 from dataclasses import dataclass
+from numba.experimental import jitclass
+from numba import int32, float64
 
 
-@dataclass
+# Define the specification for the RelaxedMatch structure
+spec = [
+    ('length', int32),
+    ('edits', int32),
+    ('start_pos1', int32),
+    ('end_pos1', int32),
+    ('start_pos2', int32),
+    ('end_pos2', int32),
+    ('values1', int32[:]),
+    ('values2', int32[:])
+]
+
+@jitclass(spec)
 class RelaxedMatch:
-    length: int
-    edits: int
-    start_pos1: int
-    end_pos1: int
-    start_pos2: int
-    end_pos2: int
-    values1: np.ndarray
-    values2: np.ndarray
+    def __init__(self, length, edits, start_pos1, end_pos1, start_pos2, end_pos2, values1, values2):
+        self.length = length
+        self.edits = edits
+        self.start_pos1 = start_pos1
+        self.end_pos1 = end_pos1
+        self.start_pos2 = start_pos2
+        self.end_pos2 = end_pos2
+        self.values1 = values1
+        self.values2 = values2
 
-    def __repr__(self):
-        return (
-            f"RelaxedMatch(length={self.length}, "
-            f"edits={self.edits}, "
-            f"s1[{self.start_pos1}:{self.end_pos1}]={self.values1}, "
-            f"s2[{self.start_pos2}:{self.end_pos2}]={self.values2})"
-        )
+@njit
+def create_relaxed_match(length, edits, start_pos1, end_pos1, start_pos2, end_pos2, values1, values2):
+    """Factory function to create RelaxedMatch instances."""
+    v1 = np.array(values1, dtype=np.int32)
+    v2 = np.array(values2, dtype=np.int32)
+    return RelaxedMatch(length, edits, start_pos1, end_pos1, start_pos2, end_pos2, v1, v2)
 
 
 @njit
@@ -63,84 +77,60 @@ def _find_match_with_edits(s1: np.ndarray, s2: np.ndarray, max_edits: int) -> Tu
     """Find the longest match with up to max_edits edits."""
     dp = _dp_edit_distance(s1, s2, max_edits)
     m, n = len(s1), len(s2)
-    
-    # Get edit distance
     edits = dp[m, n]
     if edits > max_edits:
         return 0, max_edits + 1
-        
     return max(m, n), edits
 
-
-def find_all_potential_matches(
-    s1: np.ndarray,
-    s2: np.ndarray,
-    min_length: int = 3,
-    max_edits: int = 1
-) -> List[RelaxedMatch]:
-    """Find all potential relaxed matches between s1 and s2.
-    
-    Args:
-        s1: First sequence
-        s2: Second sequence
-        min_length: Minimum length of a match
-        max_edits: Maximum number of edits allowed
-        
-    Returns:
-        List of potential matches, sorted by length (descending) and edits (ascending)
-    """
+@njit
+def find_all_potential_matches(s1: np.ndarray, s2: np.ndarray, min_length: int = 3, max_edits: int = 1) -> list:
+    """Find all potential relaxed matches between s1 and s2."""
     matches = []
     m, n = len(s1), len(s2)
     
-    # Try different window sizes
     for window in range(min_length, max(m, n) + 1):
-        # Try all possible starting positions
         for i in range(m - min_length + 1):
             for j in range(n - min_length + 1):
-                # Get subsequences to compare
                 end1 = min(i + window, m)
                 end2 = min(j + window, n)
                 seq1 = s1[i:end1]
                 seq2 = s2[j:end2]
                 
-                # Skip if length difference is too large
                 if abs(len(seq1) - len(seq2)) > max_edits:
                     continue
                 
                 match_length, num_edits = _find_match_with_edits(seq1, seq2, max_edits)
                 
                 if match_length >= min_length and num_edits <= max_edits:
-                    matches.append(RelaxedMatch(
-                        length=match_length,
-                        edits=num_edits,
-                        start_pos1=i,
-                        end_pos1=end1,
-                        start_pos2=j,
-                        end_pos2=end2,
-                        values1=s1[i:end1],
-                        values2=s2[j:end2]
-                    ))
+                    match = create_relaxed_match(
+                        match_length, num_edits,
+                        i, end1, j, end2,
+                        s1[i:end1], s2[j:end2]
+                    )
+                    matches.append(match)
     
-    # Sort matches by length (descending) and edits (ascending)
-    matches.sort(key=lambda m: (-m.length, m.edits))
     return matches
 
-def filter_contained_matches(matches: List[RelaxedMatch]) -> List[RelaxedMatch]:
-    """Filter out matches that are contained within longer matches with fewer or equal edits.
+@njit
+def filter_contained_matches(matches: list) -> list:
+    """Filter out matches that are contained within longer matches with fewer or equal edits."""
+    # Sort matches by length in descending order
+    n = len(matches)
+    # Manual sorting since we can't use sorted() in numba
+    for i in range(n):
+        for j in range(0, n-i-1):
+            if matches[j].length < matches[j+1].length:
+                matches[j], matches[j+1] = matches[j+1], matches[j]
     
-    Args:
-        matches: List of matches, should be sorted by length (descending) and edits (ascending)
-        
-    Returns:
-        Filtered list of matches with contained matches removed
-    """
     final_matches = []
     for match in matches:
-        # Check if this match is contained in any longer match
         is_contained = False
         for longer_match in final_matches:
+            # Check if contained in both sequences
             if (match.start_pos1 >= longer_match.start_pos1 and 
                 match.end_pos1 <= longer_match.end_pos1 and
+                match.start_pos2 >= longer_match.start_pos2 and 
+                match.end_pos2 <= longer_match.end_pos2 and
                 match.edits >= longer_match.edits):
                 is_contained = True
                 break
@@ -150,49 +140,40 @@ def filter_contained_matches(matches: List[RelaxedMatch]) -> List[RelaxedMatch]:
     
     return final_matches
 
-def find_relaxed_matches(
-    s1: np.ndarray,
-    s2: np.ndarray,
-    min_length: int = 3,
-    max_edits: int = 1
-) -> List[RelaxedMatch]:
-    """Find all relaxed matches between s1 and s2.
-    
-    This function combines find_all_potential_matches() and filter_contained_matches()
-    to find all valid matches and remove those contained in longer matches.
-    
-    Args:
-        s1: First sequence
-        s2: Second sequence
-        min_length: Minimum length of a match
-        max_edits: Maximum number of edits allowed
-        
-    Returns:
-        List of filtered matches, sorted by length (descending) and edits (ascending)
-    """
+@njit
+def find_relaxed_matches(s1: np.ndarray, s2: np.ndarray, min_length: int = 3, max_edits: int = 1) -> list:
+    """Find all relaxed matches between s1 and s2."""
     potential_matches = find_all_potential_matches(s1, s2, min_length, max_edits)
     return filter_contained_matches(potential_matches)
-
 
 if __name__ == "__main__":
     from datasets import load_dataset
     from time import time
 
-    # Load the JSONL file
-    # dataset = load_dataset('json', 
-    #                     data_files='/mloscratch/homes/yixuan/PDM/inference/llama_1.5B_Goldfish_K_5_H_13_GBS_120_EPOCH_93/step=3000-consumed=360000/rank0.jsonl',
-    #                     split='train')
+    s1 = [1, 2, 4, 3, 5, 6, 7, 11, 9, 10, 12, 13, 15, 14, 16, 17, 18, 20, 19]
+    s2 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 16, 17, 18, 19, 20]
 
-    # s1 = dataset[0]['true_suffix']
-    # s2 = dataset[0]['generated_suffix']
-
-    
-    s1 = np.array([1, 2, 4, 3, 5, 6, 7, 11, 9, 10, 12, 13, 15, 14, 16, 17, 18, 20, 19])
-    s2 = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 16, 17, 18, 19, 20])
-
+    # First run (includes compilation time)
     start = time()
-    result = find_relaxed_matches(s1, s2, min_length=10, max_edits=2)
-    print(f"Found {len(result)} matches in {time() - start:.2f}s")
+    result = find_relaxed_matches(s1, s2, min_length=10, max_edits=4)
+    print(f"First run (with compilation): {time() - start:.2f}s")
 
-    for res in result:
-        print(res)
+
+    # # # Load the JSONL file
+    dataset = load_dataset('json', 
+                        data_files='/mloscratch/homes/yixuan/PDM/inference/llama_1.5B_Standard_GBS_120_EPOCH_75/step=2400-consumed=288000/rank0.jsonl', # '/mloscratch/homes/yixuan/PDM/inference/llama_1.5B_Goldfish_K_5_H_13_GBS_120_EPOCH_93/step=3000-consumed=360000/rank0.jsonl'
+                        split='train')
+    
+    s1 = dataset[0]['true_suffix'][:200]
+    s2 = dataset[0]['generated_suffix'][:200]
+
+    # Second run (actual runtime)
+    start = time()
+    result = find_relaxed_matches(s1, s2, min_length=4, max_edits=2)
+    print(f"Second run (pure execution): {time() - start:.2f}s")
+
+    # Print results
+    for match in result:
+        print(f"Match(length={match.length}, edits={match.edits}, "
+              f"s1[{match.start_pos1}:{match.end_pos1}]={match.values1}, "
+              f"s2[{match.start_pos2}:{match.end_pos2}]={match.values2})")
