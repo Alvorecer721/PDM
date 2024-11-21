@@ -1,11 +1,11 @@
 
 import numpy as np
-from numba import njit
-from typing import List, Tuple
+from numba import njit, prange, get_num_threads, get_thread_id
+from typing import Tuple
 from dataclasses import dataclass
 from numba.experimental import jitclass
 from numba import int32, float64
-
+from numba.typed import List
 
 # Define the specification for the RelaxedMatch structure
 spec = [
@@ -56,11 +56,11 @@ def create_relaxed_match(
 
 
 @njit
-def _dp_edit_distance(s1: np.ndarray, s2: np.ndarray, max_edits: int) -> np.ndarray:
+def _dp_edit_distance(s1: np.ndarray, s2: np.ndarray, max_edits: int):
     """
-    Compute edit distance with Ukkonen's band optimization.
+    Compute edit distance with Ukkonen's band optimization and early stopping.
     Only computes cells within diagonal band of width 2*max_edits+1.
-    Assumes len difference check has already been done before calling.
+    Returns early if min possible edit distance exceeds max_edits.
     """
     m, n = len(s1), len(s2)
     dp = np.full((m + 1, n + 1), max_edits + 1, dtype=np.int32)
@@ -71,55 +71,77 @@ def _dp_edit_distance(s1: np.ndarray, s2: np.ndarray, max_edits: int) -> np.ndar
         dp[i, 0] = i
     for j in range(1, min(n + 1, max_edits + 1)):
         dp[0, j] = j
+
+     # Track match sections in diagonal
+    match_sections = 0
+    in_match = False
     
     # Fill DP table within band
     for i in range(1, m + 1):
         j_start = max(1, i - max_edits)
         j_end = min(n + 1, i + max_edits + 1)
+        min_edits = max_edits + 1
         
         for j in range(j_start, j_end):
             if s1[i - 1] == s2[j - 1]:
                 dp[i, j] = dp[i - 1, j - 1]
+
+                # Check for matches in diagonal
+                if i == j and not in_match:
+                    match_sections += 1
+                    in_match = True
+
             else:
                 dp[i, j] = min(
-                    dp[i - 1, j] + 1,
-                    dp[i, j - 1] + 1,
-                    dp[i - 1, j - 1] + 1
+                    dp[i - 1, j] + 1,    # Deletion
+                    dp[i, j - 1] + 1,    # Insertion
+                    dp[i - 1, j - 1] + 1 # Substitution
                 )
                 # Check for transposition
                 if (i > 1 and j > 1 and 
                     s1[i - 1] == s2[j - 2] and 
                     s1[i - 2] == s2[j - 1]):
                     dp[i, j] = min(dp[i, j], dp[i - 2, j - 2] + 1)
-    
-    return dp
 
+                if i == j:
+                    in_match = False
+            
+            # Update minimum edit count in current row
+            min_edits = min(min_edits, dp[i, j])
+        
+        # Early stopping check - if minimum possible edits exceeds max_edits
+        if min_edits > max_edits:
+            return max_edits + 1
+        
+    # If there's only one match section and some edits, reject
+    if match_sections == 1 and dp[m,n] > 0:
+        return max_edits + 1
+
+    return dp[m,n]
 
 @njit
 def _find_match_with_edits(
     s1: np.ndarray, s2: np.ndarray, max_edits: int
 ) -> Tuple[int, int]:
     """Find the longest match with up to max_edits edits."""
-    dp = _dp_edit_distance(s1, s2, max_edits)
-    m, n = len(s1), len(s2)
-    edits = dp[m, n]
+    edits = _dp_edit_distance(s1, s2, max_edits)
     if edits > max_edits:
         return 0, max_edits + 1
-    return max(m, n), edits
+    return max(len(s1), len(s2)), edits
 
 
 @njit
 def find_all_potential_matches(
-    s1: np.ndarray, s2: np.ndarray, min_length: int = 3, max_edits: int = 1, min_consecutive: int = 2
+    s1: np.ndarray, s2: np.ndarray, min_consecutive: int = 3, max_edits: int = 1,
 ) -> list:
     """Find all potential relaxed matches between s1 and s2."""
-    matches = []
-    m, n = len(s1), len(s2)  # Get lengths of input sequences
+    matches = List()
+    m, n = len(s1), len(s2)
 
-    # Calculate minimum possible window size that could contain a valid match
-    min_window = max(min_length, 2 * min_consecutive + max_edits)
+    # Calculate minimum window size based on min_length and max_edits
+    min_window = min_consecutive + max_edits + 1
 
-    # Try all possible window sizes from min_length up to max sequence length
+    # Try all possible window sizes from min_window up to max sequence length
     for window in range(min_window, max(m, n) + 1):
         # Slide window over first sequence
         for i in range(m - min_window + 1):
@@ -139,9 +161,8 @@ def find_all_potential_matches(
                 # Find length of match and number of edits needed
                 match_length, num_edits = _find_match_with_edits(seq1, seq2, max_edits)
 
-                # If match meets minimum length and edit criteria
-                if match_length >= min_length and num_edits <= max_edits:
-                    # Create and store match object
+                # If edits are within allowed limit
+                if num_edits <= max_edits:
                     match = create_relaxed_match(
                         match_length,
                         num_edits, 
@@ -200,10 +221,10 @@ def filter_contained_matches(matches: list) -> list:
 
 @njit
 def find_relaxed_matches(
-    s1: np.ndarray, s2: np.ndarray, min_length: int = 3, max_edits: int = 1
+    s1: np.ndarray, s2: np.ndarray, min_consecutive: int = 3, max_edits: int = 1
 ) -> list:
     """Find all relaxed matches between s1 and s2."""
-    potential_matches = find_all_potential_matches(s1, s2, min_length, max_edits)
+    potential_matches = find_all_potential_matches(s1, s2, min_consecutive, max_edits)
     return filter_contained_matches(potential_matches)
 
 
@@ -216,23 +237,31 @@ if __name__ == "__main__":
 
     # First run (includes compilation time)
     start = time()
-    result = find_relaxed_matches(s1, s2, min_length=10, max_edits=4)
+    result = find_relaxed_matches(
+        s1, 
+        s2, 
+        min_consecutive=2, 
+        max_edits=6, 
+    )
     print(f"First run (warmup with compilation): {time() - start:.2f}s")
 
-    # Load the JSONL file
+    # # Load the JSONL file
     dataset = load_dataset(
         "json",
         # data_files="/mloscratch/homes/yixuan/PDM/inference/llama_1.5B_Standard_GBS_120_EPOCH_75/step=2400-consumed=288000/rank0.jsonl",  
-        data_files='/mloscratch/homes/yixuan/PDM/inference/llama_1.5B_Goldfish_K_5_H_13_GBS_120_EPOCH_93/step=6900-consumed=828000/rank0.jsonl',
+        # data_files="/mloscratch/homes/yixuan/PDM/inference/llama_1.5B_Goldfish_K_10_H_13_GBS_120_EPOCH_83/step=1800-consumed=216000/rank0.jsonl",
+        data_files="/mloscratch/homes/yixuan/PDM/inference/llama_1.5B_Goldfish_K_5_H_13_GBS_120_EPOCH_93/step=2400-consumed=288000/rank0.jsonl",
+        # data_files='/mloscratch/homes/yixuan/PDM/inference/llama_1.5B_Goldfish_K_21_H_13_GBS_120_EPOCH_79/step=4200-consumed=504000/rank0.jsonl', 
         split="train",
     )
 
-    s1 = dataset[2]["true_suffix"][:400]
-    s2 = dataset[2]["generated_suffix"][:400]
+    num_tokens = 400
+    s1 = dataset[0]["true_suffix"][:num_tokens]
+    s2 = dataset[0]["generated_suffix"][:num_tokens]
 
     # Second run (actual runtime)
     start = time()
-    result = find_relaxed_matches(s1, s2, min_length=4, max_edits=2)
+    result = find_relaxed_matches(s1, s2, min_consecutive=2, max_edits=2)
     end = time()
     print(f"Second run (actual runtime): {end - start:.2f}s")
 
