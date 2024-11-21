@@ -1,3 +1,4 @@
+
 import numpy as np
 from numba import njit
 from typing import List, Tuple
@@ -56,38 +57,41 @@ def create_relaxed_match(
 
 @njit
 def _dp_edit_distance(s1: np.ndarray, s2: np.ndarray, max_edits: int) -> np.ndarray:
-    """Compute edit distance with dynamic programming."""
+    """
+    Compute edit distance with Ukkonen's band optimization.
+    Only computes cells within diagonal band of width 2*max_edits+1.
+    Assumes len difference check has already been done before calling.
+    """
     m, n = len(s1), len(s2)
     dp = np.full((m + 1, n + 1), max_edits + 1, dtype=np.int32)
-
+    
     # Initialize base cases
     dp[0, 0] = 0
-    for i in range(1, m + 1):
+    for i in range(1, min(m + 1, max_edits + 1)):
         dp[i, 0] = i
-    for j in range(1, n + 1):
+    for j in range(1, min(n + 1, max_edits + 1)):
         dp[0, j] = j
-
-    # Fill DP table
+    
+    # Fill DP table within band
     for i in range(1, m + 1):
-        for j in range(1, n + 1):
+        j_start = max(1, i - max_edits)
+        j_end = min(n + 1, i + max_edits + 1)
+        
+        for j in range(j_start, j_end):
             if s1[i - 1] == s2[j - 1]:
                 dp[i, j] = dp[i - 1, j - 1]
             else:
-                # Regular operations (insertion, deletion, substitution)
                 dp[i, j] = min(
-                    dp[i - 1, j] + 1,  # deletion
-                    dp[i, j - 1] + 1,  # insertion
-                    dp[i - 1, j - 1] + 1,  # substitution
+                    dp[i - 1, j] + 1,
+                    dp[i, j - 1] + 1,
+                    dp[i - 1, j - 1] + 1
                 )
                 # Check for transposition
-                if (
-                    i > 1
-                    and j > 1
-                    and s1[i - 1] == s2[j - 2]
-                    and s1[i - 2] == s2[j - 1]
-                ):
+                if (i > 1 and j > 1 and 
+                    s1[i - 1] == s2[j - 2] and 
+                    s1[i - 2] == s2[j - 1]):
                     dp[i, j] = min(dp[i, j], dp[i - 2, j - 2] + 1)
-
+    
     return dp
 
 
@@ -223,8 +227,8 @@ if __name__ == "__main__":
         split="train",
     )
 
-    s1 = dataset[0]["true_suffix"][:200]
-    s2 = dataset[0]["generated_suffix"][:200]
+    s1 = dataset[2]["true_suffix"][:400]
+    s2 = dataset[2]["generated_suffix"][:400]
 
     # Second run (actual runtime)
     start = time()
