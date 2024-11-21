@@ -61,6 +61,7 @@ def _dp_edit_distance(s1: np.ndarray, s2: np.ndarray, max_edits: int):
     Compute edit distance with Ukkonen's band optimization and early stopping.
     Only computes cells within diagonal band of width 2*max_edits+1.
     Returns early if min possible edit distance exceeds max_edits.
+    Also checks for single consecutive match pattern.
     """
     m, n = len(s1), len(s2)
     dp = np.full((m + 1, n + 1), max_edits + 1, dtype=np.int32)
