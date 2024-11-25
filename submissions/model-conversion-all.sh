@@ -6,11 +6,13 @@
 #SBATCH --error=/store/swissai/a06/.NeMo/Goldfish_Llama3/log-nemo-convert_%j.err
 #SBATCH --output=/store/swissai/a06/.NeMo/Goldfish_Llama3/log-nemo-convert_%j.out
 #SBATCH --gres=gpu:4
-#SBATCH --job-name=nemo-GF-conversion
+#SBATCH --job-name=ckpt-cvs
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=06:00:00
-#SBATCH --account a06
+#SBATCH --time=00:30:00
+#SBATCH --partition=debug
+# #SBATCH --time=06:00:00
+# #SBATCH --account a06
 
 # setup
 export TRANSFORMERS_OFFLINE=0
@@ -27,6 +29,6 @@ srun \
     --cpus-per-task $SLURM_CPUS_PER_TASK --jobid $SLURM_JOB_ID \
     --wait 60 \
     --unbuffered \
-    bash -c "cd /users/xyixuan/store/a06/.NeMo/Goldfish_Llama3/PDM && ./scripts/ckpt_conversion/Megatron2HFConversion.sh"
+    bash -c "cd /users/xyixuan/store/.NeMo/Goldfish_Llama3/PDM && ./scripts/ckpt_conversion/Megatron2HFConversion.sh"
 
     
