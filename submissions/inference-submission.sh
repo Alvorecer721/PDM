@@ -6,7 +6,7 @@
 #SBATCH --error=/store/swissai/a06/.NeMo/Goldfish_Llama3/log-goldfish-infer_%j.err
 #SBATCH --output=/store/swissai/a06/.NeMo/Goldfish_Llama3/log-goldfish-infer_%j.out
 #SBATCH --gres=gpu:4
-#SBATCH --job-name=nemo-inference
+#SBATCH --job-name=gfl-infer
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=06:00:00

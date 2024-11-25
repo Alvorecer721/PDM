@@ -1,7 +1,12 @@
 #!/bin/bash
 
+
+# Before running this script, make sure you have the following:
+# 1. A directory containing the Megatron checkpoints
+
 # Directories
-experiment_dir="/users/xyixuan/store/a06/.NeMo/Goldfish_Llama3/1.5B/llama_1.5B_Goldfish_K_10_H_13_GBS_120_EPOCH_83" 
+# experiment_dir="/users/xyixuan/store/a06/.NeMo/Goldfish_Llama3/1.5B/llama_1.5B_Goldfish_K_54_H_13_GBS_120_EPOCH_76"  
+experiment_dir="/iopsstor/scratch/cscs/xyixuan/llama_1.5B_Goldfish_K_54_H_13_GBS_120_EPOCH_76"
 checkpoint_dir="$experiment_dir/results/checkpoints"
 nemo_output_dir="$experiment_dir/results/Megatron2NeMo"
 hf_output_dir="$experiment_dir/results/NeMo2HF"
@@ -41,15 +46,15 @@ for filepath in $(ls "$checkpoint_dir" | sort -t'=' -k2 -n); do
     if [[ ! -f "$nemo_file_path" ]]; then
         echo "Converting Megatron ckpt to Nemo ckpt: $filename"
         # export CUDA_VISIBLE_DEVICES=0
-        python3 -m torch.distributed.launch --nproc_per_node=1 /users/xyixuan/NeMo/examples/nlp/language_modeling/megatron_ckpt_to_nemo.py \
+        python3 -m torch.distributed.launch --nproc_per_node=4 /users/xyixuan/NeMo/examples/nlp/language_modeling/megatron_ckpt_to_nemo.py \
             --checkpoint_folder "$checkpoint_dir" \
             --checkpoint_name "$filename" \
             --nemo_file_path "$nemo_file_path" \
             --model_type gpt \
             --hparams_file "$hparams_file" \
-            --tensor_model_parallel_size 1 \
+            --tensor_model_parallel_size 4 \
             --pipeline_model_parallel_size 1 \
-            --gpus_per_node 1
+            --gpus_per_node 4
     else
         echo "Nemo checkpoint already exists for step=$steps, consumed_samples=$consumed. Skipping NeMo conversion..."
     fi
@@ -59,7 +64,6 @@ for filepath in $(ls "$checkpoint_dir" | sort -t'=' -k2 -n); do
         echo "Converting NeMo ckpt to Hugging Face ckpt: $nemo_file_path"
         python3 -u /users/xyixuan/NeMo/scripts/checkpoint_converters/convert_llama_nemo_to_hf.py \
             --input_name_or_path="$nemo_file_path" \
-            --input_tokenizer="$tokenizer_dir" \
             --output_path="$hf_file_path" \
             --override_config_path="$override_config_path"
     else
