@@ -1,3 +1,5 @@
+# The approximate string matching problem is to find all locations at which 
+# a query of length m matches a substring of a text of length n with k-or-fewer differences.
 
 import numpy as np
 from numba import njit, prange, get_num_threads, get_thread_id
