@@ -97,10 +97,11 @@ def remove_duplicate_ids(example, seen_ids):
     return True
 
 
-def verify_num_token(example, expected_num_tokens):
+def verify_num_token(example, tokenize_fn, expected_num_tokens):
     """Helper function to only keep examples with the expected number of tokens."""
     # Selected_tokens is a list of tokens, not the length
-    return len(example[COLUMN_NAMES["SELECTED_TOKENS"]]) == expected_num_tokens
+
+    return len(tokenize_fn(example[COLUMN_NAMES["DETOKENIZED_TEXTS"]]).input_ids) == expected_num_tokens
 
 
 def save_tokenized_datasets(dataset, output_dir: str):
@@ -130,8 +131,11 @@ def save_tokenized_datasets(dataset, output_dir: str):
 
 
 def main(args):
+    # Use all available cpu processors
+    num_proc = os.cpu_count()
+
     # Load the dataset
-    ds = load_dataset("manu/project_gutenberg", split="en")
+    ds = load_dataset("manu/project_gutenberg", split="en", cache_dir="/iopsstor/scratch/cscs/xyixuan/gutenberg")
 
     # Load the tokenizer
     tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
@@ -143,16 +147,20 @@ def main(args):
     # Filter and select the subset of articles
     seen_ids = set()
     subset = (
-        ds.filter(lambda x: remove_duplicate_ids(x, seen_ids))
-        .filter(lambda example: len(example[COLUMN_NAMES["TEXT"]]) >= args.char_pos_end)
+        ds.filter(
+            lambda x: remove_duplicate_ids(x, seen_ids),
+            desc="De-duplicating by IDs"
+        )
+        .filter(
+            lambda example: len(example[COLUMN_NAMES["TEXT"]]) >= args.char_pos_end,
+            num_proc=num_proc,
+            desc="Filtering by text length"
+        )
     )
 
     # Verify no duplicates
     id_counts = Counter(subset["id"])
     assert len(id_counts) == len(subset), "There are duplicate IDs in the dataset"
-
-    # Use all available cpu processors
-    num_proc = os.cpu_count()
 
     # Tokenize the selected subset of articles
     gutenberg = subset.map(
@@ -182,12 +190,16 @@ def main(args):
 
     # Validate the processed gutenberg has exactly the number of tokens each article
     gutenberg_with_tokens = gutenberg_with_tokens.filter(
-        lambda x: verify_num_token(x, args.num_tokens)
-    ).select(range(args.num_articles))
+        lambda x: verify_num_token(x, tokenize_fn, args.num_tokens),
+        num_proc=num_proc,
+        desc="Verifying token counts"
+    )
 
-    logger.info(f"Final dataset contains {len(gutenberg_with_tokens)} articles")
+    print(f"After filtering: {len(gutenberg_with_tokens)}")
 
-    save_tokenized_datasets(gutenberg_with_tokens, args.output_dir)
+    gutenberg_final = gutenberg_with_tokens.select(range(args.num_articles))
+
+    save_tokenized_datasets(gutenberg_final, args.output_dir)
 
 
 if __name__ == "__main__":
@@ -212,7 +224,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--char-pos-end",
         type=int,
-        default=70_000,
+        default=80_000,
         help="Ending character position for tokenization",
     )
     parser.add_argument(
