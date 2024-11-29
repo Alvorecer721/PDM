@@ -5,15 +5,39 @@ import numpy as np
 import random
 from collections import Counter
 import os
+import pathlib
+from functools import partial
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+COLUMN_NAMES = {
+    "TEXT": "text",
+    "ID": "id",
+    "INPUT_IDS": "input_ids",
+    "SELECTED_TOKENS": "selected_tokens",
+    "DETOKENIZED_TEXTS": "detokenized_texts",
+    "SEQ_LENGTH": "seq_length",
+}
+
+FILE_NAMES = {"TOKENIZED": "tokenized.jsonl", "TEXT": "text.jsonl"}
 
 
-def batch_tokenize_gutenberg(batch, _tokenizer, char_pos_start, char_pos_end):
+def create_tokenize_fn(_tokenizer):
+    """Create a partial tokenizer function with fixed parameters."""
+    return partial(
+        _tokenizer, truncation=False, padding=False, add_special_tokens=False
+    )
+
+
+def batch_tokenize_gutenberg(batch, tokenize_fn, char_pos_start, char_pos_end):
     """
     Tokenize sequences from a batch of articles between specified character positions.
 
     Args:
         batch (dict): Batch of data containing the 'text' field.
-        _tokenizer (AutoTokenizer): The tokenizer used for tokenization.
+        tokenize_fn (function): Tokenization function.
         char_pos_start (int, optional): Starting character position. Defaults to 10_000.
         char_pos_end (int, optional): Ending character position. Defaults to 70_000.
 
@@ -23,15 +47,15 @@ def batch_tokenize_gutenberg(batch, _tokenizer, char_pos_start, char_pos_end):
     input_ids_list = []
     seq_length_list = []
 
-    for sequence in batch["text"]:
-        # Slice and tokenize the sequence
-        input_ids = _tokenizer(
-            sequence[char_pos_start:char_pos_end], truncation=False, padding=False
-        ).input_ids
+    for sequence in batch[COLUMN_NAMES["TEXT"]]:
+        input_ids = tokenize_fn(text=sequence[char_pos_start:char_pos_end]).input_ids
         input_ids_list.append(input_ids)
         seq_length_list.append(len(input_ids))
 
-    return {"input_ids": input_ids_list, "seq_length": seq_length_list}
+    return {
+        COLUMN_NAMES["INPUT_IDS"]: input_ids_list,
+        COLUMN_NAMES["SEQ_LENGTH"]: seq_length_list,
+    }
 
 
 def select_tokens_from_random_offset(batch, _tokenizer, num_tokens, seed=42):
@@ -53,42 +77,74 @@ def select_tokens_from_random_offset(batch, _tokenizer, num_tokens, seed=42):
     selected_tokens = []
     detokenized_texts = []
 
-    for input_ids in batch["input_ids"]:
+    for input_ids in batch[COLUMN_NAMES["INPUT_IDS"]]:
         offset = rng.randint(0, len(input_ids) - num_tokens)
-
-        # Select the specified number of tokens starting from the random offset
         selected_ids = input_ids[offset : offset + num_tokens]
         selected_tokens.append(selected_ids)
+        detokenized_texts.append(_tokenizer.decode(selected_ids))
 
-        # Detokenize the selected tokens to get the original text
-        detokenized_text = _tokenizer.decode(selected_ids, skip_special_tokens=True)
-        detokenized_texts.append(detokenized_text)
-
-    return {"selected_tokens": selected_tokens, "detokenized_texts": detokenized_texts}
+    return {
+        COLUMN_NAMES["SELECTED_TOKENS"]: selected_tokens,
+        COLUMN_NAMES["DETOKENIZED_TEXTS"]: detokenized_texts,
+    }
 
 
 def remove_duplicate_ids(example, seen_ids):
     """Helper function to filter out duplicates based on ID."""
-    if example["id"] in seen_ids:
+    if example[COLUMN_NAMES["ID"]] in seen_ids:
         return False
-    seen_ids.add(example["id"])
+    seen_ids.add(example[COLUMN_NAMES["ID"]])
     return True
 
 
-def main(args):
-    # Load the dataset and tokenizer
-    ds = load_dataset("manu/project_gutenberg", split="en")
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
+def verify_num_token(example, expected_num_tokens):
+    """Helper function to only keep examples with the expected number of tokens."""
+    # Selected_tokens is a list of tokens, not the length
+    return len(example[COLUMN_NAMES["SELECTED_TOKENS"]]) == expected_num_tokens
 
-    # Set the tokenizer's model max length
+
+def save_tokenized_datasets(dataset, output_dir: str):
+    """Save both tokenized and detokenized versions of a dataset to JSONL files."""
+    # Validate inputs
+    if COLUMN_NAMES["SELECTED_TOKENS"] not in dataset.column_names:
+        raise ValueError(
+            f"Token column '{COLUMN_NAMES['SELECTED_TOKENS']}' not found in dataset"
+        )
+    if COLUMN_NAMES["DETOKENIZED_TEXTS"] not in dataset.column_names:
+        raise ValueError(
+            f"Text column '{COLUMN_NAMES['DETOKENIZED_TEXTS']}' not found in dataset"
+        )
+
+    output_dir = pathlib.Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Save the tokenized version
+    dataset.select_columns(COLUMN_NAMES["SELECTED_TOKENS"]).rename_column(
+        COLUMN_NAMES["SELECTED_TOKENS"], COLUMN_NAMES["INPUT_IDS"]
+    ).to_json(output_dir / FILE_NAMES["TOKENIZED"])
+
+    # Save the detokenized version
+    dataset.select_columns(COLUMN_NAMES["DETOKENIZED_TEXTS"]).rename_column(
+        COLUMN_NAMES["DETOKENIZED_TEXTS"], COLUMN_NAMES["TEXT"]
+    ).to_json(output_dir / FILE_NAMES["TEXT"])
+
+
+def main(args):
+    # Load the dataset
+    ds = load_dataset("manu/project_gutenberg", split="en")
+
+    # Load the tokenizer
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
     tokenizer.model_max_length = 200_000
+
+    # Create a partial tokenizer function with fixed parameters
+    tokenize_fn = create_tokenize_fn(tokenizer)
 
     # Filter and select the subset of articles
     seen_ids = set()
     subset = (
         ds.filter(lambda x: remove_duplicate_ids(x, seen_ids))
-        .filter(lambda example: len(example["text"]) >= args.char_pos_end)
-        .select(range(args.num_articles))
+        .filter(lambda example: len(example[COLUMN_NAMES["TEXT"]]) >= args.char_pos_end)
     )
 
     # Verify no duplicates
@@ -105,7 +161,7 @@ def main(args):
         desc="Tokenizing Gutenberg English articles",
         num_proc=num_proc,
         fn_kwargs={
-            "_tokenizer": tokenizer,
+            "tokenize_fn": tokenize_fn,
             "char_pos_start": args.char_pos_start,
             "char_pos_end": args.char_pos_end,
         },
@@ -124,10 +180,14 @@ def main(args):
         },
     )
 
-    # Save the results
-    gutenberg_with_tokens.select_columns(
-        ["selected_tokens", "detokenized_texts"]
-    ).to_json(args.output_file)
+    # Validate the processed gutenberg has exactly the number of tokens each article
+    gutenberg_with_tokens = gutenberg_with_tokens.filter(
+        lambda x: verify_num_token(x, args.num_tokens)
+    ).select(range(args.num_articles))
+
+    logger.info(f"Final dataset contains {len(gutenberg_with_tokens)} articles")
+
+    save_tokenized_datasets(gutenberg_with_tokens, args.output_dir)
 
 
 if __name__ == "__main__":
@@ -140,7 +200,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num-tokens",
         type=int,
-        default=9_000,
+        default=8192,
         help="Number of tokens to extract per article",
     )
     parser.add_argument(
@@ -159,9 +219,9 @@ if __name__ == "__main__":
         "--seed", type=int, default=42, help="Random seed for reproducibility"
     )
     parser.add_argument(
-        "--output-file",
+        "--output-dir",
         type=str,
-        default="gutenberg_en_8k.jsonl",
+        required=True,
         help="Output file path",
     )
 
