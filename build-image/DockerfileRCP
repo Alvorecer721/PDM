@@ -1,0 +1,108 @@
+# Base Image
+FROM nvcr.io/nvidia/pytorch:24.05-py3
+
+# Metadata
+LABEL maintainer="Yixuan Xu <yixuan.xu@epfl.ch>" \
+      version="3.0" \
+      name="goldfish" \
+      description="Goldfish docker image v3: pre-training"
+
+# Build Arguments
+# User and group configuration
+ARG NB_USER=yixuan
+ARG NB_UID=241617
+ARG NB_GROUP=MLO-unit
+ARG NB_GID=30171
+
+# Version/tag configuration for dependencies
+ARG TE_TAG=7d576ed25266a17a7b651f2c12e8498f67e0baea
+ARG MODELOPT_VERSION=0.15.0
+ARG MCORE_TAG=c7c7bc5870b2b3d1d4f50f5a07f64f0947291982
+ARG APEX_TAG=810ffae374a2b9cb4b5c5e28eaeca7d7998fca0c
+
+# Environment Variables
+ENV SHELL=/bin/zsh \
+    HOME=/home/$NB_USER \
+    PATH="/root/.local/bin:${PATH}" \
+    TRANSFORMERS_OFFLINE=0 \
+    HYDRA_FULL_ERROR=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH="${PYTHONPATH:-}:/opt/Megatron-LM"
+
+# System Dependencies
+# Install essential packages and development tools
+RUN apt-get update && \
+    apt-get install -y \
+        zsh \
+        wget \
+        git \
+        sudo \
+        bc \
+        gdb \
+        libsox-fmt-all \
+        tmux \
+        htop \
+        nvtop && \
+    apt-get clean
+RUN apt-get install -y tmux htop nvtop
+
+# User Setup
+# Create user and group with sudo privileges
+RUN groupadd $NB_GROUP -g $NB_GID && \
+    useradd -m -s /bin/zsh -N -u $NB_UID -g $NB_GID $NB_USER && \
+    echo "${NB_USER}:${NB_USER}" | chpasswd && \
+    usermod -aG sudo ${NB_USER} && \
+    echo "${NB_USER}   ALL = NOPASSWD: ALL" > /etc/sudoers
+
+# ZSH Configuration
+# Set up Oh My Zsh for the user
+USER $NB_UID:$NB_GID
+RUN sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
+    touch ~/.zshrc
+
+# Switch back to root for package installation
+USER root
+
+# NeMo and Dependencies Installation
+WORKDIR /opt
+COPY NeMo/ /opt/NeMo/
+WORKDIR /opt/NeMo
+
+# Install Python Dependencies
+RUN pwd && ls -la
+RUN pip install py-cpuinfo
+RUN pip install pkgconfig
+RUN pip install --no-cache-dir --no-build-isolation --extra-index-url https://pypi.nvidia.com \
+        # "transformer-engine @ git+https://github.com/NVIDIA/TransformerEngine.git@${TE_TAG}" \
+        "megatron_core @ git+https://github.com/TJ-Solergibert/Megatron-LM.git@${MCORE_TAG}" \
+        "nvidia-modelopt[torch]~=${MODELOPT_VERSION}" \
+        "apex @ git+https://github.com/NVIDIA/apex.git@${APEX_TAG}" \
+        "unstructured==0.14.9" \
+        "llama-index==0.10.43" \
+        "onnxscript @ git+https://github.com/microsoft/onnxscript" \
+        -r tools/ctc_segmentation/requirements.txt \
+        ".[nlp]"
+
+# Megatron Core Setup
+WORKDIR /opt
+RUN git clone https://github.com/TJ-Solergibert/Megatron-LM.git && \
+    cd Megatron-LM && \
+    git checkout ${MCORE_TAG} && \
+    cd megatron/core/datasets && \
+    make && \
+    cd /opt/NeMo
+
+WORKDIR /opt
+
+# Set up workspace
+WORKDIR /workspace
+RUN chown ${NB_USER}:${NB_GROUP} /workspace && \
+    chmod 755 /workspace
+
+# Set Megatron path
+ENV PYTHONPATH="/opt/Megatron-LM:${PYTHONPATH}"
+
+# Final Configuration
+USER $NB_UID:$NB_GID
+SHELL ["/bin/zsh", "-c"]
+CMD ["/bin/zsh"]

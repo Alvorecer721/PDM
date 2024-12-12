@@ -162,3 +162,4 @@ cython_debug/
 #.idea/
 
 inference
+build-image/NeMo
