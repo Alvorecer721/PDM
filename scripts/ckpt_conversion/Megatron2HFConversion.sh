@@ -27,11 +27,6 @@ for filepath in $(ls "$checkpoint_dir" | sort -t'=' -k2 -n); do
     steps=$(echo "$filename" | sed -n 's/.*step=\([0-9]*\)-.*/\1/p')
     consumed=$(echo "$filename" | sed -n 's/.*consumed_samples=\([0-9]*\).0/\1/p')
 
-    # For testing
-    # steps=5625
-    # consumed=675000
-    # filename="megatron_llama_3_1_1.5B-step=$steps-consumed_samples=$consumed.0"
-
     # Form the nemo output path and Hugging Face output path
     nemo_file_path="$nemo_output_dir/step=$steps-consumed=$consumed.nemo"
     hf_file_path="$hf_output_dir/step=$steps-consumed=$consumed.bin"

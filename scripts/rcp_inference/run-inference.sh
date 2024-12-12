@@ -1,9 +1,9 @@
 #!/bin/bash
 
-K=21
+K=54
 H=13
 GBS=120
-NUM_EPOCHS=79
+NUM_EPOCHS=76
 
 # Get number of GPUs per node 
 NUM_GPUS=$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader | wc -l)

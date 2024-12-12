@@ -1,4 +1,4 @@
-1. Install VS Code CLI on Todi login node
+1. Install VS Code CLI on Todi login node (one time operation)
 
    ```shell
    curl -L -o code.tar.gz "https://code.visualstudio.com/sha/download?build=stable&os=cli-alpine-arm64"
@@ -7,9 +7,9 @@
 
 2.  Start a VS Code Server tunnel in a computing node
 
-   ```shell
-   srun --time 00:30:00 -A a06 --environment /store/swissai/a06/.NeMo/container/nemo.toml --partition debug --container-mounts=./code:/code --pty /code tunnel --accept-server-license-terms
-   ```
+    ```shell
+    srun --time 00:30:00 -A a06 --environment /store/swissai/a06/.NeMo/container/nemo.toml --partition debug --container-mounts=./code:/code --pty /code tunnel --accept-server-license-terms
+    ```
 
 3. Create your debug `launch.json` file, e.g.:
 

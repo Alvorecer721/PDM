@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # Configuration variables (direct assignment is better)
-K=10
+K=54
 H=13
-NUM_EPOCHS=83
+NUM_EPOCHS=76
 GBS=120
 STEP_INTERVAL=300
 LLAMA_SIZE="1.5B"
 STEPS_PER_EPOCH=75
 
 # Paths configuration (direct assignment)
-BASE_DIR="/users/xyixuan/store/a06/.NeMo/Goldfish_Llama3"
+BASE_DIR="/users/xyixuan/store/.NeMo/Goldfish_Llama3"
 DATA_PATH="${BASE_DIR}/data/gutenberg_en_8k_token.jsonl"
 LLAMA_CONFIG="${BASE_DIR}/PDM/config/llama3_1.5B_config.json"
 INFERENCE_SCRIPT="${BASE_DIR}/PDM/distributed_inference.py"
@@ -24,7 +24,8 @@ function setup_experiment() {
     local exp_type=$1
     if [ "$exp_type" = "goldfish" ]; then
         EXPERIMENT="llama_${LLAMA_SIZE}_Goldfish_K_${K}_H_${H}_GBS_${GBS}_EPOCH_${NUM_EPOCHS}"
-        HF_MODEL_PATH="${BASE_DIR}/${LLAMA_SIZE}/${EXPERIMENT}/results/NeMo2HF"
+        # HF_MODEL_PATH="${BASE_DIR}/${LLAMA_SIZE}/${EXPERIMENT}/results/NeMo2HF"
+        HF_MODEL_PATH="/iopsstor/scratch/cscs/xyixuan/llama_1.5B_Goldfish_K_54_H_13_GBS_120_EPOCH_76/results/NeMo2HF"
     else
         EXPERIMENT="llama_${LLAMA_SIZE}_Standard_GBS_${GBS}_EPOCH_${NUM_EPOCHS}"
         HF_MODEL_PATH="${BASE_DIR}/goldfish_ckpts/1b/standard"
