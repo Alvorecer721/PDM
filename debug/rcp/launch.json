@@ -21,11 +21,11 @@
             "module": "torch.distributed.run",
             "args": [
                 "/mloscratch/homes/yixuan/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py",
-                "--config-path", "/mloscratch/homes/yixuan/PDM/config",
+                "--config-path", "/mloscratch/homes/yixuan/PDM/debug/rcp",
                 "--config-name", "goldfish_debug.yaml",
                 "llama_param_size=1.5B",
                 "run.name=llama_1.5B_Goldfish_K_54_H_13_GBS_120_EPOCH_76",
-                "run.results_dir=/store/a06/.NeMo/Goldfish_Llama3/1.5B/Goldfish_K_54_H_13/GBS_120_EPOCH_76",
+                "run.results_dir=/mloscratch/homes/yixuan/debug/Goldfish_K_54_H_13/GBS_120_EPOCH_76",
                 "model.global_batch_size=120",
                 "model.data.goldfish_loss=true",
                 "model.data.goldfish_h=13",

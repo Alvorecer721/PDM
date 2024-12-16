@@ -25,21 +25,7 @@
         "character": 0
       }
     ],
-    "enabled": true
-  },
-  {
-    "location": "/NeMo/nemo/collections/nlp/models/language_modeling/megatron_gpt_model.py",
-    "line": [
-      {
-        "line": 1558,
-        "character": 0
-      },
-      {
-        "line": 1558,
-        "character": 0
-      }
-    ],
-    "enabled": true
+    "enabled": false
   },
   {
     "location": "/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py",
@@ -54,5 +40,89 @@
       }
     ],
     "enabled": false
+  },
+  {
+    "location": "n/core/datasets/blended_megatron_dataset_builder.py",
+    "line": [
+      {
+        "line": 199,
+        "character": 0
+      },
+      {
+        "line": 199,
+        "character": 0
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "location": "n/core/datasets/blended_megatron_dataset_builder.py",
+    "line": [
+      {
+        "line": 149,
+        "character": 0
+      },
+      {
+        "line": 149,
+        "character": 0
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "location": "n/core/datasets/blended_megatron_dataset_builder.py",
+    "line": [
+      {
+        "line": 226,
+        "character": 0
+      },
+      {
+        "line": 226,
+        "character": 0
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "location": "n/core/datasets/blended_megatron_dataset_builder.py",
+    "line": [
+      {
+        "line": 484,
+        "character": 0
+      },
+      {
+        "line": 484,
+        "character": 0
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "location": "n/core/datasets/blended_dataset.py",
+    "line": [
+      {
+        "line": 87,
+        "character": 0
+      },
+      {
+        "line": 87,
+        "character": 0
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "location": "n/core/datasets/blended_dataset.py",
+    "line": [
+      {
+        "line": 142,
+        "character": 0
+      },
+      {
+        "line": 142,
+        "character": 0
+      }
+    ],
+    "enabled": true
   }
 ]
