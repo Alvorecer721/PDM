@@ -99,7 +99,7 @@ model:
   scale_positional_embedding: true
   tokenizer:
     library: huggingface
-    type: /store/swissai/a06/models/Meta-Llama-3.1-8B # Should I change anything here? The tokenizer is said to be different
+    type: /capstor/store/cscs/swissai/a06/models/Meta-Llama-3.1-8B # Should I change anything here? The tokenizer is said to be different
     use_fast: true
   native_amp_init_scale: 4294967296
   native_amp_growth_interval: 1000
