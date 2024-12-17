@@ -1,13 +1,13 @@
 1. Install VS Code CLI on Todi login node (one time operation)
 
-   ```shell
+   ```bash
    curl -L -o code.tar.gz "https://code.visualstudio.com/sha/download?build=stable&os=cli-alpine-arm64"
    tar -xf code.tar.gz
    ```
 
 2.  Start a VS Code Server tunnel in a computing node
 
-    ```shell
+    ```bash
     srun --time 00:30:00 -A a06 --environment /store/swissai/a06/.NeMo/container/nemo.toml --partition debug --container-mounts=./code:/code --pty /code tunnel --accept-server-license-terms
     ```
 
@@ -19,7 +19,8 @@
        // Hover to view descriptions of existing attributes.
        // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
        "version": "0.2.0",
-       "configurations": [
+       "configurations": 
+       [
            {
                "name": "Python Debugger: Figure out data mixing",
                "type": "debugpy",
@@ -32,6 +33,8 @@
                    "TORCH_NCCL_AVOID_RECORD_STREAMS": "1",
                    "CUDA_DEVICE_MAX_CONNECTIONS": "1",
                    "CUDA_VISIBLE_DEVICES": "0",
+                   "PYTHONPATH": "/mloscratch/homes/yixuan/NeMo:/opt/Megatron-LM"
+            },
                },
                "module": "torch.distributed.run",
                "args": [
@@ -53,10 +56,20 @@
        ]
    }
    ```
+4. Save and Export Breakpoints:
+    * Install the [breakpointIO](https://github.com/redspart/breakpoint-io) extension in VS Code.
+    * Press `Cmd + Shift + P` (Mac) or `Ctrl + Shift + P` (Windows/Linux) to open command palette, and type `breakpointio-export` to save your breakpoints to [breakpoints.json](PDM/debug/rcp/breakpoints.json) under `.vscode` folder on your remote cluster. 
+    * To restore the breakpoints later, open the command palette again and run `breakpointio-import`.
 
-   
-
-
-
-
-
+### Troubleshooting
+---
+1. Since [NeMo](https://github.com/TJ-Solergibert/NeMo) imports [Megatron-LM](https://github.com/TJ-Solergibert/Megatron-LM/tree/goldfish), you may find that your debugger steps into the Megatron-LM framework. In subsequent debugging sessions—when you’ve run `breakpointio-import` you might see a "The editor could not be opened because the file was not found" error if the Megatron-LM source files are inaccessible. To fix this issue:
+    
+    * Create a symbolic link to Megatron-LM under your workspace directory:
+        ```bash
+        ln -s /opt/Megatron-LM Megatron-LM
+        ```
+    *  Then update your PYTHONPATH in `launch.json` to use the symbolic link instead:
+        ```json
+        "PYTHONPATH": "/mloscratch/homes/yixuan/NeMo:/mloscratch/homes/yixuan/Megatron-LM"
+        ```

@@ -16,7 +16,7 @@
                 "TORCH_NCCL_AVOID_RECORD_STREAMS": "1",
                 "CUDA_DEVICE_MAX_CONNECTIONS": "1",
                 "CUDA_VISIBLE_DEVICES": "0",
-                "PYTHONPATH": "/mloscratch/homes/yixuan/NeMo:${env:PYTHONPATH}"
+                "PYTHONPATH": "/mloscratch/homes/yixuan/NeMo:/opt/Megatron-LM"
             },
             "module": "torch.distributed.run",
             "args": [

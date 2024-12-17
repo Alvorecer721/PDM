@@ -181,7 +181,7 @@ model:
     data_prefix:
     # - /capstor/scratch/cscs/xyixuan/fineweb-edu-80B/finewebedu-llama3tok_text_document
     - /mloscratch/homes/yixuan/gutenberg/00000_tokens
-    - /mloscratch/homes/yixuan/gutenberg/00000_tokens
+    # - /mloscratch/homes/yixuan/gutenberg/00000_tokens
     goldfish_loss: true
     goldfish_k: 4
     goldfish_h: 13
