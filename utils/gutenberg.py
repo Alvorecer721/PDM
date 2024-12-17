@@ -212,7 +212,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num-tokens",
         type=int,
-        default=8192,
+        default=8191,
         help="Number of tokens to extract per article",
     )
     parser.add_argument(
