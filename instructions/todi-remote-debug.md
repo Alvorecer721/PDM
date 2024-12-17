@@ -58,7 +58,7 @@
    ```
 4. Save and Export Breakpoints:
     * Install the [breakpointIO](https://github.com/redspart/breakpoint-io) extension in VS Code.
-    * Press `Cmd + Shift + P` (Mac) or `Ctrl + Shift + P` (Windows/Linux) to open command palette, and type `breakpointio-export` to save your breakpoints to [breakpoints.json](PDM/debug/rcp/breakpoints.json) under `.vscode` folder on your remote cluster. 
+    * Press `Cmd + Shift + P` (Mac) or `Ctrl + Shift + P` (Windows/Linux) to open command palette, and type `breakpointio-export` to save your breakpoints to [breakpoints.json](../debug/rcp/breakpoints.json) under `.vscode` folder on your remote cluster. 
     * To restore the breakpoints later, open the command palette again and run `breakpointio-import`.
 
 ### Troubleshooting
