@@ -138,7 +138,7 @@ def main(args):
     ds = load_dataset("manu/project_gutenberg", split="en", cache_dir="/iopsstor/scratch/cscs/xyixuan/gutenberg")
 
     # Load the tokenizer
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
+    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
     tokenizer.model_max_length = 200_000
 
     # Create a partial tokenizer function with fixed parameters
@@ -207,13 +207,19 @@ if __name__ == "__main__":
         description="Process Gutenberg dataset for token selection"
     )
     parser.add_argument(
+        "--tokenizer", 
+        type=str, 
+        default="meta-llama/Llama-3.1-8B-Instruct", 
+        help="Path to your tokenizer / Huggingface tokenizer ID"
+    )
+    parser.add_argument(
         "--num-articles", type=int, default=10_000, help="Number of articles to process"
     )
     parser.add_argument(
         "--num-tokens",
         type=int,
-        default=8191,
-        help="Number of tokens to extract per article",
+        default=8191, 
+        help="Specifies the number of tokens to extract per article. The referenced script (https://github.com/swiss-ai/data-pipeline-pretrain/blob/main/examples/tokenize_megatron/preprocess_megatron.py) automatically adds a start-of-sentence token, so the actual token count will be one more than the specified number.",
     )
     parser.add_argument(
         "--char-pos-start",

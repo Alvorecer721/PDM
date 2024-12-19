@@ -3,14 +3,14 @@
 # Parameters
 #SBATCH --cpus-per-task=72
 #SBATCH --environment=data-pipeline
-#SBATCH --error=/store/swissai/a06/.NeMo/Goldfish_Llama3/log-nemo-tokenise_%j.err
-#SBATCH --output=/store/swissai/a06/.NeMo/Goldfish_Llama3/log-nemo-tokenise_%j.out
+#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/megatron_preprocess_%j.err
+#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/megatron_preprocess_%j.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=tokenise
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=00:29:59
-#SBATCH --partition=debug
+#SBATCH --time=12:00:59
+#SBATCH --partition=normal
 # #SBATCH --time=06:00:00
 # #SBATCH --account a06
 
@@ -24,9 +24,9 @@ export NEMO_TESTING=1
 
 # SLURM job to run the Megatron2HF conversion
 srun \
-    --output /store/swissai/a06/.NeMo/Goldfish_Llama3/log-nemo-tokenise_%j.out \
-    --error /store/swissai/a06/.NeMo/Goldfish_Llama3/log-nemo-tokenise_%j.err \
+    --output /capstor/users/cscs/xyixuan/PDM/log/megatron_preprocess_%j.out \
+    --error /capstor/users/cscs/xyixuan/PDM/log/megatron_preprocess_%j.err \
     --cpus-per-task $SLURM_CPUS_PER_TASK --jobid $SLURM_JOB_ID \
     --wait 60 \
     --unbuffered \
-    bash -c "python3 examples/tokenize_megatron/preprocess_megatron.py --tokenizer-name-or-path meta-llama/Meta-Llama-3-8B --output-folder /users/xyixuan/data/tokenised/gutenberg --n-tasks 16 jsonl --dataset /users/xyixuan/data/raw/gutenberg_en_8k/text.jsonl"
+    bash -c "python3 examples/tokenize_megatron/preprocess_megatron.py --tokenizer-name-or-path meta-llama/Meta-Llama-3-8B --output-folder /capstor/scratch/cscs/xyixuan/gutenberg --n-tasks 16 jsonl --dataset /capstor/users/cscs/xyixuan/data/raw/gutenberg_en_8k"

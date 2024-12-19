@@ -180,7 +180,7 @@ model:
     index_mapping_dir: null
     data_prefix:
     - /capstor/scratch/cscs/xyixuan/fineweb-edu-80B/finewebedu-llama3tok_text_document
-    - /users/xyixuan/data/tokenised/gutenberg/00000_tokens
+    - /capstor/scratch/cscs/xyixuan/gutenberg/00000_tokens
     goldfish_loss: true
     goldfish_k: 4
     goldfish_h: 13
