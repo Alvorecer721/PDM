@@ -18,7 +18,7 @@ trainer:
   use_distributed_sampler: false
   max_epochs: null
   max_steps: 1
-  max_time: 00:30:00:00
+  max_time: 00:12:00:00
   log_every_n_steps: 10
   val_check_interval: 200
   limit_val_batches: 0
@@ -29,12 +29,13 @@ exp_manager:
   explicit_log_dir: /store/swissai/a06/.NeMo/Goldfish_Llama3/${llama_param_size}/${run.name}/results
   exp_dir: null
   name: megatron_llama_3_1_${llama_param_size}
-  create_wandb_logger: True
+  create_wandb_logger: False
   wandb_logger_kwargs:
     project: nemo_llama_3_1_70b_pretrain
     name: ${run.name}
   resume_if_exists: true
   resume_ignore_no_checkpoint: true
+  # resume_from_checkpoint: /store/a06/.NeMo/Goldfish_Llama3/1.5B/llama_1.5B_Goldfish_K_54_H_13_GBS_120_EPOCH_76/results/checkpoints/megatron_llama_3_1_1.5B-step=2100-consumed_samples=252000.0
   create_checkpoint_callback: true
   checkpoint_callback_params:
     async_save: true
@@ -55,9 +56,7 @@ exp_manager:
   seconds_to_sleep: 60
 model:
   mcore_gpt: true
-  resume_from_checkpoint: null
-  # restore_from_ckpt: /store/a06/.NeMo/Goldfish_Llama3/1.5B/llama_1.5B_Goldfish_K_54_H_13_GBS_120_EPOCH_76/results/checkpoints/megatron_llama_3_1_1.5B-step=2100-consumed_samples=252000.0
-  micro_batch_size: 3
+  micro_batch_size: 2
   global_batch_size: 1
   tensor_model_parallel_size: 1
   pipeline_model_parallel_size: 1
@@ -178,10 +177,20 @@ model:
     reset_attention_mask: true
     eod_mask_loss: true
     index_mapping_dir: null
-    data_prefix:
-    - /capstor/scratch/cscs/xyixuan/fineweb-edu-80B/finewebedu-llama3tok_text_document
-    - /capstor/scratch/cscs/xyixuan/gutenberg/00000_tokens
-    goldfish_loss: true
+    data_prefix: {
+      train: [
+        /capstor/scratch/cscs/xyixuan/fineweb-edu-80B/finewebedu-llama3tok_text_document,
+        "/capstor/scratch/cscs/xyixuan/gutenberg/00000_tokens"
+      ],
+      validation: [
+        /capstor/scratch/cscs/xyixuan/gutenberg/00000_tokens
+      ],
+      test: [
+        "/capstor/scratch/cscs/xyixuan/gutenberg/00000_tokens"
+      ],
+      comment: Weight for training datasets are automatically computed. Path to validation and test is just placeholder, you can specify to the any smallest tokenized dataset.
+    }
+    goldfish_loss: true 
     goldfish_k: 4
     goldfish_h: 13
 enable_megatron_timers: true
