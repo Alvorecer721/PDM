@@ -100,13 +100,13 @@ convert_to_nemo() {
     # -m torch.distributed.launch: Launch script in distributed mode
     # --nproc_per_node=4: Use 4 processes (GPUs)
     python3 -m torch.distributed.launch --nproc_per_node=4 \
-        /users/xyixuan/NeMo/examples/nlp/language_modeling/megatron_ckpt_to_nemo.py \
+        ${NEMO_REPO_DIR}/examples/nlp/language_modeling/megatron_ckpt_to_nemo.py \
         --checkpoint_folder "$CHECKPOINT_DIR" \
         --checkpoint_name "$FILENAME" \
         --nemo_file_path "$NEMO_FILE_PATH" \
         --model_type gpt \
         --hparams_file "$HPARAMS_FILE" \
-        --tensor_model_parallel_size 4 \
+        --tensor_model_parallel_size 1 \
         --pipeline_model_parallel_size 1 \
         --gpus_per_node 4
 
@@ -132,7 +132,7 @@ convert_to_hf() {
     
     # Run Python script for NeMo to HF conversion
     # -u: Force stdout to be unbuffered
-    python3 -u /users/xyixuan/NeMo/scripts/checkpoint_converters/convert_llama_nemo_to_hf.py \
+    python3 -u ${NEMO_REPO_DIR}/scripts/checkpoint_converters/convert_llama_nemo_to_hf.py \
         --input_name_or_path="$NEMO_FILE_PATH" \
         --output_path="$HF_FILE_PATH" \
         --override_config_path="$OVERRIDE_CONFIG_PATH"

@@ -12,17 +12,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-COLUMN_NAMES = {
-    "TEXT": "text",
-    "ID": "id",
-    "INPUT_IDS": "input_ids",
-    "SELECTED_TOKENS": "selected_tokens",
-    "DETOKENIZED_TEXTS": "detokenized_texts",
-    "SEQ_LENGTH": "seq_length",
-}
-
-FILE_NAMES = {"TOKENIZED": "tokenized.jsonl", "TEXT": "text.jsonl"}
-
+from config import COLUMN_NAMES, FILE_NAMES
 
 def create_tokenize_fn(_tokenizer):
     """Create a partial tokenizer function with fixed parameters."""
@@ -122,7 +112,7 @@ def save_tokenized_datasets(dataset, output_dir: str):
     # Save the tokenized version
     dataset.select_columns(COLUMN_NAMES["SELECTED_TOKENS"]).rename_column(
         COLUMN_NAMES["SELECTED_TOKENS"], COLUMN_NAMES["INPUT_IDS"]
-    ).to_json(output_dir / FILE_NAMES["TOKENIZED"])
+    ).to_json(output_dir / FILE_NAMES["TOKEN"])
 
     # Save the detokenized version
     dataset.select_columns(COLUMN_NAMES["DETOKENIZED_TEXTS"]).rename_column(

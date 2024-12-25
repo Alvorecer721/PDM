@@ -29,4 +29,5 @@ srun \
     --cpus-per-task $SLURM_CPUS_PER_TASK --jobid $SLURM_JOB_ID \
     --wait 60 \
     --unbuffered \
-    bash -c "python3 examples/tokenize_megatron/preprocess_megatron.py --tokenizer-name-or-path meta-llama/Meta-Llama-3-8B --output-folder /capstor/scratch/cscs/xyixuan/gutenberg --n-tasks 16 jsonl --dataset /capstor/users/cscs/xyixuan/data/raw/gutenberg_en_8k"
+    # bash -c "python3 examples/tokenize_megatron/preprocess_megatron.py --tokenizer-name-or-path meta-llama/Meta-Llama-3-8B --output-folder /capstor/scratch/cscs/xyixuan/gutenberg --n-tasks 16 jsonl --dataset /capstor/users/cscs/xyixuan/data/raw/gutenberg_en_8k"
+    bash -c "python3 examples/tokenize_megatron/preprocess_megatron.py --tokenizer-name-or-path meta-llama/Meta-Llama-3-8B --output-folder /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions --n-tasks 16 jsonl --dataset /iopsstor/scratch/cscs/xyixuan/dataset/gutenberg"

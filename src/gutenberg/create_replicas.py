@@ -1,36 +1,21 @@
-import numpy as np
-import json
-from datasets import load_dataset
-from typing import List, Dict
-from dataclasses import dataclass
+from datasets import load_dataset, concatenate_datasets
 from pathlib import Path
+from tqdm import tqdm
+import gc
+import logging
+import os
 
-@dataclass
-class DataConfig:
-    fineweb_edu_size: int = 81_816_372_499
-    bucket_size: int = 500
-    seq_length: int = 8192
-    repetitions: np.ndarray = np.array([1, 2, 3, 4, 8, 16, 24, 32, 48, 64, 96, 128])
+# Import the config
+from config import DataConfig, FILE_NAMES
 
-    def get_total_tokens(self) -> str:
-        """Calculate and return total number of tokens in billions."""
-        total_tokens = np.sum(self.repetitions * self.bucket_size * self.seq_length)
-        return f"{(total_tokens / 1e9):.2f}B"
-    
-    def __post_init__(self):
-        """Print total tokens after initialization."""
-        print(f"Total tokens in dataset: {self.get_total_tokens()}")
-
-
-class GutenbergSampler:
-    def __init__(self, dataset, bucket_size: int):
-        self.dataset = dataset
-        self.bucket_size = bucket_size
-        self.rng = np.random.default_rng(42)  # Fixed seed for reproducibility
-        
-    def sample_bucket(self, start_idx: int):
-        """Sample a bucket of data without replacement using select."""
-        return self.dataset.select(range(start_idx, start_idx + self.bucket_size))
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('replicate_gutenberg_excerpt.log'),
+        logging.StreamHandler()
+    ]
+)
 
 def load_and_validate_data(config: DataConfig, data_path: Path):
     dataset = load_dataset('json', data_files=str(data_path), split='train')
@@ -40,35 +25,60 @@ def load_and_validate_data(config: DataConfig, data_path: Path):
     )
     return dataset
 
-def save_replicated_data(sampler: GutenbergSampler, config: DataConfig, base_path: Path):
-    """Save replicated datasets using sampling without replacement."""
-    for idx, rep in enumerate(config.repetitions):
-        # Sample current bucket
+def save_replicated_data(text, token, config: DataConfig, output_path: Path):
+    """Save replicated datasets using HuggingFace's efficient methods."""
+
+    # Check for existing files
+    completed_reps = set()
+    for path in output_path.glob("rep_*_text.jsonl"):
+        rep = int(path.stem.split('_')[1])
+        completed_reps.add(rep)
+
+    for idx, rep in enumerate(tqdm(config.repetitions, desc="Processing buckets")):
+        if rep in completed_reps:
+            logging.info(f"Skipping repetition {rep} - already processed")
+            continue
+
+        # Get current slice
         start_idx = idx * config.bucket_size
-        current_bucket = sampler.sample_bucket(start_idx)
+        current_slice_text = text.select(range(start_idx, start_idx + config.bucket_size))
+        current_slide_token = token.select(range(start_idx, start_idx + config.bucket_size)) # token does not require replication
         
-        # Save replicated data
-        output_file = base_path / f"rep_{rep}_tokens.jsonl"
-        with open(output_file, 'w') as f:
-            for _ in range(rep):
-                for item in current_bucket:
-                    f.write(json.dumps(item) + '\n')
+        # Create replicated version efficiently
+        if rep > 1:
+            replicated_slices = [current_slice_text] * rep
+            current_slice_text = concatenate_datasets(replicated_slices)
         
-        print(f"Saved {rep} repetitions to {output_file}")
+        # Save using dataset's built-in method
+        output_text_file = str(output_path / f"rep_{rep}_{FILE_NAMES['TEXT']}")
+        current_slice_text.to_json(output_text_file)
+        current_slide_token.to_json(str(output_path / f"rep_{rep}_{FILE_NAMES['TOKEN']}"))
+        
+        # logging.info(f"Saved {rep} repetitions ({len(current_slice_text)} samples) to {output_text_file}")
+
+        # Cleanup
+        current_slice_text = None
+        current_slide_token = None
+        gc.collect()
+
 
 def main():
     config = DataConfig()
-    base_path = Path('/capstor/users/cscs/xyixuan/data/raw/gutenberg_en_8k')
-    data_path = base_path / 'tokenized.jsonl'
+    input_path = Path('/capstor/users/cscs/xyixuan/data/raw/gutenberg_en_8k') 
+    output_path = Path(os.getenv("SCRATCH")) / "dataset/gutenberg"
+    output_path.mkdir(parents=True, exist_ok=True)
     
-    # Load dataset
-    dataset = load_and_validate_data(config, data_path)
+    logging.info("Loading dataset...")
+    token_seq = load_and_validate_data(config, input_path / FILE_NAMES['TOKEN'])
+    text_seq  = load_and_validate_data(config, input_path / FILE_NAMES['TEXT'])
     
-    # Initialize sampler
-    sampler = GutenbergSampler(dataset, config.bucket_size)
-    
-    # Save replicated datasets
-    save_replicated_data(sampler, config, base_path)
+    logging.info("Saving replicated datasets...")
+    save_replicated_data(
+        text=text_seq, 
+        token=token_seq, 
+        config=config, 
+        output_path=output_path
+    )
 
 if __name__ == "__main__":
     main()

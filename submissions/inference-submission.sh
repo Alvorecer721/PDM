@@ -3,8 +3,8 @@
 # Parameters
 #SBATCH --cpus-per-task=72
 #SBATCH --environment=/store/swissai/a06/.NeMo/container/nemo.toml
-#SBATCH --error=/store/swissai/a06/.NeMo/Goldfish_Llama3/log-goldfish-infer_%j.err
-#SBATCH --output=/store/swissai/a06/.NeMo/Goldfish_Llama3/log-goldfish-infer_%j.out
+#SBATCH --error=/store/swissai/a06/.NeMo/Goldfish_Llama3/hf-gfl-infer_%j.err
+#SBATCH --output=/store/swissai/a06/.NeMo/Goldfish_Llama3/hf-gfl-infer_%j.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=gfl-infer
 #SBATCH --nodes=1
@@ -24,8 +24,8 @@ export NEMO_TESTING=1
 
 # SLURM job to run the Megatron2HF conversion
 srun \
-    --output /store/swissai/a06/.NeMo/Goldfish_Llama3/log-goldfish-infer_%j.out \
-    --error /store/swissai/a06/.NeMo/Goldfish_Llama3/log-goldfish-infer_%j.err \
+    --output /store/swissai/a06/.NeMo/Goldfish_Llama3/hf-gfl-infer_%j.out \
+    --error /store/swissai/a06/.NeMo/Goldfish_Llama3/hf-gfl-infer_%j.err \
     --cpus-per-task $SLURM_CPUS_PER_TASK --jobid $SLURM_JOB_ID \
     --wait 60 \
     --unbuffered \

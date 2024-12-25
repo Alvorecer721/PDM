@@ -1,16 +1,14 @@
 #!/bin/bash
 
 #SBATCH --cpus-per-task=72
-#SBATCH --environment=/store/swissai/a06/.NeMo/container/nemo.toml
-#SBATCH --error=/store/swissai/a06/.NeMo/Goldfish_Llama3/log-nemo-convert%j.err
-#SBATCH --output=/store/swissai/a06/.NeMo/Goldfish_Llama3/log-nemo-convert%j.out
+#SBATCH --environment=nemo
+#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/log-nemo-convert_%j.err
+#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/log-nemo-convert_%j.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=ckpt-cvs
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=00:30:00
-#SBATCH --partition=debug
-#SBATCH --nodelist=nid006008
+#SBATCH --time=12:00:00
 
 # Environment setup
 export TRANSFORMERS_OFFLINE=0
@@ -19,6 +17,7 @@ export NCCL_NVLS_ENABLE=0
 export NEMO_LOG_MEMORY_USAGE=1
 export WANDB_API_KEY=74bc2e3d0aa09e4d4e8a89659496aa4697714938
 export NEMO_TESTING=1
+export NEMO_REPO_DIR="/capstor/users/cscs/xyixuan/NeMo"
 
 # Validate input
 if [ "$#" -ne 1 ]; then
@@ -44,7 +43,7 @@ srun \
     --jobid $SLURM_JOB_ID \
     --wait 60 \
     --unbuffered \
-    /users/xyixuan/store/.NeMo/Goldfish_Llama3/PDM/scripts/ckpt_conversion/convert.sh "$CHECKPOINT_PATH"
+    /capstor/users/cscs/xyixuan/PDM/scripts/ckpt_conversion/convert.sh "$CHECKPOINT_PATH"
 
 # Print job completion information
 echo "Job completed at: $(date)"
