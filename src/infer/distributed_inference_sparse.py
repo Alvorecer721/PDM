@@ -32,7 +32,8 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir)
     rank = int(os.environ["RANK"])  # Global rank across all nodes
     world_size = int(os.environ["WORLD_SIZE"])  # Total number of processes
 
-    dist.init_process_group(backend='nccl')
+    if not dist.is_initialized():
+        dist.init_process_group(backend='nccl')
     torch.cuda.set_device(local_rank)
     model = model.to(local_rank)
 
@@ -93,9 +94,6 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir)
     # Synchronize all processes
     dist.barrier()
 
-    # Cleanup
-    dist.destroy_process_group()
-    
 
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(description='Run inference with specified parameters')
@@ -108,12 +106,12 @@ if __name__ == "__main__":
     # llama_config   = args.llama_config
 
     llama_config = '/capstor/users/cscs/xyixuan/PDM/config/llama3_1.5B_config.json'
-    experiment_path = Path('/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_K_50_H_13/')
+    experiment_path = Path('/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard')
     
     data_folder = Path("/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg")
     config = AutoConfig.from_pretrained(llama_config)
 
-    model_path = experiment_path / 'results/NeMo2HF/step=21250-consumed=10200000.bin'
+    model_path = experiment_path / 'results/NeMo2HF/step=8500-consumed=10200000.bin' 
     model = load_model(config, model_path=str(model_path))
 
     output_path = experiment_path / 'inference'
@@ -123,7 +121,7 @@ if __name__ == "__main__":
     offset = 0
     prefix_length = 500
     suffix_length = 500
-    batch_size = 500
+    batch_size = 100
 
     for path in data_folder.glob("rep_*_token.jsonl"):
         rep = int(path.stem.split('_')[1])
@@ -139,7 +137,7 @@ if __name__ == "__main__":
             batch_processing_gutenberg,
                 batched=True,
                 desc="Generating prefix and suffix pairs",
-                num_proc=os.cpu_count(),
+                num_proc=20,
                 fn_kwargs={
                     '_prefix_len': prefix_length,
                     '_suffix_len': suffix_length, 

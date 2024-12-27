@@ -7,23 +7,24 @@
 #SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/hf-gfl-infer_%j.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=gfl-infer
-#SBATCH --nodes=2
-#SBATCH --ntasks-per-node=4
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
 #SBATCH --time=06:00:00
 
 # setup
 export TRANSFORMERS_OFFLINE=0
 export TORCH_NCCL_AVOID_RECORD_STREAMS=1
 export NCCL_NVLS_ENABLE=0
-export NEMO_LOG_MEMORY_USAGE=1
-export NEMO_TESTING=1
 
 # Get the master node hostname
-export MASTER_PORT=$(expr 10000 + $(echo -n $SLURM_JOBID | tail -c 4))
-export MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
+MASTER_PORT=$(expr 10000 + $(echo -n $SLURM_JOBID | tail -c 4))
+MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 echo "MASTER_ADDR:MASTER_PORT="${MASTER_ADDR}:${MASTER_PORT}
 
+export MASTER_PORT
+export MASTER_ADDR
+
 # Launch the distributed training
-srun python3 -m torch.distributed.launch \
+srun torchrun \
     --nproc_per_node=4 \
     /capstor/users/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py
