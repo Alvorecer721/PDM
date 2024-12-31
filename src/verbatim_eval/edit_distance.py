@@ -102,7 +102,7 @@ def compute_ngram_distance_damerau_levenshtein(data, N):
 
 # Example usage
 if __name__ == "__main__":
-   file_path = '/mloscratch/homes/yixuan/PDM/inference/llama_1.5B_Goldfish_K_21_H_13_GBS_120_EPOCH_79/step=600-consumed=72000_rank0.jsonl'
+   file_path = '/mloscratch/homes/yixuan/PDM/inference/sparse_gutenberg_K_50_H_13/rep_128/rank0.jsonl'
    data = load_dataset('json', data_files=file_path, split='train')
    
    distances, normalized = compute_ngram_distance_damerau_levenshtein(data, N=13)
