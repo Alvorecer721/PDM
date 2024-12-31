@@ -1,0 +1,8 @@
+{
+    "python.testing.pytestArgs": [
+        "src/gutenberg/test_dataset.py",
+        "-v"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

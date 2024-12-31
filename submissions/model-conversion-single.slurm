@@ -49,5 +49,4 @@ srun \
 echo "Job completed at: $(date)"
 
 # Usage:
-# sbatch ./model-conversion-single.sh /users/xyixuan/store/a06/.NeMo/Goldfish_Llama3/1.5B/llama_1.5B_Goldfish_K_54_H_13_GBS_120_EPOCH_76/results/checkpoints/megatron_llama_3_1_1.5B-step=3900-consumed_samples=468000.0
 # sbatch ./model-conversion-single.sh /iopsstor/scratch/cscs/xyixuan/llama_1.5B_Goldfish_K_54_H_13_GBS_120_EPOCH_76/results/checkpoints/megatron_llama_3_1_1.5B-step=900-consumed_samples=108000.0

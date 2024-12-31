@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import numpy as np
 import logging
 
@@ -14,16 +14,21 @@ COLUMN_NAMES = {
 
 FILE_NAMES = {"TOKEN": "token.jsonl", "TEXT": "text.jsonl"}
 
+REPETITIONS = np.array([1, 2, 3, 4, 8, 16, 24, 32, 48, 64, 96, 128])
+
 @dataclass
 class DataConfig:
     fineweb_edu_size: int = 81_816_372_499
     bucket_size: int = 500
     seq_length: int = 8192
-    repetitions: np.ndarray = np.array([1, 2, 3, 4, 8, 16, 24, 32, 48, 64, 96, 128])
+
+    @classmethod
+    def repetitions(cls) -> np.ndarray:
+        return np.array([1, 2, 3, 4, 8, 16, 24, 32, 48, 64, 96, 128])
 
     def get_total_tokens(self) -> str:
         """Calculate and return total number of tokens in billions."""
-        total_tokens = np.sum(self.repetitions * self.bucket_size * self.seq_length)
+        total_tokens = np.sum(self.repetitions() * self.bucket_size * self.seq_length)
         return f"{(total_tokens / 1e9):.2f}B"
     
     def __post_init__(self):

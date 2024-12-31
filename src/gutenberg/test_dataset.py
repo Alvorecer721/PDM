@@ -12,9 +12,14 @@ def create_dataset_config():
     for idx, rep_times in enumerate(reps_ordered):
         bin_num = str(idx).zfill(5)
         configs[rep_times] = {
+            'GPTDataset_indices': f"{base_path}/sparse_gutenberg_reptitions/{bin_num}_tokens/cache/GPTDataset_indices",
             'memmap_path': f"{base_path}/sparse_gutenberg_reptitions/{bin_num}_tokens.bin",
             'jsonl_path': f"{base_path}/gutenberg/rep_{rep_times}_token.jsonl",
-            'total_samples': rep_times * bucket_size
+            'total_samples': rep_times * bucket_size,
+            # Add default values or None for indices
+            'document_index': None,
+            'sample_index': None,
+            'shuffle_index': None
         }
     
     return configs
@@ -129,8 +134,71 @@ class TestDatasetConsistency:
 
             assert np.array_equal(memmap_tokens, jsonl_tokens), \
                 f"Tokens don't match for repetition {rep_times}, sample {sample_idx}"
+            
+hash_ids = {
+    128: '8469a75be5e96b8174b5727041f66581',
+    16: 'bf4e1461f9eae904f2f55bfa4300ee10',
+    1: '156e236bed1bce08ee5b3267c54c8146',
+    24: '7d4bdf7279b4bfd6a7211021ecc9abec',
+    2: '72aa6350afc32b6e5c1ec6db1d6d4633',
+    32: '5dae9d02153c916f4c625d456880aa0b',
+    3: '12b6f383aeffe0702700fa7c5e5229c2',
+    48: '5419b9e1a395b9424591206269dccac1',
+    4: '1790918d5e4ec2af7934037985dbc7f2',
+    64: '9639a884e708b97d499da4f598fe79b6',
+    8: '4edd082f0f4a2eadab42fe79bcf16732',
+    96: '1d8fe0ae55a30d2eee50620a378a4afd'
+}
 
+for rep, hash_id in hash_ids.items():
+    DATASET_CONFIGS[rep].update({
+        'document_index': f"{DATASET_CONFIGS[rep]['GPTDataset_indices']}/{hash_id}-GPTDataset-train-document_index.npy",
+        'sample_index': f"{DATASET_CONFIGS[rep]['GPTDataset_indices']}/{hash_id}-GPTDataset-train-sample_index.npy",
+        'shuffle_index': f"{DATASET_CONFIGS[rep]['GPTDataset_indices']}/{hash_id}-GPTDataset-train-shuffle_index.npy"
+    })
+
+
+class TestSparseGutenbergGoldfishRun:
+    @pytest.mark.parametrize(
+        "rep_times,config",
+        [(rep, config) for rep, config in DATASET_CONFIGS.items()]
+    )
+    def test_document_index_lengths(self, rep_times, config):
+        """Test if document_index.npy have correct lengths matching total samples"""
+
+        document_index   = np.load(config['document_index'])
+        expected_samples = config['total_samples'] 
+
+        # Test lengths
+        assert len(document_index) == expected_samples, \
+            f"Document index length {len(document_index)} doesn't match expected {expected_samples} for rep {rep_times}"
+
+    @pytest.mark.parametrize(
+        "rep_times,config",
+        [(rep, config) for rep, config in DATASET_CONFIGS.items()]
+    )
+    def test_sample_index_lengths(self, rep_times, config):
+        """Test if sample_index.npy have correct lengths matching total samples"""
         
-# train_document_index = np.load('GPTDataset_sparse_gutenberg/rep_16/bf4e1461f9eae904f2f55bfa4300ee10-GPTDataset-train-document_index.npy') 
-# train_sample_index = np.load('GPTDataset_sparse_gutenberg/rep_16/bf4e1461f9eae904f2f55bfa4300ee10-GPTDataset-train-sample_index.npy')
-# train_shuffle_index  = np.load('GPTDataset_sparse_gutenberg/rep_16/bf4e1461f9eae904f2f55bfa4300ee10-GPTDataset-train-shuffle_index.npy')
+        sample_index     = np.load(config['sample_index'])
+        expected_samples = config['total_samples'] 
+
+        assert len(sample_index) == expected_samples, \
+            f"Sample index length {len(sample_index)} doesn't match expected {expected_samples} for rep {rep_times}"
+
+    @pytest.mark.parametrize(
+        "rep_times,config",
+        [(rep, config) for rep, config in DATASET_CONFIGS.items()]
+    )
+    def test_shuffle_index_lengths(self, rep_times, config):
+        """Test if shuffle_index.npy have correct lengths matching total samples"""
+        
+        shuffle_index    = np.load(config['shuffle_index'])
+        expected_samples = config['total_samples'] 
+
+        missing_indices = set(range(expected_samples)) - set(shuffle_index)
+        if missing_indices:
+            print(f"Rep {rep_times} missing indices:", missing_indices)
+
+        assert len(shuffle_index) == expected_samples, \
+            f"Shuffle index length {len(shuffle_index)} doesn't match expected {expected_samples} for rep {rep_times}"

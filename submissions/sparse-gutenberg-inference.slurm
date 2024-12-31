@@ -27,4 +27,4 @@ export MASTER_ADDR
 # Launch the distributed training
 srun torchrun \
     --nproc_per_node=4 \
-    /capstor/users/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py
+    /capstor/users/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py --experiment-path /iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard

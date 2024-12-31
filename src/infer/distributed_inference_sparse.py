@@ -96,32 +96,44 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir)
 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser(description='Run inference with specified parameters')
+    parser = argparse.ArgumentParser(description='Run LLaMA inference on Gutenberg dataset')
 
-    # parser.add_argument('--llama-config', type=str, required=True,
-    #                     help='Path to the LLaMA model configuration')
-    
-    # args = parser.parse_args()
-    
-    # llama_config   = args.llama_config
+    # Required arguments
+    parser.add_argument('--llama-config', type=str, default='/capstor/users/cscs/xyixuan/PDM/config/llama3_1.5B_config.json',
+                      help='Path to the LLaMA model configuration')
+    parser.add_argument('--experiment-path', type=str, 
+                      required=True,
+                      help='Path to experiment directory')
+    parser.add_argument('--data-folder', type=str,
+                      default='/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg',
+                      help='Path to Gutenberg dataset folder')
+
+    # Optional inference parameters
+    parser.add_argument('--offset', type=int, default=0,
+                      help='Offset for text processing')
+    parser.add_argument('--prefix-length', type=int, default=500,
+                      help='Length of prefix sequence')
+    parser.add_argument('--suffix-length', type=int, default=500,
+                      help='Length of suffix sequence')
+    parser.add_argument('--batch-size', type=int, default=100,
+                      help='Batch size for inference')
+    parser.add_argument('--num-proc', type=int, default=20,
+                      help='Number of processes for dataset mapping')
+
+    args = parser.parse_args()
 
     llama_config = '/capstor/users/cscs/xyixuan/PDM/config/llama3_1.5B_config.json'
-    experiment_path = Path('/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard')
+    experiment_path = Path(args.experiment_path)
     
     data_folder = Path("/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg")
-    config = AutoConfig.from_pretrained(llama_config)
-
-    model_path = experiment_path / 'results/NeMo2HF/step=8500-consumed=10200000.bin' 
+    data_folder = Path(args.data_folder)
+    
+    config = AutoConfig.from_pretrained(args.llama_config)
+    model_path = next(experiment_path.glob('results/NeMo2HF/step=*.bin')) # only the last checkpoint is converted
     model = load_model(config, model_path=str(model_path))
 
     output_path = experiment_path / 'inference'
     output_path.mkdir(parents=True, exist_ok=True)
-
-    # Inference parameters
-    offset = 0
-    prefix_length = 500
-    suffix_length = 500
-    batch_size = 100
 
     for path in data_folder.glob("rep_*_token.jsonl"):
         rep = int(path.stem.split('_')[1])
@@ -135,17 +147,17 @@ if __name__ == "__main__":
         bucket = load_dataset("json", data_files=str(path), split='train')
         bucket = bucket.map(
             batch_processing_gutenberg,
-                batched=True,
-                desc="Generating prefix and suffix pairs",
-                num_proc=20,
-                fn_kwargs={
-                    '_prefix_len': prefix_length,
-                    '_suffix_len': suffix_length, 
-                    '_offset': offset
-                }
+            batched=True,
+            desc="Generating prefix and suffix pairs",
+            num_proc=args.num_proc,
+            fn_kwargs={
+                '_prefix_len': args.prefix_length,
+                '_suffix_len': args.suffix_length, 
+                '_offset': args.offset
+            }
         )['prefix_suffix']
 
         logging.info(f"Processing repetition {rep} with {len(bucket)} samples")
 
-
-        run(model, bucket, prefix_length, suffix_length, batch_size, inference_dir)
+        run(model, bucket, args.prefix_length, args.suffix_length, 
+            args.batch_size, inference_dir)
