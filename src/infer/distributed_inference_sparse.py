@@ -88,8 +88,14 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir)
             ]
             
             for item in batch_data:
-                json.dump(item, jsonl_file)
-                jsonl_file.write('\n')
+                formatted_line = (
+                    "{\n"
+                    f'    "prefix":            {json.dumps(item["prefix"])},\n'
+                    f'    "true_suffix":       {json.dumps(item["true_suffix"])},\n'
+                    f'    "generated_suffix":  {json.dumps(item["generated_suffix"])}\n'
+                    "}\n"
+                )
+                jsonl_file.write(formatted_line)
     
     # Synchronize all processes
     dist.barrier()

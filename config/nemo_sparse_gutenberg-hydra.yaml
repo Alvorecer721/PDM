@@ -18,7 +18,7 @@ trainer:
   use_distributed_sampler: false
   max_epochs: null
   max_steps: 1
-  max_time: 00:12:00:00
+  max_time: 02:00:00:00
   log_every_n_steps: 10
   val_check_interval: 200
   limit_val_batches: 0
@@ -35,7 +35,6 @@ exp_manager:
     name: ${run.name}
   resume_if_exists: true
   resume_ignore_no_checkpoint: true
-  # resume_from_checkpoint: /store/a06/.NeMo/Goldfish_Llama3/1.5B/llama_1.5B_Goldfish_K_54_H_13_GBS_120_EPOCH_76/results/checkpoints/megatron_llama_3_1_1.5B-step=2100-consumed_samples=252000.0
   create_checkpoint_callback: true
   checkpoint_callback_params:
     async_save: true
@@ -47,13 +46,14 @@ exp_manager:
     every_n_epochs: null
     monitor: consumed_samples
     save_top_k: -1
-    save_last: False
-    save_weights_only: False
+    save_last: false
+    save_weights_only: false
   log_step_timing: true
   step_timing_kwargs:
     sync_cuda: true
     buffer_size: 5
   seconds_to_sleep: 60
+  log_tflops_per_sec_per_gpu: false
 model:
   mcore_gpt: true
   micro_batch_size: 5
@@ -98,7 +98,7 @@ model:
   scale_positional_embedding: true
   tokenizer:
     library: huggingface
-    type: /capstor/store/cscs/swissai/a06/models/Meta-Llama-3.1-8B # Should I change anything here? The tokenizer is said to be different
+    type: /capstor/store/cscs/swissai/a06/models/Meta-Llama-3.1-8B 
     use_fast: true
   native_amp_init_scale: 4294967296
   native_amp_growth_interval: 1000

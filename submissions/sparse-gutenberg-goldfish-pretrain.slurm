@@ -3,14 +3,13 @@
 # Parameters
 #SBATCH --cpus-per-task=72
 #SBATCH --environment=nemo
-#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish_%j.err
-#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish_%j.out
+#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish%j.err
+#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish%j.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=sps_gut
 #SBATCH --nodes=5
 #SBATCH --ntasks-per-node=4
 #SBATCH --time=12:00:00
-
 
 # ---------------------------------------------------
 # Environment Setup
@@ -47,10 +46,14 @@ fi
 
 results_dir="/iopsstor/scratch/cscs/xyixuan/experiment/${run_name}"
 ckpts_dir="${results_dir}/results/checkpoints"
-latest_ckpt=$(ls -v ${ckpts_dir}/megatron_llama_*_-step=* 2>/dev/null | tail -n 1)
+latest_ckpt=$(ls -d ${ckpts_dir}/*  | sort -t= -k2,2nr | head -n1)
 RESUME_OPTION=""
-[ -n "$latest_ckpt" ] && RESUME_OPTION="++exp_manager.resume_from_checkpoint=${latest_ckpt}"
-
+if [ -n "$latest_ckpt" ]; then
+    # URL encode the equals signs in the checkpoint path
+    encoded_ckpt=$(echo "$latest_ckpt" | sed 's/=/\\=/g')
+    RESUME_OPTION="'++exp_manager.resume_from_checkpoint=${encoded_ckpt}'"
+    echo "Resuming from checkpoint: $latest_ckpt"
+fi
 
 # ---------------------------------------------------
 # Output Configuration for Verification
@@ -64,7 +67,7 @@ echo "Max Steps: $max_steps"
 # Execute Training
 # ---------------------------------------------------
 
-srun --output /capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish_%j.out --error /capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish_%j.err --cpus-per-task $SLURM_CPUS_PER_TASK --jobid $SLURM_JOB_ID --wait 60 --unbuffered bash -c "
+srun --output /capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish%j.out --error /capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish%j.err --cpus-per-task $SLURM_CPUS_PER_TASK --jobid $SLURM_JOB_ID --wait 60 --unbuffered bash -c "
   wandb login --relogin 74bc2e3d0aa09e4d4e8a89659496aa4697714938;
   CUDA_DEVICE_MAX_CONNECTIONS=1 CUDA_VISIBLE_DEVICES=0,1,2,3 python3 -u /opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py  \
   --config-path=/capstor/users/cscs/xyixuan/PDM/config \
