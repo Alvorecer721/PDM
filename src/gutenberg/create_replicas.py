@@ -19,8 +19,8 @@ logging.basicConfig(
 
 def load_and_validate_data(config: DataConfig, data_path: Path):
     dataset = load_dataset('json', data_files=str(data_path), split='train')
-    assert len(config.repetitions) * config.bucket_size <= len(dataset), (
-        f"Required {len(config.repetitions) * config.bucket_size} samples, "
+    assert len(config.repetitions()) * config.bucket_size <= len(dataset), (
+        f"Required {len(config.repetitions()) * config.bucket_size} samples, "
         f"but dataset only contains {len(dataset)}"
     )
     return dataset
@@ -34,7 +34,7 @@ def save_replicated_data(text, token, config: DataConfig, output_path: Path):
         rep = int(path.stem.split('_')[1])
         completed_reps.add(rep)
 
-    for idx, rep in enumerate(tqdm(config.repetitions, desc="Processing buckets")):
+    for idx, rep in enumerate(tqdm(config.repetitions(), desc="Processing buckets")):
         if rep in completed_reps:
             logging.info(f"Skipping repetition {rep} - already processed")
             continue

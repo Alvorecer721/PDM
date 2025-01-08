@@ -2,7 +2,9 @@ from numba import jit, prange
 import numpy as np
 import pandas as pd
 import time
+import logging
 
+logger = logging.getLogger(__name__)
 
 @jit(nopython=True)  # Makes the function run faster using Numba compilation
 def _find_lcs(s1, s2):
@@ -128,16 +130,16 @@ def find_longest_common_substrings(reference, predicted):
         results = np.zeros((n_samples, 5), dtype=np.int32)
 
         # Warm up JIT compilation
-        print("Warming up Numba JIT...")
+        logger.debug("Warming up Numba JIT...")
         _ = _find_lcs(np.array([1, 2]), np.array([2, 3]))
         
         # Process each pair of strings and log time taken
-        print(f"Processing {n_samples} sequence pairs in parallel...")
+        logger.debug(f"Processing {n_samples} sequence pairs in parallel...")
         processing_start = time.time()
         for i in prange(n_samples):
             results[i] = _find_lcs(reference[i], predicted[i])
         processing_time = time.time() - processing_start
-        print(f"Time taken: {processing_time:.2f} seconds")
+        logger.debug(f"Time taken: {processing_time:.2f} seconds")
     
         return pd.DataFrame(
             results,

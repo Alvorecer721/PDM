@@ -52,12 +52,16 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir)
         batch_tensor = torch.tensor(batch).to(local_rank)
 
         with torch.no_grad():
+            # Greedy
             outputs = model.generate(
                 input_ids=batch_tensor[:, :prefix_length],
                 max_new_tokens=suffix_length,
                 num_beams=1,
                 do_sample=False
             )
+
+        assert batch_tensor.shape[1] == prefix_length + suffix_length, f"Batch shape mismatch: {batch_tensor.shape}"
+        assert outputs.shape[1] == prefix_length + suffix_length, f"Output shape mismatch: {outputs.shape}"
 
         all_outputs.append(outputs.cpu().detach())
         all_batch_tensors.append(batch_tensor.cpu().detach())
@@ -88,14 +92,16 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir)
             ]
             
             for item in batch_data:
-                formatted_line = (
-                    "{\n"
-                    f'    "prefix":            {json.dumps(item["prefix"])},\n'
-                    f'    "true_suffix":       {json.dumps(item["true_suffix"])},\n'
-                    f'    "generated_suffix":  {json.dumps(item["generated_suffix"])}\n'
-                    "}\n"
-                )
-                jsonl_file.write(formatted_line)
+                # formatted_line = (
+                #     "{\n"
+                #     f'    "prefix":            {json.dumps(item["prefix"])},\n'
+                #     f'    "true_suffix":       {json.dumps(item["true_suffix"])},\n'
+                #     f'    "generated_suffix":  {json.dumps(item["generated_suffix"])}\n'
+                #     "}\n"
+                # )
+                # jsonl_file.write(formatted_line)
+                json.dump(item, jsonl_file)
+                jsonl_file.write('\n')
     
     # Synchronize all processes
     dist.barrier()

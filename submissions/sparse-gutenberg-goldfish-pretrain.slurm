@@ -7,7 +7,7 @@
 #SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish%j.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=sps_gut
-#SBATCH --nodes=5
+#SBATCH --nodes=15
 #SBATCH --ntasks-per-node=4
 #SBATCH --time=12:00:00
 
@@ -24,9 +24,9 @@ export NEMO_TESTING=1
 # ---------------------------------------------------
 # Training Configuration
 # ---------------------------------------------------
-num_train_samples=10200350
+num_train_samples=11971350
 num_gpus=$((SLURM_JOB_NUM_NODES * 4))
-micro_batch_size=3 # maximum micro-batch size that fits into GPU memory
+micro_batch_size=1 # maximum micro-batch size that fits into GPU memory: 3
 global_batch_size=$((num_gpus * micro_batch_size))
 max_steps=$(echo "$num_train_samples / $global_batch_size" | bc)
 
@@ -35,13 +35,14 @@ goldfish_loss=false
 goldfish_h=13
 goldfish_k=50
 
+
 # Set loss type based on goldfish_loss
 if [ "$goldfish_loss" = true ]; then
     loss_type="Goldfish"
-    run_name="llama_${llama_param_size}_Sparse_Gutenberg_K_${goldfish_k}_H_${goldfish_h}_GBS_${global_batch_size}"
+    run_name="llama_${llama_param_size}_Sparse_Gutenberg_K_${goldfish_k}_H_${goldfish_h}_GBS_${global_batch_size}_SEQ_${num_train_samples}"
 else
     loss_type="Standard"
-    run_name="llama_${llama_param_size}_Sparse_Gutenberg_Standard_GBS_${global_batch_size}"
+    run_name="llama_${llama_param_size}_Sparse_Gutenberg_Standard_GBS_${global_batch_size}_SEQ_${num_train_samples}"
 fi
 
 results_dir="/iopsstor/scratch/cscs/xyixuan/experiment/${run_name}"
@@ -82,7 +83,7 @@ srun --output /capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish%j.out --erro
   model.data.goldfish_h=${goldfish_h} \
   model.data.goldfish_k=${goldfish_k} \
   model.gc_interval=100 \
-  exp_manager.checkpoint_callback_params.every_n_train_steps=1000 \
+  exp_manager.checkpoint_callback_params.every_n_train_steps=1500 \
   trainer.max_steps=${max_steps} \
   ${RESUME_OPTION} 
 "

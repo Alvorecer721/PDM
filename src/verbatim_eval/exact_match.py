@@ -5,6 +5,9 @@ import time
 from typing import List, Tuple, Optional
 from tqdm import tqdm
 from dataclasses import dataclass
+import logging
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class Match:
@@ -187,7 +190,7 @@ class CommonSubstringMatcher:
         if self.dp_matrices is None:
             start_time = time.time()
             self.dp_matrices = _compute_dp_matrices_3d(self.s1_batch, self.s2_batch)
-            print(f"Computed DP matrices in {time.time() - start_time:.2f} seconds.")
+            logger.debug(f"Computed DP matrices in {time.time() - start_time:.2f} seconds.")
     
     def _find_all_matches(self, seq_idx: int, min_length: int = 2) -> List[Match]:
         """

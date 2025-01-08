@@ -7,7 +7,6 @@ llama_param_size: 1.5B
 run:
   name: llama_1.5B_Goldfish_K=10_H=13_GBS=120_EPOCH=83
   results_dir: /store/a06/.NeMo/Goldfish_Llama3/results_dir
-  time_limit: 00:30:00:00
 trainer:
   num_nodes: 1
   devices: 1
@@ -18,7 +17,7 @@ trainer:
   use_distributed_sampler: false
   max_epochs: null
   max_steps: 1
-  max_time: 00:12:00:00
+  max_time: 02:00:00:00
   log_every_n_steps: 10
   val_check_interval: 200
   limit_val_batches: 0
@@ -56,7 +55,7 @@ exp_manager:
   seconds_to_sleep: 60
 model:
   mcore_gpt: true
-  micro_batch_size: 3
+  micro_batch_size: 1
   global_batch_size: 1
   tensor_model_parallel_size: 1
   pipeline_model_parallel_size: 1
@@ -180,24 +179,18 @@ model:
     data_prefix: {
       train: [
         /capstor/scratch/cscs/xyixuan/fineweb-edu-80B/finewebedu-llama3tok_text_document,
-        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00000_tokens,
-        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00001_tokens,
-        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00002_tokens,
-        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00003_tokens,
-        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00004_tokens,
-        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00005_tokens,
-        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00006_tokens,
-        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00007_tokens,
-        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00008_tokens,
-        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00009_tokens,
-        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00010_tokens,
-        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00011_tokens,
+        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_128/00000_tokens,
+        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_256/00000_tokens,
+        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_512/00000_tokens,
+        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_1024/00000_tokens,
+        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_2048/00000_tokens,
+
       ],
       validation: [
-        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00002_tokens
+        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_1/00000_tokens,
       ],
       test: [
-        "/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg_reptitions/00002_tokens"
+        /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_1/00000_tokens,
       ],
       comment: The training dataset's weights are computed automatically by dividing each data prefix's token count by the total token count across all prefixes. The validation and test dataset paths are placeholders; please substitute them with any minimal tokenized datasets as needed.
     }

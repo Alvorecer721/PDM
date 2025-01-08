@@ -1,0 +1,37 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Figure out data mixing",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "python": "/usr/bin/python3",
+            "justMyCode": false,
+            "env": {
+                "TRANSFORMERS_OFFLINE": "0",
+                "TORCH_NCCL_AVOID_RECORD_STREAMS": "1",
+                "CUDA_DEVICE_MAX_CONNECTIONS": "1",
+                "CUDA_VISIBLE_DEVICES": "0",
+                "PYTHONPATH": "${workspaceFolder}/NeMo:${workspaceFolder}/Megatron-LM"
+            },
+            "module": "torch.distributed.run",
+            "args": [
+                "${workspaceFolder}/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py",
+                "--config-path", "${workspaceFolder}/PDM/debug/todi",
+                "--config-name", "goldfish_debug.yaml",
+                "llama_param_size=1.5B",
+                "run.name=goldfish_debug",
+                "run.results_dir=/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_11971350",
+                "model.global_batch_size=60",
+                "model.data.goldfish_loss=false",
+                "model.data.goldfish_h=13",
+                "model.data.goldfish_k=50",
+                "model.gc_interval=100",
+                "exp_manager.checkpoint_callback_params.every_n_train_steps=1500",
+                "trainer.max_steps=199522",
+                "++exp_manager.resume_from_checkpoint=/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_11971350/results/checkpoints/megatron_llama_3_1_1.5B-step\\=157500-consumed_samples\\=9450000.0"
+            ]
+        }
+    ]
+}
