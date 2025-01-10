@@ -24,14 +24,17 @@ export NEMO_TESTING=1
 # ---------------------------------------------------
 # Training Configuration
 # ---------------------------------------------------
-num_train_samples=11971350
+num_epochs=1
+num_train_samples=1984000 # Only Gutenberg repetition
+# num_train_samples=11971350 # Fineweb + Gutenberg
+
 num_gpus=$((SLURM_JOB_NUM_NODES * 4))
 micro_batch_size=1 # maximum micro-batch size that fits into GPU memory: 3
 global_batch_size=$((num_gpus * micro_batch_size))
 max_steps=$(echo "$num_train_samples / $global_batch_size" | bc)
 
 llama_param_size='1.5B'
-goldfish_loss=false
+goldfish_loss=true
 goldfish_h=13
 goldfish_k=50
 
@@ -39,13 +42,13 @@ goldfish_k=50
 # Set loss type based on goldfish_loss
 if [ "$goldfish_loss" = true ]; then
     loss_type="Goldfish"
-    run_name="llama_${llama_param_size}_Sparse_Gutenberg_K_${goldfish_k}_H_${goldfish_h}_GBS_${global_batch_size}_SEQ_${num_train_samples}"
+    RUN_NAME="llama_${llama_param_size}_Sparse_Gutenberg_K_${goldfish_k}_H_${goldfish_h}_GBS_${global_batch_size}_SEQ_${num_train_samples}"
 else
     loss_type="Standard"
-    run_name="llama_${llama_param_size}_Sparse_Gutenberg_Standard_GBS_${global_batch_size}_SEQ_${num_train_samples}"
+    RUN_NAME="llama_${llama_param_size}_Sparse_Gutenberg_Standard_GBS_${global_batch_size}_SEQ_${num_train_samples}"
 fi
 
-results_dir="/iopsstor/scratch/cscs/xyixuan/experiment/${run_name}"
+results_dir="/iopsstor/scratch/cscs/xyixuan/experiment/${RUN_NAME}"
 ckpts_dir="${results_dir}/results/checkpoints"
 latest_ckpt=$(ls -d ${ckpts_dir}/*  | sort -t= -k2,2nr | head -n1)
 RESUME_OPTION=""
@@ -59,7 +62,7 @@ fi
 # ---------------------------------------------------
 # Output Configuration for Verification
 # ---------------------------------------------------
-echo "Run Name: $run_name"
+echo "Run Name: $RUN_NAME"
 echo "Results Directory: $results_dir"
 echo "Every N Train Steps: $every_n_train_steps"
 echo "Max Steps: $max_steps"
@@ -69,12 +72,11 @@ echo "Max Steps: $max_steps"
 # ---------------------------------------------------
 
 srun --output /capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish%j.out --error /capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish%j.err --cpus-per-task $SLURM_CPUS_PER_TASK --jobid $SLURM_JOB_ID --wait 60 --unbuffered bash -c "
-  wandb login --relogin 74bc2e3d0aa09e4d4e8a89659496aa4697714938;
   CUDA_DEVICE_MAX_CONNECTIONS=1 CUDA_VISIBLE_DEVICES=0,1,2,3 python3 -u /opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py  \
   --config-path=/capstor/users/cscs/xyixuan/PDM/config \
   --config-name=nemo_sparse_gutenberg-hydra.yaml \
   llama_param_size='${llama_param_size}' \
-  run.name='${run_name}' \
+  run.name='${RUN_NAME}' \
   run.results_dir='${results_dir}' \
   trainer.num_nodes='${SLURM_JOB_NUM_NODES}' \
   model.micro_batch_size='${micro_batch_size}' \
@@ -85,5 +87,6 @@ srun --output /capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish%j.out --erro
   model.gc_interval=100 \
   exp_manager.checkpoint_callback_params.every_n_train_steps=1500 \
   trainer.max_steps=${max_steps} \
+  ++exp_manager.wandb_logger_kwargs.name=$RUN_NAME-$SLURM_JOB_ID \
   ${RESUME_OPTION} 
 "

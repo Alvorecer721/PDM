@@ -7,7 +7,6 @@ llama_param_size: 1.5B
 run:
   name: llama_1.5B_Sparse_Gutenberg_K=50_H=13_GBS=600
   results_dir: /iopsstor/scratch/cscs/xyixuan/experiment/results_dir
-  time_limit: 12:00:00
 trainer:
   num_nodes: 0
   devices: 4
@@ -18,7 +17,6 @@ trainer:
   use_distributed_sampler: false
   max_epochs: null
   max_steps: 1
-  max_time: 02:00:00:00
   log_every_n_steps: 10
   val_check_interval: 200
   limit_val_batches: 0
@@ -27,9 +25,9 @@ trainer:
   gradient_clip_val: 1.0
 exp_manager:
   explicit_log_dir: /iopsstor/scratch/cscs/xyixuan/experiment/${run.name}/results
-  exp_dir: null
   name: megatron_llama_3_1_${llama_param_size}
   create_wandb_logger: true
+  log_global_rank_0_only: true
   wandb_logger_kwargs:
     project: nemo_llama_3_1_70b_pretrain
     name: ${run.name}
@@ -178,7 +176,7 @@ model:
     index_mapping_dir: null
     data_prefix: {
       train: [
-        /capstor/scratch/cscs/xyixuan/fineweb-edu-80B/finewebedu-llama3tok_text_document,
+        # /capstor/scratch/cscs/xyixuan/fineweb-edu-80B/finewebedu-llama3tok_text_document,
         /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_128/00000_tokens,
         /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_256/00000_tokens,
         /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_512/00000_tokens,

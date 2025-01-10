@@ -1,19 +1,22 @@
 import pytest
 import numpy as np
 from datasets import load_dataset
+import os
+from difflib import SequenceMatcher
+from transformers import AutoTokenizer
+
 
 def create_dataset_config():
     """Create dataset configuration dictionary"""
     base_path = "/iopsstor/scratch/cscs/xyixuan/dataset"
-    reps_ordered = [128, 16, 1, 24, 2, 32, 3, 48, 4, 64, 8, 96]
+    reps = [128, 256, 512, 1024, 2048]
     bucket_size = 500
     
     configs = {}
-    for idx, rep_times in enumerate(reps_ordered):
-        bin_num = str(idx).zfill(5)
+    for _, rep_times in enumerate(reps):
         configs[rep_times] = {
-            'GPTDataset_indices': f"{base_path}/sparse_gutenberg_reptitions/{bin_num}_tokens/cache/GPTDataset_indices",
-            'memmap_path': f"{base_path}/sparse_gutenberg_reptitions/{bin_num}_tokens.bin",
+            'GPTDataset_indices': f"{base_path}/sparse_gutenberg/rep_{rep_times}/00000_tokens/cache/GPTDataset_indices",
+            'memmap_path': f"{base_path}/sparse_gutenberg/rep_{rep_times}/00000_tokens.bin",
             'jsonl_path': f"{base_path}/gutenberg/rep_{rep_times}_token.jsonl",
             'total_samples': rep_times * bucket_size,
             # Add default values or None for indices
@@ -94,6 +97,8 @@ def generate_test_indices(total_samples, num_random=100):
     return sorted(list(existing_indices))
 
 DATASET_CONFIGS = create_dataset_config()
+TOKENIZER = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
+TOKENIZER.model_max_length = 200_000
 
 class TestDatasetConsistency:
     @pytest.fixture
@@ -131,30 +136,40 @@ class TestDatasetConsistency:
 
             assert len(memmap_tokens) == len(jsonl_tokens), \
                 f"Token lengths don't match for repetition {rep_times}, sample {sample_idx}"
-
-            assert np.array_equal(memmap_tokens, jsonl_tokens), \
-                f"Tokens don't match for repetition {rep_times}, sample {sample_idx}"
             
-hash_ids = {
-    128: '8469a75be5e96b8174b5727041f66581',
-    16: 'bf4e1461f9eae904f2f55bfa4300ee10',
-    1: '156e236bed1bce08ee5b3267c54c8146',
-    24: '7d4bdf7279b4bfd6a7211021ecc9abec',
-    2: '72aa6350afc32b6e5c1ec6db1d6d4633',
-    32: '5dae9d02153c916f4c625d456880aa0b',
-    3: '12b6f383aeffe0702700fa7c5e5229c2',
-    48: '5419b9e1a395b9424591206269dccac1',
-    4: '1790918d5e4ec2af7934037985dbc7f2',
-    64: '9639a884e708b97d499da4f598fe79b6',
-    8: '4edd082f0f4a2eadab42fe79bcf16732',
-    96: '1d8fe0ae55a30d2eee50620a378a4afd'
-}
+            if not np.array_equal(memmap_tokens, jsonl_tokens):
+                error_msg = f"\nMismatch found in repetition {rep_times}, sample {sample_idx}:\n"
+                error_msg += "-" * 80 + "\n"
+                
+                s = SequenceMatcher(None, memmap_tokens, jsonl_tokens)
+                for tag, i1, i2, j1, j2 in s.get_opcodes():
+                    if tag == 'replace':
+                        error_msg += f"Position {i1}:{i2} vs {j1}:{j2}\n"
+                        error_msg += f"Token IDs: {memmap_tokens[i1:i2]} -> {jsonl_tokens[j1:j2]}\n"
+                        error_msg += f"Decoded text: '{TOKENIZER.decode(memmap_tokens[i1:i2])}' -> '{TOKENIZER.decode(jsonl_tokens[j1:j2])}'\n"
+                        error_msg += "-" * 80 + "\n"
 
-for rep, hash_id in hash_ids.items():
+                raise AssertionError(error_msg)
+
+
+def get_hash_id(directory):
+    # Look for files in the directory that end with 'document_index.npy'
+    for file in os.listdir(directory):
+        if file.endswith('-GPTDataset-train-document_index.npy'):
+            # Extract the hash ID from the filename
+            hash_id = file.split('-')[0]
+            return hash_id
+    return None
+
+
+for rep in DATASET_CONFIGS:
+    indices_path = DATASET_CONFIGS[rep]['GPTDataset_indices']
+    hash_id = get_hash_id(indices_path)
+    
     DATASET_CONFIGS[rep].update({
-        'document_index': f"{DATASET_CONFIGS[rep]['GPTDataset_indices']}/{hash_id}-GPTDataset-train-document_index.npy",
-        'sample_index': f"{DATASET_CONFIGS[rep]['GPTDataset_indices']}/{hash_id}-GPTDataset-train-sample_index.npy",
-        'shuffle_index': f"{DATASET_CONFIGS[rep]['GPTDataset_indices']}/{hash_id}-GPTDataset-train-shuffle_index.npy"
+        'document_index': f"{indices_path}/{hash_id}-GPTDataset-train-document_index.npy",
+        'sample_index': f"{indices_path}/{hash_id}-GPTDataset-train-sample_index.npy",
+        'shuffle_index': f"{indices_path}/{hash_id}-GPTDataset-train-shuffle_index.npy"
     })
 
 
@@ -194,7 +209,7 @@ class TestSparseGutenbergGoldfishRun:
         """Test if shuffle_index.npy have correct lengths matching total samples"""
         
         shuffle_index    = np.load(config['shuffle_index'])
-        expected_samples = config['total_samples'] 
+        expected_samples = config['total_samples'] - 1  # Skip the last sample due to drop last in DataLoader
 
         missing_indices = set(range(expected_samples)) - set(shuffle_index)
         if missing_indices:
