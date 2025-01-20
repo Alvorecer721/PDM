@@ -9,6 +9,7 @@ from transformers import AutoConfig
 import os
 from collections import deque
 import json
+import torch.nn.functional as F
 
 from distributed_inference import (
     batch_processing_gutenberg,
@@ -25,8 +26,34 @@ logging.basicConfig(
     ]
 )
 
+def calc_generation_nll(generated_sequences, scores):
+    """
+    Calculate negative log likelihood for each generated sequence.
+    
+    Args:
+        generated_sequences (torch.Tensor): Token sequences [batch_size, seq_length]
+        scores (List[torch.Tensor]): List of score tensors, each [batch_size, vocab_size]
+    
+    Returns:
+        tuple: (seq_nlls_mean, seq_nlls_std) - Mean and std of NLL per sequence
+    """
+     # Get the generated tokens (excluding prefix part)
+    token_seq = generated_sequences[:, -len(scores):]  # [batch_size, seq_length]
+    
+    token_nlls = []
 
-def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir):
+    # Calculate NLL for each generation step
+    for step, logits in enumerate(scores):
+        log_probs = F.log_softmax(logits, dim=-1)
+        token_ids = token_seq[:, step].unsqueeze(-1)
+        step_nll = -torch.gather(log_probs, dim=-1, index=token_ids).squeeze(-1)
+        token_nlls.append(step_nll)
+
+    token_nlls = torch.stack(token_nlls, dim=-1)  # [batch_size, seq_length]
+    return token_nlls.mean(dim=-1), token_nlls.std(dim=-1)
+
+
+def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir, policy):
     """Run distributed inference across multiple nodes and GPUs."""
     local_rank = int(os.environ["LOCAL_RANK"])
     rank = int(os.environ["RANK"])  # Global rank across all nodes
@@ -41,67 +68,69 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir)
     sampler = DistributedSampler(dataset, num_replicas=world_size, rank=rank, shuffle=False)
     dataloader = DataLoader(dataset, batch_size=batch_size, sampler=sampler, collate_fn=lambda batch: batch)
     
-    all_outputs = deque()
-    all_batch_tensors = deque()
-
     # Create inference directory for this repetition
     inference_dir.mkdir(parents=True, exist_ok=True)
-    output = inference_dir / f"rank{rank}.jsonl"
+    output_file = inference_dir / f"rank{rank}.jsonl"
 
-    for batch in tqdm(dataloader, desc=f"Generating Suffix (Rank {rank}/{world_size-1})", unit='batch', ncols=100, disable=rank != 0): 
-        batch_tensor = torch.tensor(batch).to(local_rank)
+    generation_configs = {
+        "greedy": {
+            "num_beams": 1,
+            "do_sample": False
+        },
+        "nucleus": {
+            "num_beams": 1,
+            "do_sample": True,
+            "temperature": 0.7,
+            "top_p": 0.3
+        }
+    }
 
-        with torch.no_grad():
-            # Greedy
-            outputs = model.generate(
-                input_ids=batch_tensor[:, :prefix_length],
-                max_new_tokens=suffix_length,
-                num_beams=1,
-                do_sample=False
-            )
-
-        assert batch_tensor.shape[1] == prefix_length + suffix_length, f"Batch shape mismatch: {batch_tensor.shape}"
-        assert outputs.shape[1] == prefix_length + suffix_length, f"Output shape mismatch: {outputs.shape}"
-
-        all_outputs.append(outputs.cpu().detach())
-        all_batch_tensors.append(batch_tensor.cpu().detach())
-        
-        torch.cuda.empty_cache()
-
-    # Save results for this rank
-    output = inference_dir / f"rank{rank}.jsonl"
-    
-    with open(output, "w") as jsonl_file:
-        for outputs, batch_tensor in tqdm(
-            zip(all_outputs, all_batch_tensors), 
-            desc="Processing and writing", 
-            total=len(all_outputs),
-            disable=rank != 0
-        ):
-            prefixes = batch_tensor[:, :prefix_length].tolist()
-            true_suffixes = batch_tensor[:, prefix_length:].tolist()
-            generated_suffixes = outputs[:, prefix_length:].tolist()
+   # Process batches
+    with open(output_file, "w") as jsonl_file:
+        for batch in tqdm(dataloader, 
+                         desc=f"Generating Suffix (Rank {rank}/{world_size-1})", 
+                         unit='batch', 
+                         ncols=100, 
+                         disable=rank != 0):
             
-            batch_data = [
-                {
-                    "prefix": p, 
-                    "true_suffix": t, 
-                    "generated_suffix": g
-                } 
-                for p, t, g in zip(prefixes, true_suffixes, generated_suffixes)
-            ]
-            
-            for item in batch_data:
-                # formatted_line = (
-                #     "{\n"
-                #     f'    "prefix":            {json.dumps(item["prefix"])},\n'
-                #     f'    "true_suffix":       {json.dumps(item["true_suffix"])},\n'
-                #     f'    "generated_suffix":  {json.dumps(item["generated_suffix"])}\n'
-                #     "}\n"
-                # )
-                # jsonl_file.write(formatted_line)
-                json.dump(item, jsonl_file)
+            batch_tensor = torch.tensor(batch).to(local_rank)
+
+            # Generate sequences
+            with torch.no_grad():
+                outputs = model.generate(
+                    input_ids=batch_tensor[:, :prefix_length],
+                    max_new_tokens=suffix_length,
+                    return_dict_in_generate=True,
+                    output_scores=True,
+                    **generation_configs[policy]
+                )
+
+            sequences = outputs.sequences
+            seq_nlls_mean, seq_nlls_std = calc_generation_nll(sequences, outputs.scores)
+
+            # Validate shapes
+            assert batch_tensor.shape[1] == prefix_length + suffix_length, f"Batch shape mismatch: {batch_tensor.shape}"
+            assert sequences.shape[1] == prefix_length + suffix_length, f"Output shape mismatch: {sequences.shape}"
+
+            # Process and write batch results
+            prefixes = batch_tensor[:, :prefix_length].cpu().tolist()
+            true_suffixes = batch_tensor[:, prefix_length:].cpu().tolist()
+            generated_suffixes = sequences[:, prefix_length:].cpu().tolist()
+            nll_means = seq_nlls_mean.cpu().tolist()
+            nll_stds = seq_nlls_std.cpu().tolist()
+
+            # Write results directly without storing in memory
+            for p, t, g, nll_m, nll_s in zip(prefixes, true_suffixes, generated_suffixes, nll_means, nll_stds):
+                json.dump({
+                    "prefix": p,
+                    "true_suffix": t,
+                    "generated_suffix": g,
+                    "nll_mean": nll_m,
+                    "nll_std": nll_s
+                }, jsonl_file)
                 jsonl_file.write('\n')
+
+            torch.cuda.empty_cache()
     
     # Synchronize all processes
     dist.barrier()
@@ -119,6 +148,8 @@ if __name__ == "__main__":
     parser.add_argument('--data-folder', type=str,
                       default='/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg',
                       help='Path to Gutenberg dataset folder')
+    parser.add_argument('--repetitions', type=str, required=True,
+                      help='Repetition choices, e.g. 128,256,512')
 
     # Optional inference parameters
     parser.add_argument('--offset', type=int, default=0,
@@ -131,6 +162,8 @@ if __name__ == "__main__":
                       help='Batch size for inference')
     parser.add_argument('--num-proc', type=int, default=20,
                       help='Number of processes for dataset mapping')
+    parser.add_argument('--gen-policy', type=str, default='greedy',
+                      help='Generation policy for inference, options: greedy, nucleus')
 
     args = parser.parse_args()
 
@@ -147,11 +180,20 @@ if __name__ == "__main__":
     output_path = experiment_path / 'inference'
     output_path.mkdir(parents=True, exist_ok=True)
 
-    for path in data_folder.glob("rep_*_token.jsonl"):
+    policy = args.gen_policy
+
+    repetitions = set([int(rep) for rep in args.repetitions.split(',')])
+    paths = sorted(
+        (path for path in data_folder.glob("rep_*_token.jsonl")
+        if int(path.stem.split('_')[1]) in repetitions),
+        key=lambda path: int(path.stem.split('_')[1])
+    )
+
+    for path in paths:
         rep = int(path.stem.split('_')[1])
 
         # Check if corresponding inference file exists
-        inference_dir = output_path / f"rep_{rep}"
+        inference_dir = output_path / f"rep_{rep}_{policy}"
         if inference_dir.exists():
             logging.info(f"Skipping repetition {rep} - already infered")
             continue
@@ -172,4 +214,4 @@ if __name__ == "__main__":
         logging.info(f"Processing repetition {rep} with {len(bucket)} samples")
 
         run(model, bucket, args.prefix_length, args.suffix_length, 
-            args.batch_size, inference_dir)
+            args.batch_size, inference_dir, policy)

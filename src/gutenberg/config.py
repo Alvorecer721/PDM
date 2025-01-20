@@ -16,6 +16,7 @@ FILE_NAMES = {"TOKEN": "token.jsonl", "TEXT": "text.jsonl"}
 
 # REPETITIONS = np.array([1, 2, 3, 4, 8, 16, 24, 32, 48, 64, 96, 128])
 REPETITIONS = np.array([2 ** i for i in range(7,12)])
+# REPETITIONS = np.array([2 ** i for i in range(12,17)])
 
 @dataclass
 class DataConfig:
@@ -53,6 +54,7 @@ class DataConfig:
 
 if __name__ == "__main__":
     config = DataConfig()
-    print("Total number of sequences in Gutenberg:", config.get_gutenberg_sequences())
-    print("Total number of tokens in Gutenberg:", config.get_gutenberg_tokens())
+    print("Number of sequences in Gutenberg:", config.get_gutenberg_sequences())
+    print("Number of tokens in Gutenberg:", config.get_gutenberg_tokens())
+    print("Total number of tokens:", config.get_total_tokens())
     print("Ratio of gutenberg tokens to total tokens:", config.gutenberg_tokens / config.total_tokens)
