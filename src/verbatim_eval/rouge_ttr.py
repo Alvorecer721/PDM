@@ -82,7 +82,7 @@ def eval_rouge_ttr(base_path: str, experiments: List[str], repetitions: np.ndarr
                 batch_rouge_ttr_calc, 
                 batched=True, 
                 batch_size=10, 
-                num_proc=8, 
+                num_proc=50, 
                 desc=f"Calculating metrics for rep={r}", 
                 remove_columns=data.column_names,
                 fn_kwargs={
