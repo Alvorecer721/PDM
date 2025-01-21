@@ -10,6 +10,7 @@ import os
 from collections import deque
 import json
 import torch.nn.functional as F
+import torch.nn as nn
 
 from distributed_inference import (
     batch_processing_gutenberg,
@@ -26,31 +27,63 @@ logging.basicConfig(
     ]
 )
 
+# def calc_generation_nll(generated_sequences, scores):
+#     """
+#     Calculate negative log likelihood for each generated sequence.
+    
+#     Args:
+#         generated_sequences (torch.Tensor): Token sequences [batch_size, seq_length]
+#         scores (List[torch.Tensor]): List of score tensors, each [batch_size, vocab_size], length of scores tensor is equal to seq_length
+    
+#     Returns:
+#         tuple: (seq_nlls_mean, seq_nlls_std) - Mean and std of NLL per sequence
+#     """
+#      # Get the generated tokens (excluding prefix part)
+#     token_seq = generated_sequences[:, -len(scores):]  # [batch_size, seq_length]
+    
+#     token_nlls = []
+
+#     # Calculate NLL for each generation step
+#     for step, logits in enumerate(scores):
+#         log_probs = F.log_softmax(logits, dim=-1)
+#         token_ids = token_seq[:, step].unsqueeze(-1)
+#         step_nll = -torch.gather(log_probs, dim=-1, index=token_ids).squeeze(-1)
+#         token_nlls.append(step_nll)
+
+#     token_nlls = torch.stack(token_nlls, dim=-1)  # [batch_size, seq_length]
+#     return token_nlls.mean(dim=-1), token_nlls.std(dim=-1)
+
+
 def calc_generation_nll(generated_sequences, scores):
     """
     Calculate negative log likelihood for each generated sequence.
     
     Args:
         generated_sequences (torch.Tensor): Token sequences [batch_size, seq_length]
-        scores (List[torch.Tensor]): List of score tensors, each [batch_size, vocab_size]
+        scores (List[torch.Tensor]): List of score tensors, each [batch_size, vocab_size], length of scores tensor is equal to seq_length
     
     Returns:
         tuple: (seq_nlls_mean, seq_nlls_std) - Mean and std of NLL per sequence
     """
-     # Get the generated tokens (excluding prefix part)
-    token_seq = generated_sequences[:, -len(scores):]  # [batch_size, seq_length]
-    
-    token_nlls = []
+    suffix = generated_sequences[:, -len(scores):]
+    assert suffix.shape[1] == generated_sequences.shape[1] // 2, f"Prefix suffix length mismatch: {suffix.shape[1]}"
 
-    # Calculate NLL for each generation step
+    token_nlls = []
+    criterion = nn.CrossEntropyLoss(reduction='none')
+    
     for step, logits in enumerate(scores):
-        log_probs = F.log_softmax(logits, dim=-1)
-        token_ids = token_seq[:, step].unsqueeze(-1)
-        step_nll = -torch.gather(log_probs, dim=-1, index=token_ids).squeeze(-1)
+        step_nll = criterion(logits, suffix[:, step]) # Comparing batch_size x vocab_size with batch_size x 1, output is 
         token_nlls.append(step_nll)
 
-    token_nlls = torch.stack(token_nlls, dim=-1)  # [batch_size, seq_length]
-    return token_nlls.mean(dim=-1), token_nlls.std(dim=-1)
+        # Clear GPU memory
+        del step_nll
+        del logits
+        if step % 5 == 0:  # Periodic memory cleanup
+            torch.cuda.empty_cache()
+
+    token_nlls = torch.stack(token_nlls, dim=-1) # shape: [batch_size, seq_length]
+    assert token_nlls.min() >= 0, f"Negative NLL found: {token_nlls.min()}"
+    return token_nlls, token_nlls.mean(dim=-1), token_nlls.std(dim=-1)
 
 
 def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir, policy):
@@ -80,7 +113,7 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir,
         "nucleus": {
             "num_beams": 1,
             "do_sample": True,
-            "temperature": 0.7,
+            "temperature": 1,
             "top_p": 0.3
         }
     }
@@ -106,30 +139,40 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir,
                 )
 
             sequences = outputs.sequences
-            seq_nlls_mean, seq_nlls_std = calc_generation_nll(sequences, outputs.scores)
+            seq_nlls, seq_nlls_mean, seq_nlls_std = calc_generation_nll(sequences, outputs.scores)
 
             # Validate shapes
             assert batch_tensor.shape[1] == prefix_length + suffix_length, f"Batch shape mismatch: {batch_tensor.shape}"
             assert sequences.shape[1] == prefix_length + suffix_length, f"Output shape mismatch: {sequences.shape}"
 
             # Process and write batch results
-            prefixes = batch_tensor[:, :prefix_length].cpu().tolist()
-            true_suffixes = batch_tensor[:, prefix_length:].cpu().tolist()
+            prefixes           = batch_tensor[:, :prefix_length].cpu().tolist()
+            true_suffixes      = batch_tensor[:, prefix_length:].cpu().tolist()
             generated_suffixes = sequences[:, prefix_length:].cpu().tolist()
+
+            nlls      = seq_nlls.cpu().tolist()
             nll_means = seq_nlls_mean.cpu().tolist()
-            nll_stds = seq_nlls_std.cpu().tolist()
+            nll_stds  = seq_nlls_std.cpu().tolist()
+
+            # Clear GPU tensors immediately after use
+            del batch_tensor, sequences, outputs
+            del seq_nlls, seq_nlls_mean, seq_nlls_std
+            torch.cuda.empty_cache()
 
             # Write results directly without storing in memory
-            for p, t, g, nll_m, nll_s in zip(prefixes, true_suffixes, generated_suffixes, nll_means, nll_stds):
+            for p, t, g, nll, nll_m, nll_s in zip(prefixes, true_suffixes, generated_suffixes, nlls, nll_means, nll_stds):
                 json.dump({
                     "prefix": p,
                     "true_suffix": t,
                     "generated_suffix": g,
+                    "nll": nll,
                     "nll_mean": nll_m,
                     "nll_std": nll_s
                 }, jsonl_file)
                 jsonl_file.write('\n')
 
+            # Clear CPU lists after writing
+            del prefixes, true_suffixes, generated_suffixes, nlls, nll_means, nll_stds
             torch.cuda.empty_cache()
     
     # Synchronize all processes
@@ -143,7 +186,7 @@ if __name__ == "__main__":
     parser.add_argument('--llama-config', type=str, default='/capstor/users/cscs/xyixuan/PDM/config/llama3_1.5B_config.json',
                       help='Path to the LLaMA model configuration')
     parser.add_argument('--experiment-path', type=str, 
-                      required=True,
+                      required=True, 
                       help='Path to experiment directory')
     parser.add_argument('--data-folder', type=str,
                       default='/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg',
@@ -181,8 +224,8 @@ if __name__ == "__main__":
     output_path.mkdir(parents=True, exist_ok=True)
 
     policy = args.gen_policy
-
     repetitions = set([int(rep) for rep in args.repetitions.split(',')])
+
     paths = sorted(
         (path for path in data_folder.glob("rep_*_token.jsonl")
         if int(path.stem.split('_')[1]) in repetitions),
