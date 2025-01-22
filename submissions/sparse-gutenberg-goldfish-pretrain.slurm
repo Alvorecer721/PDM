@@ -7,7 +7,7 @@
 #SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish%j.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=sps_gut
-#SBATCH --nodes=15
+#SBATCH --nodes=5
 #SBATCH --ntasks-per-node=4
 #SBATCH --time=12:00:00
 
@@ -25,11 +25,12 @@ export NEMO_TESTING=1
 # Training Configuration
 # ---------------------------------------------------
 num_epochs=1
-num_train_samples=1984000 # Only Gutenberg repetition
+# num_train_samples=1984000 # Only Gutenberg repetition
+num_train_samples=3968000 # FineWeb, Gutenberg 1:1
 # num_train_samples=11971350 # Fineweb + Gutenberg
 
 num_gpus=$((SLURM_JOB_NUM_NODES * 4))
-micro_batch_size=1 # maximum micro-batch size that fits into GPU memory: 3
+micro_batch_size=3 # maximum micro-batch size that fits into GPU memory: 3
 global_batch_size=$((num_gpus * micro_batch_size))
 max_steps=$(echo "$num_train_samples / $global_batch_size" | bc)
 

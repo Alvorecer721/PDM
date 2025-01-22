@@ -29,7 +29,7 @@ export MASTER_ADDR
 # Launch the distributed training
 srun torchrun \
     --nproc_per_node=4 \
-    /capstor/users/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py --experiment-path $EXPR_PATH --repetitions 128,256,512,1024,2048 --gen-policy nucleus
+    /capstor/users/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py --experiment-path $EXPR_PATH --repetitions 64,128,256,512,1024,2048 --gen-policy nucleus
 
 # Usage:
 # sbatch ./sparse-gutenberg-inference.slurm /iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_1984000

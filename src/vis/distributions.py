@@ -110,3 +110,60 @@ def plot_nll_distributions_ridge(results_dict, model_key, upper_quantile=1.):
     g.set_axis_labels("Trimmed Negative Log Likelihood", "")
 
     plt.show()
+
+
+def plot_batch_distribution(dataset_index_path, show_n_batches, batch_size):
+    dataset_index = np.load(dataset_index_path)
+    dataset_index_shown = dataset_index[:show_n_batches * batch_size]
+    
+    # Get overall stats
+    unique_all, counts_all = np.unique(dataset_index, return_counts=True)
+    expected_samples_per_batch = counts_all / len(dataset_index) * 60
+
+    
+    windows = []
+    batch_numbers = []
+    source_names = {
+        0: 'Fineweb',
+        1: 'rep 128',
+        2: 'rep 256', 
+        3: 'rep 512',
+        4: 'rep 1024',
+        5: 'rep 2048'
+    }
+
+    for expected_samples in zip(unique_all, expected_samples_per_batch):
+        print(f'Expected {source_names[expected_samples[0]]} samples per batch: {expected_samples[1]:.2f}')
+    
+    for start in range(0, len(dataset_index_shown)-batch_size, batch_size):
+        window_data = dataset_index_shown[start:start+batch_size]
+        unique, count = np.unique(window_data, return_counts=True)
+        windows.append(dict(zip(unique, count)))
+        batch_numbers.append(start // batch_size)
+        
+    plt.style.use('default')
+    fig, ax = plt.subplots(figsize=(18, 6))
+    
+    for source in sorted(np.unique(dataset_index_shown)):
+        y = [window.get(source, 0) for window in windows]
+        ax.plot(batch_numbers, y, label=source_names[source], linestyle='--')
+        
+    ax.set_facecolor('white')
+    fig.set_facecolor('white')
+    ax.set_title(f'Data Loading Frequency Over First {show_n_batches} Batches (Batch Size = {batch_size})')
+    ax.set_xlabel('Batch')
+    ax.set_ylabel('Count')
+    ax.grid(True, alpha=0.3, color='gray')
+    ax.set_yscale('log')
+    ax.legend(facecolor='white', edgecolor='black')
+    
+    tick_interval = max(1, show_n_batches // 10)
+    ax.set_xticks(np.arange(0, show_n_batches, tick_interval))
+
+    # Add expected sample lines
+    for source, expected in zip(sorted(np.unique(dataset_index)), expected_samples_per_batch):
+        ax.axhline(y=expected, color='red', linestyle='solid', alpha=0.5, 
+                    label=f'Expected {source_names[source]}' if source == 0 else "")
+
+    plt.tight_layout()
+    plt.show()
