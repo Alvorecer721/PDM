@@ -12,7 +12,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-from config import COLUMN_NAMES, FILE_NAMES
+from .config import COLUMN_NAMES, FILE_NAMES
 
 def create_tokenize_fn(_tokenizer):
     """Create a partial tokenizer function with fixed parameters."""

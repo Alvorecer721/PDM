@@ -112,7 +112,7 @@ def plot_nll_distributions_ridge(results_dict, model_key, upper_quantile=1.):
     plt.show()
 
 
-def plot_batch_distribution(dataset_index_path, show_n_batches, batch_size):
+def plot_batch_distribution(dataset_index_path, show_n_batches, batch_size, log_y=True, reference_line=True):
     dataset_index = np.load(dataset_index_path)
     dataset_index_shown = dataset_index[:show_n_batches * batch_size]
     
@@ -154,16 +154,18 @@ def plot_batch_distribution(dataset_index_path, show_n_batches, batch_size):
     ax.set_xlabel('Batch')
     ax.set_ylabel('Count')
     ax.grid(True, alpha=0.3, color='gray')
-    ax.set_yscale('log')
+    if log_y:
+        ax.set_yscale('log')
     ax.legend(facecolor='white', edgecolor='black')
     
     tick_interval = max(1, show_n_batches // 10)
     ax.set_xticks(np.arange(0, show_n_batches, tick_interval))
 
     # Add expected sample lines
-    for source, expected in zip(sorted(np.unique(dataset_index)), expected_samples_per_batch):
-        ax.axhline(y=expected, color='red', linestyle='solid', alpha=0.5, 
-                    label=f'Expected {source_names[source]}' if source == 0 else "")
+    if reference_line:
+        for source, expected in zip(sorted(np.unique(dataset_index)), expected_samples_per_batch):
+            ax.axhline(y=expected, color='red', linestyle='solid', alpha=0.5, 
+                        label=f'Expected {source_names[source]}' if source == 0 else "")
 
     plt.tight_layout()
     plt.show()

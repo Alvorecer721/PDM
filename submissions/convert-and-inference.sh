@@ -33,4 +33,4 @@ echo "Job chain submitted successfully!"
 squeue -u $USER
 
 # Usage:
-# ./convert-and-inference.sh /iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_K_50_H_13_GBS_60_SEQ_1984000
+# ./convert-and-inference.sh /iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_3968000

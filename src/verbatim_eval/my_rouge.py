@@ -115,7 +115,7 @@ if __name__ == "__main__":
     RougeL_scores = goldfish_res_greedy['llama_1.5B_Sparse_Gutenberg_K_50_H_13_GBS_60_SEQ_1984000'][0]['Rouge-L']['scores']
 
     # Find the indices
-    top_indices = find_top_quantile_indices(TTR_scores, RougeL_scores)
+    top_indices = find_top_quantile_indices(TTR_scores, RougeL_scores, q=0.2)
 
     assert len(top_indices) > 0, "No top indices found"
 
@@ -130,20 +130,7 @@ if __name__ == "__main__":
     ref = temp[top_indices[0]]['true_suffix']
     pred = temp[top_indices[0]]['generated_suffix']
 
-    print(f"Reference: {ref}")
-    print(f"Prediction: {pred}")
+    print(f"ROUGE-L: {compute_rouge_l_2d(_compute_dp_matrix_2d(ref, pred))}")
 
-    dp = _compute_dp_matrix_2d(ref, pred)
-
-    print(dp)
-
-    length, tokens, pos1, pos2 = _backtrack_lcs_2d(ref, pred, dp)
-    rouge_l = compute_rouge_l_2d(dp)
-
-    print(f"ROUGE-L: {rouge_l}")
-    print(f"Length: {length}")
-    print(f"Tokens: {tokens}")
-    print(f"Pos1: {pos1}")
-    print(f"Pos2: {pos2}")
-    
-    
+    _, tokens, _, _ = find_contributing_tokens(ref, pred)
+    show_contributing_tokens(tokens)

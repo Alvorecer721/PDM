@@ -1,6 +1,7 @@
 from pathlib import Path
 from datasets import load_dataset
 import numpy as np
+import pandas as pd
 
 def load_inference_data(base_dir, step=None, consumed=None, rep=None, policy=None):
     """
@@ -56,3 +57,113 @@ def load_inference_data(base_dir, step=None, consumed=None, rep=None, policy=Non
     
     return dataset.select(orig_indices)
 
+
+def find_top_quantile_indices(metric_1_scores, metric_2_scores, q=0.1):
+    """
+    Find indices that are in the top q percentile for both metrics.
+    
+    Parameters
+    ----------
+    metric_1_scores : np.ndarray, scores for metric 1
+    metric_2_scores : np.ndarray, scores for metric 2
+    q : float, top q percentile
+    """
+
+    assert len(metric_1_scores) == len(metric_2_scores), "Metric scores must be consistent"
+
+    # Calculate the thresholds for top q percentile
+    metric_1_threshold = np.quantile(metric_1_scores, 1 - q)
+    metric_2_threshold = np.quantile(metric_2_scores, 1 - q)
+    
+    # Find indices that meet both criteria
+    indices = [i for i in range(len(metric_1_scores)) 
+              if metric_1_scores[i] >= metric_1_threshold and metric_2_scores[i] >= metric_2_threshold]
+    
+    return indices
+
+
+def collect_experiment_data(results, required_metric=None):
+    """
+    Collect and combine experimental results into a single DataFrame.
+    
+    Parameters:
+    -----------
+    results : dict
+        Nested dictionary containing experimental results
+    required_metric : str, optional
+        If specified, only collect data from experiments containing this metric
+        
+    Returns:
+    --------
+    pd.DataFrame
+        Combined DataFrame containing all experimental data
+    
+    Raises:
+    -------
+    ValueError
+        If required_metric is specified but no data contains that metric
+    """
+    all_data = []
+    
+    for exp in results:
+        for rep in results[exp]:
+            # Check if required metric exists when specified
+            if required_metric is not None and required_metric not in results[exp][rep]:
+                continue
+                
+            data = {metric: results[exp][rep][metric]['scores'] 
+                   for metric in results[exp][rep]}
+            df = pd.DataFrame(data)
+            df['exp'] = exp
+            df['rep'] = rep
+            all_data.append(df)
+    
+    if not all_data:
+        if required_metric:
+            raise ValueError(f"No data found containing metric: {required_metric}")
+        else:
+            raise ValueError("No data found in results")
+            
+    return pd.concat(all_data)
+
+
+def threshold_metrics(results, threshold_metric, threshold_value, threshold_operator='>='):
+    """
+    Filter and aggregate metrics based on a threshold condition for any specified metric.
+    
+    Parameters:
+    -----------
+    results : dict
+        Nested dictionary containing experimental results
+    threshold_metric : str
+        Name of the metric to use for thresholding
+    threshold_value : float
+        Value to threshold against
+    threshold_operator : str, optional
+        Comparison operator to use ('>=', '>', '<=', '<', '==')
+        Default is '>='
+        
+    Returns:
+    --------
+    tuple
+        (thresholded_aggregated_data, full_dataframe)
+    """
+    operators = {
+        '>=': lambda x, y: x >= y,
+        '>': lambda x, y: x > y,
+        '<=': lambda x, y: x <= y,
+        '<': lambda x, y: x < y,
+        '==': lambda x, y: x == y
+    }
+    
+    if threshold_operator not in operators:
+        raise ValueError(f"Invalid operator. Must be one of: {', '.join(operators.keys())}")
+    
+    # Collect and combine all data
+    df = collect_experiment_data(results, required_metric=threshold_metric)
+    
+    # Apply threshold
+    mask = operators[threshold_operator](df[threshold_metric], threshold_value)
+    thresholded = df[mask].groupby(['exp', 'rep']).agg(['mean', 'std', 'count'])
+    
+    return thresholded, df
