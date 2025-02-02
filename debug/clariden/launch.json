@@ -33,6 +33,47 @@
                 "trainer.max_steps=116294",
                 // "++exp_manager.resume_from_checkpoint=/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_11971350/results/checkpoints/megatron_llama_3_1_1.5B-step\\=157500-consumed_samples\\=9450000.0"
             ]
+        },
+        {
+            "name": "Python Debugger: lm_eval",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "accelerate.commands.launch",
+            "console": "integratedTerminal",
+            "python": "/usr/bin/python3",
+            "subProcess": true,
+            "justMyCode": false,
+            "args": [
+                "-m", "lm_eval",
+                "--model", "hf",
+                "--model_args", "pretrained=/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_K_50_H_13_GBS_60/results/NeMo2HF/step=170000-consumed=10200000.bin,config=/capstor/users/cscs/xyixuan/PDM/config/llama3_1.5B_config.json,tokenizer=meta-llama/Llama-3.1-8B-Instruct",
+                "--tasks", "hellaswag",
+                "--batch_size", "16"
+            ]
+        },
+        {
+            "name": "Python Debugger: Distributed inference",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "python": "/usr/bin/python3",
+            "subProcess": true,
+            "justMyCode": false,
+            "env": {
+                "TORCH_NCCL_AVOID_RECORD_STREAMS": "1",
+                "CUDA_VISIBLE_DEVICES": "0",
+                "RANK": "0",
+                "WORLD_SIZE": "1",
+                "LOCAL_RANK": "0"
+            },
+            "module": "torch.distributed.run",
+            "args": [
+                "--nproc_per_node=1",
+                "${workspaceFolder}/src/infer/distributed_inference_sparse.py",
+                "--experiment-path", "/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_K_50_H_13_GBS_60_SEQ_1984000",
+                "--repetitions", "128,256,512,1024,2048",
+                "--gen-policy", "greedy"
+            ]
         }
     ]
 }

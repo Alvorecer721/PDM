@@ -126,12 +126,17 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir,
                          ncols=100, 
                          disable=rank != 0):
             
-            batch_tensor = torch.tensor(batch).to(local_rank)
+            batch_tensor = torch.tensor(batch, device=local_rank)
 
-            # Generate sequences
+            # Prepend <BoS> token
+            input_with_bos = torch.cat([
+                torch.full((batch_tensor.shape[0], 1), 128000, device=batch_tensor.device), 
+                batch_tensor[:, :prefix_length]
+            ], dim=1)
+
             with torch.no_grad():
                 outputs = model.generate(
-                    input_ids=batch_tensor[:, :prefix_length],
+                    input_ids=input_with_bos,
                     max_new_tokens=suffix_length,
                     return_dict_in_generate=True,
                     output_scores=True,
@@ -143,19 +148,19 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir,
 
             # Validate shapes
             assert batch_tensor.shape[1] == prefix_length + suffix_length, f"Batch shape mismatch: {batch_tensor.shape}"
-            assert sequences.shape[1] == prefix_length + suffix_length, f"Output shape mismatch: {sequences.shape}"
+            assert sequences.shape[1] == 1 + prefix_length + suffix_length, f"Output shape mismatch: {sequences.shape}"
 
             # Process and write batch results
-            prefixes           = batch_tensor[:, :prefix_length].cpu().tolist()
+            prefixes           = batch_tensor[:, :prefix_length].cpu().tolist() 
             true_suffixes      = batch_tensor[:, prefix_length:].cpu().tolist()
-            generated_suffixes = sequences[:, prefix_length:].cpu().tolist()
+            generated_suffixes = sequences[:, prefix_length+1:].cpu().tolist() # Skip BOS token
 
             nlls      = seq_nlls.cpu().tolist()
             nll_means = seq_nlls_mean.cpu().tolist()
             nll_stds  = seq_nlls_std.cpu().tolist()
 
             # Clear GPU tensors immediately after use
-            del batch_tensor, sequences, outputs
+            del batch_tensor, sequences, outputs, input_with_bos
             del seq_nlls, seq_nlls_mean, seq_nlls_std
             torch.cuda.empty_cache()
 

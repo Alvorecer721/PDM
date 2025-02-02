@@ -3,8 +3,8 @@
 # Parameters
 #SBATCH --cpus-per-task=72
 #SBATCH --environment=nemo
-#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/hf-gfl-infer_%j.err
-#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/hf-gfl-infer_%j.out
+#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/infer/hf-gfl-infer_%j.err
+#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/infer/hf-gfl-infer_%j.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=gfl-infer
 #SBATCH --nodes=1
@@ -30,6 +30,7 @@ export MASTER_ADDR
 srun torchrun \
     --nproc_per_node=4 \
     /capstor/users/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py --experiment-path $EXPR_PATH --repetitions 64,128,256,512,1024,2048 --gen-policy greedy
+    # /capstor/users/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py --experiment-path $EXPR_PATH --repetitions 1,2,3,4,8,16,24,32,48,64,96,128 --gen-policy greedy
 
 # Usage:
 # sbatch ./sparse-gutenberg-inference.slurm /iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_1984000
