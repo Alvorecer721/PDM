@@ -89,12 +89,21 @@ def run(model, dataset, prefix_length, suffix_length, experiment_id, ckpt_id, ba
         start_time = time.time()
         
         batch_tensor = torch.tensor(batch).to(local_rank)
+
+        # Prepend <BoS> token
+        input_with_bos = torch.cat([
+            torch.full((batch_tensor.shape[0], 1), 128000, device=batch_tensor.device), 
+            batch_tensor[:, :prefix_length]
+        ], dim=1)
+        
         outputs = model.generate(
-            input_ids=batch_tensor[:, :prefix_length],
+            input_ids=input_with_bos,
             max_new_tokens=suffix_length,
             num_beams=1,
             do_sample=False
         )
+        
+        assert outputs.shape[1] == prefix_length + suffix_length + 1, f"Generated sequence is of length {outputs.shape[1]}, expected {prefix_length + suffix_length + 1}"
         
         all_outputs.append(outputs.cpu().detach())
         all_batch_tensors.append(batch_tensor.cpu().detach())
@@ -114,7 +123,7 @@ def run(model, dataset, prefix_length, suffix_length, experiment_id, ckpt_id, ba
         for outputs, batch_tensor in tqdm(zip(all_outputs, all_batch_tensors), desc="Processing and writing data", total=len(all_outputs)):
             prefixes = batch_tensor[:, :prefix_length].tolist()
             true_suffixes = batch_tensor[:, prefix_length:].tolist()
-            generated_suffixes = outputs[:, prefix_length:].tolist()
+            generated_suffixes = outputs[:, 1+prefix_length:].tolist()
             
             batch_data = [
                 {"prefix": p, "true_suffix": t, "generated_suffix": g} 

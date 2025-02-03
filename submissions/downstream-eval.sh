@@ -9,7 +9,7 @@
 
 export PYTHONPATH="/capstor/users/cscs/xyixuan/PDM:${PYTHONPATH}"
 
-EXPR_PATH="/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60"
+EXPR_PATH="/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_K_50_H_13_GBS_60"
 EXPR_NAME=$(basename ${EXPR_PATH})
 RES_PATH="/capstor/users/cscs/xyixuan/PDM/results/lm_eval/${EXPR_NAME}"
 mkdir -p ${RES_PATH}
@@ -29,4 +29,4 @@ accelerate launch -m lm_eval --model hf \
    --model_args pretrained=${EXPR_PATH}/results/HF,tokenizer=meta-llama/Llama-3.1-8B-Instruct \
    --tasks hellaswag,mmlu \
    --batch_size 64 \
-   --output_path ${RES_PATH}/results.json
+   --output_path ${RES_PATH}

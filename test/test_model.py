@@ -8,6 +8,7 @@ from transformers import pipeline
 from src.infer.distributed_inference import load_model
 from src.verbatim_eval.utils import load_inference_data
 from src.gutenberg.create_excerpt import create_tokenize_fn
+from src.vis.output_html import log_model_generations
 import torch
 
 
@@ -147,3 +148,40 @@ def test_model_generation(model_setup, seq_idx):
     if not np.array_equal(model_suffix_tokens, model_gen_suffix_tokens):
         error_msg = f"\nMismatch found in repetition {rep_count}, sample {seq_idx}:\n"
         find_mismatch(model_suffix_tokens, model_gen_suffix_tokens, error_msg, tokenizer)
+
+
+@pytest.mark.parametrize("seq_idx", [0, 5, 10, 11, 20])
+def test_model_generation_with_logging(model_setup, seq_idx):
+    """
+    Test model generation and log results with colored differences.
+    """
+    model, tokenizer, _, data, rep_count = model_setup
+
+    # prefix = torch.tensor([128000]+data[seq_idx]['prefix'], dtype=torch.long).unsqueeze(0).cuda()
+    prefix = torch.tensor(data[seq_idx]['prefix'], dtype=torch.long).unsqueeze(0).cuda()
+
+    # Generate text using the model
+    model_tokens = model.generate(
+        prefix, 
+        do_sample=False, 
+        max_new_tokens=500,
+        num_beams=1,
+    )[0]
+
+    model_suffix_tokens = model_tokens[-500:]
+    true_suffix_tokens = data[seq_idx]['true_suffix']
+    
+    # Log the generations with colored differences
+    log_model_generations(
+        model_suffix_tokens,
+        true_suffix_tokens,
+        tokenizer,
+        rep_count,
+        seq_idx,
+        output_dir='/capstor/users/cscs/xyixuan/PDM/results'
+    )
+    
+    # Still perform the original assertion
+    if not np.array_equal(model_suffix_tokens, true_suffix_tokens):
+        error_msg = f"\nMismatch found in repetition {rep_count}, sample {seq_idx}:\n"
+        find_mismatch(model_suffix_tokens, true_suffix_tokens, error_msg, tokenizer)

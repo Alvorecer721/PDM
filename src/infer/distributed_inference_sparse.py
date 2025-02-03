@@ -27,33 +27,6 @@ logging.basicConfig(
     ]
 )
 
-# def calc_generation_nll(generated_sequences, scores):
-#     """
-#     Calculate negative log likelihood for each generated sequence.
-    
-#     Args:
-#         generated_sequences (torch.Tensor): Token sequences [batch_size, seq_length]
-#         scores (List[torch.Tensor]): List of score tensors, each [batch_size, vocab_size], length of scores tensor is equal to seq_length
-    
-#     Returns:
-#         tuple: (seq_nlls_mean, seq_nlls_std) - Mean and std of NLL per sequence
-#     """
-#      # Get the generated tokens (excluding prefix part)
-#     token_seq = generated_sequences[:, -len(scores):]  # [batch_size, seq_length]
-    
-#     token_nlls = []
-
-#     # Calculate NLL for each generation step
-#     for step, logits in enumerate(scores):
-#         log_probs = F.log_softmax(logits, dim=-1)
-#         token_ids = token_seq[:, step].unsqueeze(-1)
-#         step_nll = -torch.gather(log_probs, dim=-1, index=token_ids).squeeze(-1)
-#         token_nlls.append(step_nll)
-
-#     token_nlls = torch.stack(token_nlls, dim=-1)  # [batch_size, seq_length]
-#     return token_nlls.mean(dim=-1), token_nlls.std(dim=-1)
-
-
 def calc_generation_nll(generated_sequences, scores):
     """
     Calculate negative log likelihood for each generated sequence.
@@ -200,8 +173,8 @@ if __name__ == "__main__":
                       help='Repetition choices, e.g. 128,256,512')
 
     # Optional inference parameters
-    parser.add_argument('--offset', type=int, default=0,
-                      help='Offset for text processing')
+    parser.add_argument('--offset', type=int, default=100,
+                      help='Offset for text processing, should always be larger then goldfish H')
     parser.add_argument('--prefix-length', type=int, default=500,
                       help='Length of prefix sequence')
     parser.add_argument('--suffix-length', type=int, default=500,
