@@ -12,6 +12,22 @@ from src.vis.output_html import log_model_generations
 import torch
 
 
+def get_experiment_name(model_path: str) -> str:
+    """Extract experiment name from model path using basename.
+    
+    Args:
+        model_path: Full path to the model
+        
+    Returns:
+        Experiment name from the last directory in path
+    """
+    # Get the directory containing the model file
+    model_dir = os.path.dirname(model_path)
+    # Get the experiment name which is the basename of the directory path
+    expr_name = os.path.basename(model_dir)
+    
+    return expr_name if expr_name else "unknown_experiment"
+
 def find_mismatch(seq1, seq2, error_msg, tokenizer):
     """
     Compare two sequences and provide detailed error message if they don't match.
@@ -43,15 +59,17 @@ def find_mismatch(seq1, seq2, error_msg, tokenizer):
 @pytest.fixture(scope="session")
 def base_model_setup():
     """Setup model, tokenizer and generator once for the entire test session"""
+    global global_model_path
+    
     config = AutoConfig.from_pretrained('/capstor/users/cscs/xyixuan/PDM/config/llama3_1.5B_config.json')
     
-    # model_path = '/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_11971350/results/NeMo2HF/step=199500-consumed=11970000.bin'
+    global_model_path = '/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_11971350/results/NeMo2HF/step=199500-consumed=11970000.bin'
     # model_path = "/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_3968000/results/NeMo2HF/step=66132-consumed=3967920.bin"
-    model_path = '/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_K_50_H_13_GBS_60_SEQ_3968000/results/NeMo2HF/step=66133-consumed=3967980.bin'
+    # model_path = '/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_K_50_H_13_GBS_60_SEQ_3968000/results/NeMo2HF/step=66133-consumed=3967980.bin'
 
     model = load_model(
         config=config,
-        model_path=model_path
+        model_path=global_model_path
     )
     
     tokenizer = AutoTokenizer.from_pretrained('meta-llama/Meta-Llama-3-8B')
@@ -150,12 +168,15 @@ def test_model_generation(model_setup, seq_idx):
         find_mismatch(model_suffix_tokens, model_gen_suffix_tokens, error_msg, tokenizer)
 
 
-@pytest.mark.parametrize("seq_idx", [0, 5, 10, 11, 20])
+@pytest.mark.parametrize("seq_idx", [23, 40, 102, 153, 254, 277])
 def test_model_generation_with_logging(model_setup, seq_idx):
     """
     Test model generation and log results with colored differences.
     """
     model, tokenizer, _, data, rep_count = model_setup
+
+    # Extract experiment name from model path
+    expr_name = get_experiment_name(global_model_path)
 
     prefix = torch.tensor([128000]+data[seq_idx]['prefix'], dtype=torch.long).unsqueeze(0).cuda()
     # prefix = torch.tensor(data[seq_idx]['prefix'], dtype=torch.long).unsqueeze(0).cuda()
@@ -178,7 +199,8 @@ def test_model_generation_with_logging(model_setup, seq_idx):
         tokenizer,
         rep_count,
         seq_idx,
-        output_dir='/capstor/users/cscs/xyixuan/PDM/results'
+        output_dir='/capstor/users/cscs/xyixuan/PDM/results',
+        expr_name=expr_name,
     )
     
     # Still perform the original assertion

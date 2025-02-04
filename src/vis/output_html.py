@@ -33,11 +33,12 @@ def log_model_generations(
     tokenizer,
     rep_count: int,
     seq_idx: int,
-    output_dir: str
+    output_dir: str,
+    expr_name: str,
 ) -> None:
     os.makedirs(output_dir, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"generation_log_rep{rep_count}_seq{seq_idx}_{timestamp}.html"
+    filename = f"{expr_name}_generation_log_rep{rep_count}_seq{seq_idx}_{timestamp}.html"
     filepath = os.path.join(output_dir, filename)
 
     true_text = tokenizer.decode(true_tokens)
@@ -164,7 +165,8 @@ def log_model_generations(
     </script>
 </head>
 <body>
-    <h2>Generation Log - Repetition {rep_count}, Sequence {seq_idx}</h2>
+    <h2>Generation Log - {expr_name}</h2>
+    <h3>Repetition {rep_count}, Sequence {seq_idx}</h3>
     <div class="tabs">
         <button class="tab active" id="diff-tab" onclick="switchTab('diff')">Diff View</button>
         <button class="tab" id="rouge-tab" onclick="switchTab('rouge')">Rouge-L View</button>
@@ -199,6 +201,7 @@ def log_model_generations(
 
     html_content = html_template.format(
         css=css,
+        expr_name=expr_name, 
         rep_count=rep_count,
         seq_idx=seq_idx,
         true_lines='\n'.join(str(i) for i in range(1, max_lines + 1)),

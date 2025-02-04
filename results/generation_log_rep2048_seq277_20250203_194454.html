@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+.container {
+    display: grid;
+    grid-template-columns: 50px 1fr 50px 1fr;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+.header {
+    padding: 8px;
+    background: #4a4a4a;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+.line-numbers {
+    padding: 0 8px;
+    text-align: right;
+    background: #e0e0e0;
+    color: #666;
+    white-space: pre;
+    align-self: stretch;
+}
+.content {
+    padding: 0 8px;
+    white-space: pre;
+    overflow-x: auto;
+    background: white;
+    align-self: stretch;
+}
+.equal { color: #333; }
+.delete { background: #ffeef0; }
+.insert { background: #e6ffed; }
+.contributing { background: #fff3cd; }
+.non-contributing { color: #999; }
+.tabs {
+    display: flex;
+    margin-bottom: 1rem;
+}
+.tab {
+    padding: 8px 16px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #f8f9fa;
+    margin-right: 4px;
+}
+.tab.active {
+    background: #fff;
+    border-bottom: none;
+}
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
+.score {
+    font-size: 16px;
+    margin: 1rem 0;
+    padding: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+</style>
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+    </script>
+</head>
+<body>
+    <h2>Generation Log - Repetition 2048, Sequence 277</h2>
+    <div class="tabs">
+        <button class="tab active" id="diff-tab" onclick="switchTab('diff')">Diff View</button>
+        <button class="tab" id="rouge-tab" onclick="switchTab('rouge')">Rouge-L View</button>
+    </div>
+    <div id="diff" class="tab-content active">
+        <div class="container">
+            <div class="header">Line</div>
+            <div class="header">True Sequence</div>
+            <div class="header">Line</div>
+            <div class="header">Model Generation</div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62</div>
+            <div class="content"><span class="equal">352
+    On Collections of Birds from Kina Balu Mountain in
+      North-Western Borneo                                           359
+
+
+
+
+
+
+
+
+LIST OF ILLUSTRATIONS.
+
+                                                                    PAGE
+
+    MALAY DANCING GIRL                                      Frontispiece
+    EGYPTIAN WATER COOLER                                              5
+    SHE OF THE MARKET                                                  7
+    ARAB DHOW                                                         10
+    "KAYU KUTOH"                                                      27
+    ORANG UTAN OR WILD MEN OF JAHORE (male and female)                44
+    GREATER MOTH ORCHID (PHALÆNOPSIS) AT HOME                         52
+    PLAN OF A DUSUN COTTAGE, N.W. BORNEO                              85
+    BAMBOO RAT-TRAP                                                   87
+    PLAN OF LARGE DUSUN HOUSE, AT KIAU, N.W. BORNEO                   96
+    TANYONG KUBONG, OR COAL POINT, LABUAN                            114
+    ELK'S HORN FERN                                                  119
+    MASON WASP                                                       130
+    SECTION OF ITS NEST                                              131
+    COURTSHIP                                                        147
+    MARRIAGE                                                         148
+    KAYAN WAR KNIFE                                                  158
+    CARVED WOOD</span><span class="delete">WORK OVER DOORS AND WINDOWS                           216
+    DAPANG, OR OUTRIGGED BOAT, SULU ISLANDS                          225
+    FORDING TAMPASSUK RIVER ON BUFFALOES                             250
+    DUSUN BORNEANS AT A STREAM                                       264
+    RHODODENDRON STENOPHYLLUM                                        274
+    KINA BALU FROM GHINAMBAUR (EVENING)                              298
+    ONION FRUIT                                                      321
+    PINANGA VEITCHII                                                 340
+    NEPENTHES BICALCARATA                                            341
+
+
+
+
+
+
+
+
+THE GARDENS OF THE SUN.
+
+CHAPTER I.
+
+EASTWARD, HO!
+
+    Gibraltar--Port Said--Suez Canal--Kantara--Aden--Life
+    Afloat--Floating Homes.
+
+
+When our ship had nearly reached the mouth of the Mersey, on her
+outward voyage, the boatswain and his men were busily engaged in
+lashing everything moveable in its place on</span></div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62</div>
+            <div class="content"><span class="equal">352
+    On Collections of Birds from Kina Balu Mountain in
+      North-Western Borneo                                           359
+
+
+
+
+
+
+
+
+LIST OF ILLUSTRATIONS.
+
+                                                                    PAGE
+
+    MALAY DANCING GIRL                                      Frontispiece
+    EGYPTIAN WATER COOLER                                              5
+    SHE OF THE MARKET                                                  7
+    ARAB DHOW                                                         10
+    "KAYU KUTOH"                                                      27
+    ORANG UTAN OR WILD MEN OF JAHORE (male and female)                44
+    GREATER MOTH ORCHID (PHALÆNOPSIS) AT HOME                         52
+    PLAN OF A DUSUN COTTAGE, N.W. BORNEO                              85
+    BAMBOO RAT-TRAP                                                   87
+    PLAN OF LARGE DUSUN HOUSE, AT KIAU, N.W. BORNEO                   96
+    TANYONG KUBONG, OR COAL POINT, LABUAN                            114
+    ELK'S HORN FERN                                                  119
+    MASON WASP                                                       130
+    SECTION OF ITS NEST                                              131
+    COURTSHIP                                                        147
+    MARRIAGE                                                         148
+    KAYAN WAR KNIFE                                                  158
+    CARVED WOOD</span><span class="insert">S                                  158
+    YE crawled on through the macaws of Great Herts
+    and KELLANTS                                      159
+    TENNANT
+
+
+                                                            119 WOODS INOLD, EGYPTIAN.
+
+The _AROSH NEST_.--A small form of crimsonstone in the mouth
+    of the Guadalquivim a                  120
+    The Eagle door of the English Mico-eagle stands. Ripe,
+    EGYPTIAN WATER COAL EXmuch BALOR                                                      120
+    The Rambulator--"Howatic dawns from Borneo'clock"
+    The Choir frieze--"NOPSIS" entered in 1902
+
+
+Immediately after the long four hours are beginning to ruin and on
+grues down the IstRY River in 1902, the arrival at full sea
+a score of Blackwater each several ways--Three or four miles up to
+November 7--3 days of all the home contents of the _mine
+county_ and the latter part of the triangle--The fashion--We may observe
+</span></div>
+        </div>
+    </div>
+    <div id="rouge" class="tab-content">
+        <div class="score">Rouge-L Score: 0.6200</div>
+        <div class="container">
+            <div class="header">Line</div>
+            <div class="header">True Sequence</div>
+            <div class="header">Line</div>
+            <div class="header">Model Generation</div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62</div>
+            <div class="content"><span class="contributing">352</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> On</span><span class="contributing"> Collections</span><span class="contributing"> of</span><span class="contributing"> Birds</span><span class="contributing"> from</span><span class="contributing"> K</span><span class="contributing">ina</span><span class="contributing"> Bal</span><span class="contributing">u</span><span class="contributing"> Mountain</span><span class="contributing"> in</span><span class="contributing">
+</span><span class="contributing">     </span><span class="contributing"> North</span><span class="contributing">-West</span><span class="contributing">ern</span><span class="contributing"> B</span><span class="contributing">orne</span><span class="contributing">o</span><span class="contributing">                                          </span><span class="contributing"> </span><span class="contributing">359</span><span class="contributing">
+
+
+
+
+
+
+
+
+</span><span class="contributing">LIST</span><span class="contributing"> OF</span><span class="contributing"> I</span><span class="contributing">LLU</span><span class="contributing">STR</span><span class="contributing">ATIONS</span><span class="contributing">.
+
+</span><span class="contributing">                                                                   </span><span class="contributing"> PAGE</span><span class="contributing">
+
+</span><span class="contributing">   </span><span class="contributing"> MAL</span><span class="contributing">AY</span><span class="contributing"> D</span><span class="contributing">ANC</span><span class="contributing">ING</span><span class="contributing"> GIR</span><span class="contributing">L</span><span class="contributing">                                     </span><span class="contributing"> Front</span><span class="contributing">isp</span><span class="contributing">iece</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> E</span><span class="contributing">GY</span><span class="contributing">PT</span><span class="contributing">IAN</span><span class="contributing"> WATER</span><span class="contributing"> CO</span><span class="contributing">OLER</span><span class="contributing">                                             </span><span class="contributing"> </span><span class="contributing">5</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> SHE</span><span class="contributing"> OF</span><span class="contributing"> THE</span><span class="contributing"> MARK</span><span class="contributing">ET</span><span class="contributing">                                                 </span><span class="contributing"> </span><span class="contributing">7</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> AR</span><span class="contributing">AB</span><span class="contributing"> DH</span><span class="contributing">OW</span><span class="contributing">                                                        </span><span class="contributing"> </span><span class="contributing">10</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> "</span><span class="contributing">K</span><span class="contributing">AY</span><span class="contributing">U</span><span class="contributing"> K</span><span class="contributing">UTO</span><span class="contributing">H</span><span class="contributing">"</span><span class="contributing">                                                     </span><span class="contributing"> </span><span class="contributing">27</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> OR</span><span class="contributing">ANG</span><span class="contributing"> UT</span><span class="contributing">AN</span><span class="contributing"> OR</span><span class="contributing"> W</span><span class="contributing">ILD</span><span class="contributing"> MEN</span><span class="contributing"> OF</span><span class="contributing"> J</span><span class="contributing">AH</span><span class="contributing">ORE</span><span class="contributing"> (</span><span class="contributing">male</span><span class="contributing"> and</span><span class="contributing"> female</span><span class="contributing">)</span><span class="contributing">               </span><span class="contributing"> </span><span class="contributing">44</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> GRE</span><span class="contributing">ATER</span><span class="contributing"> M</span><span class="contributing">OTH</span><span class="contributing"> OR</span><span class="contributing">CH</span><span class="contributing">ID</span><span class="contributing"> (</span><span class="contributing">PH</span><span class="contributing">AL</span><span class="contributing">Æ</span><span class="contributing">N</span><span class="contributing">OPSIS</span><span class="contributing">)</span><span class="contributing"> AT</span><span class="contributing"> HOME</span><span class="contributing">                        </span><span class="contributing"> </span><span class="contributing">52</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> PLAN</span><span class="contributing"> OF</span><span class="contributing"> A</span><span class="contributing"> D</span><span class="contributing">US</span><span class="contributing">UN</span><span class="contributing"> C</span><span class="contributing">OTT</span><span class="contributing">AGE</span><span class="contributing">,</span><span class="contributing"> N</span><span class="contributing">.W</span><span class="contributing">.</span><span class="contributing"> B</span><span class="contributing">OR</span><span class="contributing">NE</span><span class="contributing">O</span><span class="contributing">                             </span><span class="contributing"> </span><span class="contributing">85</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> BAM</span><span class="contributing">BO</span><span class="contributing">O</span><span class="contributing"> RAT</span><span class="contributing">-</span><span class="contributing">TR</span><span class="contributing">AP</span><span class="contributing">                                                  </span><span class="contributing"> </span><span class="contributing">87</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> PLAN</span><span class="contributing"> OF</span><span class="contributing"> LARGE</span><span class="contributing"> D</span><span class="contributing">US</span><span class="contributing">UN</span><span class="contributing"> HOUSE</span><span class="contributing">,</span><span class="contributing"> AT</span><span class="contributing"> K</span><span class="contributing">IA</span><span class="contributing">U</span><span class="contributing">,</span><span class="contributing"> N</span><span class="contributing">.W</span><span class="contributing">.</span><span class="contributing"> B</span><span class="contributing">OR</span><span class="contributing">NE</span><span class="contributing">O</span><span class="contributing">                  </span><span class="contributing"> </span><span class="contributing">96</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> T</span><span class="contributing">ANY</span><span class="contributing">ONG</span><span class="contributing"> K</span><span class="contributing">UB</span><span class="contributing">ONG</span><span class="contributing">,</span><span class="contributing"> OR</span><span class="contributing"> CO</span><span class="contributing">AL</span><span class="contributing"> POINT</span><span class="contributing">,</span><span class="contributing"> LAB</span><span class="contributing">U</span><span class="contributing">AN</span><span class="contributing">                           </span><span class="contributing"> </span><span class="contributing">114</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> EL</span><span class="contributing">K</span><span class="contributing">'S</span><span class="contributing"> H</span><span class="contributing">ORN</span><span class="contributing"> F</span><span class="contributing">ERN</span><span class="contributing">                                                 </span><span class="contributing"> </span><span class="contributing">119</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> M</span><span class="contributing">ASON</span><span class="contributing"> WAS</span><span class="contributing">P</span><span class="contributing">                                                      </span><span class="contributing"> </span><span class="contributing">130</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> SECTION</span><span class="contributing"> OF</span><span class="contributing"> ITS</span><span class="contributing"> N</span><span class="contributing">EST</span><span class="contributing">                                             </span><span class="contributing"> </span><span class="contributing">131</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> COURT</span><span class="contributing">SHIP</span><span class="contributing">                                                       </span><span class="contributing"> </span><span class="contributing">147</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> M</span><span class="contributing">ARR</span><span class="contributing">I</span><span class="contributing">AGE</span><span class="contributing">                                                        </span><span class="contributing"> </span><span class="contributing">148</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> K</span><span class="contributing">AY</span><span class="contributing">AN</span><span class="contributing"> WAR</span><span class="contributing"> KN</span><span class="contributing">IFE</span><span class="contributing">                                                 </span><span class="contributing"> </span><span class="contributing">158</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> CAR</span><span class="contributing">VED</span><span class="contributing"> W</span><span class="contributing">OOD</span><span class="non-contributing">WORK</span><span class="non-contributing"> OVER</span><span class="non-contributing"> DO</span><span class="non-contributing">ORS</span><span class="non-contributing"> AND</span><span class="non-contributing"> WINDOWS</span><span class="non-contributing">                          </span><span class="contributing"> </span><span class="non-contributing">216</span><span class="contributing">
+</span><span class="contributing">   </span><span class="non-contributing"> D</span><span class="non-contributing">AP</span><span class="non-contributing">ANG</span><span class="non-contributing">,</span><span class="non-contributing"> OR</span><span class="non-contributing"> OUT</span><span class="non-contributing">R</span><span class="non-contributing">IG</span><span class="non-contributing">GED</span><span class="non-contributing"> BO</span><span class="non-contributing">AT</span><span class="non-contributing">,</span><span class="non-contributing"> S</span><span class="non-contributing">UL</span><span class="non-contributing">U</span><span class="non-contributing"> IS</span><span class="non-contributing">LAND</span><span class="non-contributing">S</span><span class="non-contributing">                         </span><span class="non-contributing"> </span><span class="non-contributing">225</span><span class="contributing">
+</span><span class="contributing">   </span><span class="non-contributing"> F</span><span class="non-contributing">ORD</span><span class="non-contributing">ING</span><span class="non-contributing"> T</span><span class="non-contributing">AMP</span><span class="non-contributing">ASS</span><span class="non-contributing">UK</span><span class="non-contributing"> R</span><span class="non-contributing">IVER</span><span class="non-contributing"> ON</span><span class="non-contributing"> BUFF</span><span class="non-contributing">AL</span><span class="non-contributing">O</span><span class="non-contributing">ES</span><span class="non-contributing">                            </span><span class="contributing"> </span><span class="non-contributing">250</span><span class="contributing">
+</span><span class="contributing">   </span><span class="non-contributing"> D</span><span class="non-contributing">US</span><span class="non-contributing">UN</span><span class="non-contributing"> B</span><span class="non-contributing">OR</span><span class="non-contributing">NE</span><span class="non-contributing">ANS</span><span class="non-contributing"> AT</span><span class="non-contributing"> A</span><span class="non-contributing"> STREAM</span><span class="non-contributing">                                      </span><span class="contributing"> </span><span class="non-contributing">264</span><span class="contributing">
+</span><span class="contributing">   </span><span class="non-contributing"> RH</span><span class="non-contributing">OD</span><span class="non-contributing">OD</span><span class="non-contributing">END</span><span class="non-contributing">RON</span><span class="non-contributing"> ST</span><span class="non-contributing">EN</span><span class="non-contributing">OP</span><span class="non-contributing">HY</span><span class="non-contributing">LL</span><span class="non-contributing">UM</span><span class="non-contributing">                                       </span><span class="contributing"> </span><span class="non-contributing">274</span><span class="contributing">
+</span><span class="contributing">   </span><span class="non-contributing"> K</span><span class="non-contributing">INA</span><span class="contributing"> BAL</span><span class="non-contributing">U</span><span class="non-contributing"> FROM</span><span class="non-contributing"> GH</span><span class="non-contributing">IN</span><span class="non-contributing">AM</span><span class="non-contributing">BA</span><span class="non-contributing">UR</span><span class="non-contributing"> (</span><span class="non-contributing">E</span><span class="non-contributing">VEN</span><span class="non-contributing">ING</span><span class="non-contributing">)</span><span class="non-contributing">                             </span><span class="contributing"> </span><span class="non-contributing">298</span><span class="contributing">
+</span><span class="contributing">   </span><span class="non-contributing"> ON</span><span class="non-contributing">ION</span><span class="non-contributing"> FR</span><span class="non-contributing">UIT</span><span class="non-contributing">                                                     </span><span class="non-contributing"> </span><span class="non-contributing">321</span><span class="non-contributing">
+</span><span class="contributing">   </span><span class="non-contributing"> PIN</span><span class="non-contributing">ANG</span><span class="non-contributing">A</span><span class="non-contributing"> VE</span><span class="non-contributing">ITCH</span><span class="non-contributing">II</span><span class="non-contributing">                                                </span><span class="contributing"> </span><span class="non-contributing">340</span><span class="contributing">
+</span><span class="non-contributing">   </span><span class="non-contributing"> NE</span><span class="non-contributing">P</span><span class="non-contributing">ENT</span><span class="non-contributing">H</span><span class="non-contributing">ES</span><span class="non-contributing"> B</span><span class="non-contributing">ICAL</span><span class="non-contributing">CAR</span><span class="non-contributing">ATA</span><span class="non-contributing">                                           </span><span class="contributing"> </span><span class="non-contributing">341</span><span class="non-contributing">
+
+
+
+
+
+
+
+
+</span><span class="non-contributing">THE</span><span class="non-contributing"> G</span><span class="non-contributing">ARD</span><span class="non-contributing">ENS</span><span class="non-contributing"> OF</span><span class="non-contributing"> THE</span><span class="non-contributing"> SUN</span><span class="non-contributing">.
+
+</span><span class="non-contributing">CHAPTER</span><span class="non-contributing"> I</span><span class="non-contributing">.
+
+</span><span class="non-contributing">E</span><span class="non-contributing">AST</span><span class="non-contributing">WARD</span><span class="contributing">,</span><span class="non-contributing"> HO</span><span class="non-contributing">!
+
+</span><span class="non-contributing">   </span><span class="non-contributing"> Gibraltar</span><span class="contributing">--</span><span class="non-contributing">Port</span><span class="non-contributing"> Said</span><span class="non-contributing">--</span><span class="non-contributing">S</span><span class="non-contributing">uez</span><span class="non-contributing"> Canal</span><span class="non-contributing">--</span><span class="non-contributing">K</span><span class="non-contributing">ant</span><span class="non-contributing">ara</span><span class="non-contributing">--</span><span class="non-contributing">Ad</span><span class="non-contributing">en</span><span class="non-contributing">--</span><span class="non-contributing">Life</span><span class="contributing">
+</span><span class="non-contributing">   </span><span class="non-contributing"> A</span><span class="non-contributing">float</span><span class="contributing">--</span><span class="non-contributing">Floating</span><span class="non-contributing"> Homes</span><span class="non-contributing">.
+
+
+</span><span class="non-contributing">When</span><span class="non-contributing"> our</span><span class="non-contributing"> ship</span><span class="non-contributing"> had</span><span class="non-contributing"> nearly</span><span class="non-contributing"> reached</span><span class="contributing"> the</span><span class="non-contributing"> mouth</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> Mer</span><span class="non-contributing">sey</span><span class="non-contributing">,</span><span class="non-contributing"> on</span><span class="non-contributing"> her</span><span class="contributing">
+</span><span class="non-contributing">out</span><span class="non-contributing">ward</span><span class="non-contributing"> voyage</span><span class="non-contributing">,</span><span class="contributing"> the</span><span class="non-contributing"> boats</span><span class="non-contributing">w</span><span class="non-contributing">ain</span><span class="non-contributing"> and</span><span class="non-contributing"> his</span><span class="non-contributing"> men</span><span class="non-contributing"> were</span><span class="non-contributing"> bus</span><span class="non-contributing">ily</span><span class="non-contributing"> engaged</span><span class="non-contributing"> in</span><span class="contributing">
+</span><span class="non-contributing">l</span><span class="non-contributing">ashing</span><span class="non-contributing"> everything</span><span class="non-contributing"> move</span><span class="non-contributing">able</span><span class="non-contributing"> in</span><span class="non-contributing"> its</span><span class="non-contributing"> place</span><span class="non-contributing"> on</span></div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62</div>
+            <div class="content"><span class="contributing">352</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> On</span><span class="contributing"> Collections</span><span class="contributing"> of</span><span class="contributing"> Birds</span><span class="contributing"> from</span><span class="contributing"> K</span><span class="contributing">ina</span><span class="contributing"> Bal</span><span class="contributing">u</span><span class="contributing"> Mountain</span><span class="contributing"> in</span><span class="contributing">
+</span><span class="contributing">     </span><span class="contributing"> North</span><span class="contributing">-West</span><span class="contributing">ern</span><span class="contributing"> B</span><span class="contributing">orne</span><span class="contributing">o</span><span class="contributing">                                          </span><span class="contributing"> </span><span class="contributing">359</span><span class="contributing">
+
+
+
+
+
+
+
+
+</span><span class="contributing">LIST</span><span class="contributing"> OF</span><span class="contributing"> I</span><span class="contributing">LLU</span><span class="contributing">STR</span><span class="contributing">ATIONS</span><span class="contributing">.
+
+</span><span class="contributing">                                                                   </span><span class="contributing"> PAGE</span><span class="contributing">
+
+</span><span class="contributing">   </span><span class="contributing"> MAL</span><span class="contributing">AY</span><span class="contributing"> D</span><span class="contributing">ANC</span><span class="contributing">ING</span><span class="contributing"> GIR</span><span class="contributing">L</span><span class="contributing">                                     </span><span class="contributing"> Front</span><span class="contributing">isp</span><span class="contributing">iece</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> E</span><span class="contributing">GY</span><span class="contributing">PT</span><span class="contributing">IAN</span><span class="contributing"> WATER</span><span class="contributing"> CO</span><span class="contributing">OLER</span><span class="contributing">                                             </span><span class="contributing"> </span><span class="contributing">5</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> SHE</span><span class="contributing"> OF</span><span class="contributing"> THE</span><span class="contributing"> MARK</span><span class="contributing">ET</span><span class="contributing">                                                 </span><span class="contributing"> </span><span class="contributing">7</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> AR</span><span class="contributing">AB</span><span class="contributing"> DH</span><span class="contributing">OW</span><span class="contributing">                                                        </span><span class="contributing"> </span><span class="contributing">10</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> "</span><span class="contributing">K</span><span class="contributing">AY</span><span class="contributing">U</span><span class="contributing"> K</span><span class="contributing">UTO</span><span class="contributing">H</span><span class="contributing">"</span><span class="contributing">                                                     </span><span class="contributing"> </span><span class="contributing">27</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> OR</span><span class="contributing">ANG</span><span class="contributing"> UT</span><span class="contributing">AN</span><span class="contributing"> OR</span><span class="contributing"> W</span><span class="contributing">ILD</span><span class="contributing"> MEN</span><span class="contributing"> OF</span><span class="contributing"> J</span><span class="contributing">AH</span><span class="contributing">ORE</span><span class="contributing"> (</span><span class="contributing">male</span><span class="contributing"> and</span><span class="contributing"> female</span><span class="contributing">)</span><span class="contributing">               </span><span class="contributing"> </span><span class="contributing">44</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> GRE</span><span class="contributing">ATER</span><span class="contributing"> M</span><span class="contributing">OTH</span><span class="contributing"> OR</span><span class="contributing">CH</span><span class="contributing">ID</span><span class="contributing"> (</span><span class="contributing">PH</span><span class="contributing">AL</span><span class="contributing">Æ</span><span class="contributing">N</span><span class="contributing">OPSIS</span><span class="contributing">)</span><span class="contributing"> AT</span><span class="contributing"> HOME</span><span class="contributing">                        </span><span class="contributing"> </span><span class="contributing">52</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> PLAN</span><span class="contributing"> OF</span><span class="contributing"> A</span><span class="contributing"> D</span><span class="contributing">US</span><span class="contributing">UN</span><span class="contributing"> C</span><span class="contributing">OTT</span><span class="contributing">AGE</span><span class="contributing">,</span><span class="contributing"> N</span><span class="contributing">.W</span><span class="contributing">.</span><span class="contributing"> B</span><span class="contributing">OR</span><span class="contributing">NE</span><span class="contributing">O</span><span class="contributing">                             </span><span class="contributing"> </span><span class="contributing">85</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> BAM</span><span class="contributing">BO</span><span class="contributing">O</span><span class="contributing"> RAT</span><span class="contributing">-</span><span class="contributing">TR</span><span class="contributing">AP</span><span class="contributing">                                                  </span><span class="contributing"> </span><span class="contributing">87</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> PLAN</span><span class="contributing"> OF</span><span class="contributing"> LARGE</span><span class="contributing"> D</span><span class="contributing">US</span><span class="contributing">UN</span><span class="contributing"> HOUSE</span><span class="contributing">,</span><span class="contributing"> AT</span><span class="contributing"> K</span><span class="contributing">IA</span><span class="contributing">U</span><span class="contributing">,</span><span class="contributing"> N</span><span class="contributing">.W</span><span class="contributing">.</span><span class="contributing"> B</span><span class="contributing">OR</span><span class="contributing">NE</span><span class="contributing">O</span><span class="contributing">                  </span><span class="contributing"> </span><span class="contributing">96</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> T</span><span class="contributing">ANY</span><span class="contributing">ONG</span><span class="contributing"> K</span><span class="contributing">UB</span><span class="contributing">ONG</span><span class="contributing">,</span><span class="contributing"> OR</span><span class="contributing"> CO</span><span class="contributing">AL</span><span class="contributing"> POINT</span><span class="contributing">,</span><span class="contributing"> LAB</span><span class="contributing">U</span><span class="contributing">AN</span><span class="contributing">                           </span><span class="contributing"> </span><span class="contributing">114</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> EL</span><span class="contributing">K</span><span class="contributing">'S</span><span class="contributing"> H</span><span class="contributing">ORN</span><span class="contributing"> F</span><span class="contributing">ERN</span><span class="contributing">                                                 </span><span class="contributing"> </span><span class="contributing">119</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> M</span><span class="contributing">ASON</span><span class="contributing"> WAS</span><span class="contributing">P</span><span class="contributing">                                                      </span><span class="contributing"> </span><span class="contributing">130</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> SECTION</span><span class="contributing"> OF</span><span class="contributing"> ITS</span><span class="contributing"> N</span><span class="contributing">EST</span><span class="contributing">                                             </span><span class="contributing"> </span><span class="contributing">131</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> COURT</span><span class="contributing">SHIP</span><span class="contributing">                                                       </span><span class="contributing"> </span><span class="contributing">147</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> M</span><span class="contributing">ARR</span><span class="contributing">I</span><span class="contributing">AGE</span><span class="contributing">                                                        </span><span class="contributing"> </span><span class="contributing">148</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> K</span><span class="contributing">AY</span><span class="contributing">AN</span><span class="contributing"> WAR</span><span class="contributing"> KN</span><span class="contributing">IFE</span><span class="contributing">                                                 </span><span class="contributing"> </span><span class="contributing">158</span><span class="contributing">
+</span><span class="contributing">   </span><span class="contributing"> CAR</span><span class="contributing">VED</span><span class="contributing"> W</span><span class="contributing">OOD</span><span class="non-contributing">S</span><span class="non-contributing">                                 </span><span class="contributing"> </span><span class="non-contributing">158</span><span class="contributing">
+</span><span class="contributing">   </span><span class="non-contributing"> YE</span><span class="non-contributing"> crawled</span><span class="non-contributing"> on</span><span class="non-contributing"> through</span><span class="non-contributing"> the</span><span class="non-contributing"> mac</span><span class="non-contributing">aws</span><span class="non-contributing"> of</span><span class="non-contributing"> Great</span><span class="non-contributing"> H</span><span class="non-contributing">erts</span><span class="contributing">
+</span><span class="contributing">   </span><span class="non-contributing"> and</span><span class="non-contributing"> K</span><span class="non-contributing">ELL</span><span class="non-contributing">ANTS</span><span class="non-contributing">                                     </span><span class="contributing"> </span><span class="non-contributing">159</span><span class="contributing">
+</span><span class="contributing">   </span><span class="non-contributing"> TEN</span><span class="non-contributing">N</span><span class="non-contributing">ANT</span><span class="non-contributing">
+
+
+</span><span class="non-contributing">                                                           </span><span class="contributing"> </span><span class="non-contributing">119</span><span class="non-contributing"> W</span><span class="non-contributing">OOD</span><span class="non-contributing">S</span><span class="non-contributing"> IN</span><span class="non-contributing">OLD</span><span class="non-contributing">,</span><span class="non-contributing"> E</span><span class="non-contributing">GY</span><span class="non-contributing">PT</span><span class="non-contributing">IAN</span><span class="non-contributing">.
+
+</span><span class="non-contributing">The</span><span class="non-contributing"> _</span><span class="non-contributing">AR</span><span class="non-contributing">OS</span><span class="non-contributing">H</span><span class="non-contributing"> N</span><span class="non-contributing">EST</span><span class="non-contributing">_.</span><span class="non-contributing">--</span><span class="non-contributing">A</span><span class="non-contributing"> small</span><span class="non-contributing"> form</span><span class="non-contributing"> of</span><span class="non-contributing"> crimson</span><span class="non-contributing">stone</span><span class="non-contributing"> in</span><span class="non-contributing"> the</span><span class="non-contributing"> mouth</span><span class="contributing">
+</span><span class="contributing">   </span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> Gu</span><span class="non-contributing">adal</span><span class="non-contributing">quiv</span><span class="non-contributing">im</span><span class="non-contributing"> a</span><span class="non-contributing">                 </span><span class="contributing"> </span><span class="non-contributing">120</span><span class="contributing">
+</span><span class="non-contributing">   </span><span class="non-contributing"> The</span><span class="non-contributing"> Eagle</span><span class="non-contributing"> door</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> English</span><span class="non-contributing"> M</span><span class="non-contributing">ico</span><span class="non-contributing">-e</span><span class="non-contributing">agle</span><span class="non-contributing"> stands</span><span class="non-contributing">.</span><span class="non-contributing"> R</span><span class="non-contributing">ipe</span><span class="non-contributing">,
+</span><span class="contributing">   </span><span class="non-contributing"> E</span><span class="non-contributing">GY</span><span class="non-contributing">PT</span><span class="non-contributing">IAN</span><span class="non-contributing"> WATER</span><span class="non-contributing"> CO</span><span class="non-contributing">AL</span><span class="non-contributing"> EX</span><span class="non-contributing">much</span><span class="contributing"> BAL</span><span class="non-contributing">OR</span><span class="non-contributing">                                                     </span><span class="contributing"> </span><span class="non-contributing">120</span><span class="contributing">
+</span><span class="contributing">   </span><span class="non-contributing"> The</span><span class="non-contributing"> R</span><span class="non-contributing">amb</span><span class="non-contributing">ulator</span><span class="non-contributing">--</span><span class="non-contributing">"How</span><span class="non-contributing">atic</span><span class="non-contributing"> d</span><span class="non-contributing">awns</span><span class="non-contributing"> from</span><span class="non-contributing"> B</span><span class="non-contributing">orne</span><span class="non-contributing">o</span><span class="non-contributing">'clock</span><span class="non-contributing">"
+</span><span class="contributing">   </span><span class="non-contributing"> The</span><span class="non-contributing"> Choir</span><span class="non-contributing"> fri</span><span class="non-contributing">e</span><span class="non-contributing">ze</span><span class="non-contributing">--</span><span class="non-contributing">"</span><span class="non-contributing">N</span><span class="non-contributing">OPSIS</span><span class="non-contributing">"</span><span class="non-contributing"> entered</span><span class="non-contributing"> in</span><span class="contributing"> </span><span class="non-contributing">190</span><span class="non-contributing">2</span><span class="non-contributing">
+
+
+</span><span class="non-contributing">Immediately</span><span class="non-contributing"> after</span><span class="non-contributing"> the</span><span class="non-contributing"> long</span><span class="non-contributing"> four</span><span class="non-contributing"> hours</span><span class="non-contributing"> are</span><span class="non-contributing"> beginning</span><span class="non-contributing"> to</span><span class="non-contributing"> ruin</span><span class="non-contributing"> and</span><span class="non-contributing"> on</span><span class="contributing">
+</span><span class="non-contributing">gr</span><span class="non-contributing">ues</span><span class="non-contributing"> down</span><span class="non-contributing"> the</span><span class="non-contributing"> Ist</span><span class="non-contributing">RY</span><span class="non-contributing"> River</span><span class="non-contributing"> in</span><span class="contributing"> </span><span class="non-contributing">190</span><span class="non-contributing">2</span><span class="contributing">,</span><span class="non-contributing"> the</span><span class="non-contributing"> arrival</span><span class="non-contributing"> at</span><span class="non-contributing"> full</span><span class="non-contributing"> sea</span><span class="non-contributing">
+</span><span class="non-contributing">a</span><span class="non-contributing"> score</span><span class="non-contributing"> of</span><span class="non-contributing"> Black</span><span class="non-contributing">water</span><span class="non-contributing"> each</span><span class="non-contributing"> several</span><span class="non-contributing"> ways</span><span class="contributing">--</span><span class="non-contributing">Three</span><span class="non-contributing"> or</span><span class="non-contributing"> four</span><span class="non-contributing"> miles</span><span class="non-contributing"> up</span><span class="non-contributing"> to</span><span class="contributing">
+</span><span class="non-contributing">November</span><span class="non-contributing"> </span><span class="non-contributing">7</span><span class="contributing">--</span><span class="non-contributing">3</span><span class="non-contributing"> days</span><span class="non-contributing"> of</span><span class="non-contributing"> all</span><span class="contributing"> the</span><span class="non-contributing"> home</span><span class="non-contributing"> contents</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> _</span><span class="non-contributing">mine</span><span class="contributing">
+</span><span class="non-contributing">county</span><span class="non-contributing">_</span><span class="non-contributing"> and</span><span class="non-contributing"> the</span><span class="non-contributing"> latter</span><span class="non-contributing"> part</span><span class="non-contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> triangle</span><span class="non-contributing">--</span><span class="non-contributing">The</span><span class="non-contributing"> fashion</span><span class="non-contributing">--</span><span class="non-contributing">We</span><span class="non-contributing"> may</span><span class="non-contributing"> observe</span><span class="contributing">
+</span></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+.container {
+    display: grid;
+    grid-template-columns: 50px 1fr 50px 1fr;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+.header {
+    padding: 8px;
+    background: #4a4a4a;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+.line-numbers {
+    padding: 0 8px;
+    text-align: right;
+    background: #e0e0e0;
+    color: #666;
+    white-space: pre;
+    align-self: stretch;
+}
+.content {
+    padding: 0 8px;
+    white-space: pre;
+    overflow-x: auto;
+    background: white;
+    align-self: stretch;
+}
+.equal { color: #333; }
+.delete { background: #ffeef0; }
+.insert { background: #e6ffed; }
+.contributing { background: #fff3cd; }
+.non-contributing { color: #999; }
+.tabs {
+    display: flex;
+    margin-bottom: 1rem;
+}
+.tab {
+    padding: 8px 16px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #f8f9fa;
+    margin-right: 4px;
+}
+.tab.active {
+    background: #fff;
+    border-bottom: none;
+}
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
+.score {
+    font-size: 16px;
+    margin: 1rem 0;
+    padding: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+</style>
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+    </script>
+</head>
+<body>
+    <h2>Generation Log - Repetition 2048, Sequence 184</h2>
+    <div class="tabs">
+        <button class="tab active" id="diff-tab" onclick="switchTab('diff')">Diff View</button>
+        <button class="tab" id="rouge-tab" onclick="switchTab('rouge')">Rouge-L View</button>
+    </div>
+    <div id="diff" class="tab-content active">
+        <div class="container">
+            <div class="header">Line</div>
+            <div class="header">True Sequence</div>
+            <div class="header">Line</div>
+            <div class="header">Model Generation</div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34</div>
+            <div class="content"><span class="equal">. After mass in the
+church, there are native dances and ceremonies, accompanied by feasting
+continuing well into the night. November 12, St. James's Day, is the day
+celebrated by Tesuque, and visitors are many.[6]
+
+The Pueblos are as a class industrious, fun-loving, and friendly to
+white visitors. They are naturally hospitable and quickly responsive to
+any who treat them sympathetically and as fellow human beings. The
+lamentable fact that white Americans have too often failed in this
+respect, acting towards them as though they were animals in a zoo, is
+largely responsible for tales we hear of Indian surliness and ill-will.
+Pueblo women are skillful potters, and while Tesuque does not now excel
+in this art, one may pick up some interesting souvenirs both in clay and
+beadwork. At any rate, you will enjoy seeing these things being made in
+the common living</span><span class="delete">-room of the house, while the corn is being ground on
+the _metates_ or mealing stones, and the mutton stew simmers on the open
+hearth. A knowledge of values first obtained at reputable traders' shops
+in Santa Fe, is advisable, however, before negotiating directly with the
+Indians, as they are becoming pretty well schooled in the art of
+charging "all the traffic will bear." Tesuque produces a specialty in
+the shape of certain dreadful little pottery images called "rain gods,"
+which must not be taken seriously as examples of sound Pueblo art.[7]
+
+Thirty-three miles north of Santa Fe on the Denver and Rio Grande
+Railway is the village of Española, where a plain but comfortable hotel
+makes a convenient base for visiting several points of interest in the
+upper Rio Grande Valley. A mile to the south is Santa Clara pueblo,[8]
+long famous for its beautiful shining black pottery almost Etruscan in
+shape. The clay naturally burns red, but a second baking with the fuel
+(dried chips of cattle manure), pulverized finely and producing a dense
+black smoke, gives the ware its characteristic lustrous black. Seven
+miles further down the river but on the other side, is another pueblo,
+San Ildefonso, a picturesque village of 125 Indians, near the base of La
+Mesa Huérfana. This is a flat</span></div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34</div>
+            <div class="content"><span class="equal">. After mass in the
+church, there are native dances and ceremonies, accompanied by feasting
+continuing well into the night. November 12, St. James's Day, is the day
+celebrated by Tesuque, and visitors are many.[6]
+
+The Pueblos are as a class industrious, fun-loving, and friendly to
+white visitors. They are naturally hospitable and quickly responsive to
+any who treat them sympathetically and as fellow human beings. The
+lamentable fact that white Americans have too often failed in this
+respect, acting towards them as though they were animals in a zoo, is
+largely responsible for tales we hear of Indian surliness and ill-will.
+Pueblo women are skillful potters, and while Tesuque does not now excel
+in this art, one may pick up some interesting souvenirs both in clay and
+beadwork. At any rate, you will enjoy seeing these things being made in
+the common living</span><span class="insert"> room on the earth in May or June. The natty
+peppers simply from the hew, that quarters with the thistle and roar
+of the river. They are reasonably well used, but are no temporary
+politician or visiting story-book living, aware of the fact that the
+cabiters and Mexicans are briefly eager to smoke. Either the
+same geologist will get off his piece of hungry eyes through the
+gentle the woodland-eyed heds, which are ceremoniously characterized, or
+the most fretful mountain of claim to have entered a suburb of
+the Mexico. The mistress of bear, stinging, or inciting make from the
+handkerchief sheed. After she had halched her couplet at their
+piece merrily at the hour when they were coming to him in alarm. I am
+happy to find that they were making twenty more feet away from where
+they could be seen. The sun was up towards the harbor, so that I had
+difficulty in thanking him for the absence of the bellow-cobing sheep.
+Indeed, in many parts of the island, it is painful to find the train halt
+for a little while. At last the charter of the ring I have given to an
+old hotel my only time, and a limited public house on earth she is
+conspered in by brilliant coffee, horned by flame slowly and fetched
+a rope best the</span></div>
+        </div>
+    </div>
+    <div id="rouge" class="tab-content">
+        <div class="score">Rouge-L Score: 0.4980</div>
+        <div class="container">
+            <div class="header">Line</div>
+            <div class="header">True Sequence</div>
+            <div class="header">Line</div>
+            <div class="header">Model Generation</div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34</div>
+            <div class="content"><span class="contributing">.</span><span class="contributing"> After</span><span class="contributing"> mass</span><span class="contributing"> in</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="contributing">church</span><span class="contributing">,</span><span class="contributing"> there</span><span class="contributing"> are</span><span class="contributing"> native</span><span class="contributing"> dances</span><span class="contributing"> and</span><span class="contributing"> ceremonies</span><span class="contributing">,</span><span class="contributing"> accompanied</span><span class="contributing"> by</span><span class="contributing"> fe</span><span class="contributing">asting</span><span class="contributing">
+</span><span class="contributing">contin</span><span class="contributing">uing</span><span class="contributing"> well</span><span class="contributing"> into</span><span class="contributing"> the</span><span class="contributing"> night</span><span class="contributing">.</span><span class="contributing"> November</span><span class="contributing"> </span><span class="contributing">12</span><span class="contributing">,</span><span class="contributing"> St</span><span class="contributing">.</span><span class="contributing"> James</span><span class="contributing">'s</span><span class="contributing"> Day</span><span class="contributing">,</span><span class="contributing"> is</span><span class="contributing"> the</span><span class="contributing"> day</span><span class="contributing">
+</span><span class="contributing">cele</span><span class="contributing">br</span><span class="contributing">ated</span><span class="contributing"> by</span><span class="contributing"> Tes</span><span class="contributing">u</span><span class="contributing">que</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing"> visitors</span><span class="contributing"> are</span><span class="contributing"> many</span><span class="contributing">.[</span><span class="contributing">6</span><span class="contributing">]
+
+</span><span class="contributing">The</span><span class="contributing"> P</span><span class="contributing">ue</span><span class="contributing">b</span><span class="contributing">los</span><span class="contributing"> are</span><span class="contributing"> as</span><span class="contributing"> a</span><span class="contributing"> class</span><span class="contributing"> industri</span><span class="contributing">ous</span><span class="contributing">,</span><span class="contributing"> fun</span><span class="contributing">-loving</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing"> friendly</span><span class="contributing"> to</span><span class="contributing">
+</span><span class="contributing">white</span><span class="contributing"> visitors</span><span class="contributing">.</span><span class="contributing"> They</span><span class="contributing"> are</span><span class="contributing"> naturally</span><span class="contributing"> hosp</span><span class="contributing">itable</span><span class="contributing"> and</span><span class="contributing"> quickly</span><span class="contributing"> responsive</span><span class="contributing"> to</span><span class="contributing">
+</span><span class="contributing">any</span><span class="contributing"> who</span><span class="contributing"> treat</span><span class="contributing"> them</span><span class="contributing"> sympath</span><span class="contributing">etically</span><span class="contributing"> and</span><span class="contributing"> as</span><span class="contributing"> fellow</span><span class="contributing"> human</span><span class="contributing"> beings</span><span class="contributing">.</span><span class="contributing"> The</span><span class="contributing">
+</span><span class="contributing">lament</span><span class="contributing">able</span><span class="contributing"> fact</span><span class="contributing"> that</span><span class="contributing"> white</span><span class="contributing"> Americans</span><span class="contributing"> have</span><span class="contributing"> too</span><span class="contributing"> often</span><span class="contributing"> failed</span><span class="contributing"> in</span><span class="contributing"> this</span><span class="contributing">
+</span><span class="contributing">respect</span><span class="contributing">,</span><span class="contributing"> acting</span><span class="contributing"> towards</span><span class="contributing"> them</span><span class="contributing"> as</span><span class="contributing"> though</span><span class="contributing"> they</span><span class="contributing"> were</span><span class="contributing"> animals</span><span class="contributing"> in</span><span class="contributing"> a</span><span class="contributing"> zoo</span><span class="contributing">,</span><span class="contributing"> is</span><span class="contributing">
+</span><span class="contributing">larg</span><span class="contributing">ely</span><span class="contributing"> responsible</span><span class="contributing"> for</span><span class="contributing"> tales</span><span class="contributing"> we</span><span class="contributing"> hear</span><span class="contributing"> of</span><span class="contributing"> Indian</span><span class="contributing"> s</span><span class="contributing">url</span><span class="contributing">iness</span><span class="contributing"> and</span><span class="contributing"> ill</span><span class="contributing">-w</span><span class="contributing">ill</span><span class="contributing">.
+</span><span class="contributing">P</span><span class="contributing">ueblo</span><span class="contributing"> women</span><span class="contributing"> are</span><span class="contributing"> skill</span><span class="contributing">ful</span><span class="contributing"> p</span><span class="contributing">ott</span><span class="contributing">ers</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing"> while</span><span class="contributing"> Tes</span><span class="contributing">u</span><span class="contributing">que</span><span class="contributing"> does</span><span class="contributing"> not</span><span class="contributing"> now</span><span class="contributing"> excel</span><span class="contributing">
+</span><span class="contributing">in</span><span class="contributing"> this</span><span class="contributing"> art</span><span class="contributing">,</span><span class="contributing"> one</span><span class="contributing"> may</span><span class="contributing"> pick</span><span class="contributing"> up</span><span class="contributing"> some</span><span class="contributing"> interesting</span><span class="contributing"> sou</span><span class="contributing">ven</span><span class="contributing">irs</span><span class="contributing"> both</span><span class="contributing"> in</span><span class="contributing"> clay</span><span class="contributing"> and</span><span class="contributing">
+</span><span class="contributing">be</span><span class="contributing">ad</span><span class="contributing">work</span><span class="contributing">.</span><span class="contributing"> At</span><span class="contributing"> any</span><span class="contributing"> rate</span><span class="contributing">,</span><span class="contributing"> you</span><span class="contributing"> will</span><span class="contributing"> enjoy</span><span class="contributing"> seeing</span><span class="contributing"> these</span><span class="contributing"> things</span><span class="contributing"> being</span><span class="contributing"> made</span><span class="contributing"> in</span><span class="contributing">
+</span><span class="contributing">the</span><span class="contributing"> common</span><span class="contributing"> living</span><span class="non-contributing">-room</span><span class="non-contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> house</span><span class="contributing">,</span><span class="non-contributing"> while</span><span class="contributing"> the</span><span class="non-contributing"> corn</span><span class="non-contributing"> is</span><span class="non-contributing"> being</span><span class="non-contributing"> ground</span><span class="non-contributing"> on</span><span class="contributing">
+</span><span class="non-contributing">the</span><span class="non-contributing"> _</span><span class="non-contributing">met</span><span class="non-contributing">ates</span><span class="non-contributing">_</span><span class="contributing"> or</span><span class="non-contributing"> me</span><span class="non-contributing">aling</span><span class="non-contributing"> stones</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="contributing"> the</span><span class="non-contributing"> m</span><span class="non-contributing">utton</span><span class="non-contributing"> stew</span><span class="non-contributing"> sim</span><span class="non-contributing">mers</span><span class="non-contributing"> on</span><span class="contributing"> the</span><span class="non-contributing"> open</span><span class="contributing">
+</span><span class="non-contributing">he</span><span class="non-contributing">arth</span><span class="contributing">.</span><span class="non-contributing"> A</span><span class="non-contributing"> knowledge</span><span class="contributing"> of</span><span class="non-contributing"> values</span><span class="non-contributing"> first</span><span class="non-contributing"> obtained</span><span class="non-contributing"> at</span><span class="non-contributing"> reputable</span><span class="non-contributing"> traders</span><span class="non-contributing">'</span><span class="non-contributing"> shops</span><span class="contributing">
+</span><span class="non-contributing">in</span><span class="non-contributing"> Santa</span><span class="non-contributing"> Fe</span><span class="non-contributing">,</span><span class="non-contributing"> is</span><span class="non-contributing"> advisable</span><span class="non-contributing">,</span><span class="non-contributing"> however</span><span class="non-contributing">,</span><span class="non-contributing"> before</span><span class="non-contributing"> negotiating</span><span class="non-contributing"> directly</span><span class="non-contributing"> with</span><span class="contributing"> the</span><span class="non-contributing">
+</span><span class="non-contributing">Ind</span><span class="non-contributing">ians</span><span class="contributing">,</span><span class="non-contributing"> as</span><span class="non-contributing"> they</span><span class="contributing"> are</span><span class="non-contributing"> becoming</span><span class="non-contributing"> pretty</span><span class="non-contributing"> well</span><span class="non-contributing"> scho</span><span class="non-contributing">oled</span><span class="non-contributing"> in</span><span class="non-contributing"> the</span><span class="non-contributing"> art</span><span class="non-contributing"> of</span><span class="non-contributing">
+</span><span class="non-contributing">charging</span><span class="non-contributing"> "</span><span class="non-contributing">all</span><span class="non-contributing"> the</span><span class="non-contributing"> traffic</span><span class="non-contributing"> will</span><span class="non-contributing"> bear</span><span class="non-contributing">."</span><span class="non-contributing"> Tes</span><span class="non-contributing">u</span><span class="non-contributing">que</span><span class="non-contributing"> produces</span><span class="non-contributing"> a</span><span class="non-contributing"> specialty</span><span class="non-contributing"> in</span><span class="contributing">
+</span><span class="contributing">the</span><span class="non-contributing"> shape</span><span class="contributing"> of</span><span class="non-contributing"> certain</span><span class="non-contributing"> dreadful</span><span class="non-contributing"> little</span><span class="non-contributing"> pottery</span><span class="non-contributing"> images</span><span class="non-contributing"> called</span><span class="non-contributing"> "</span><span class="non-contributing">rain</span><span class="non-contributing"> gods</span><span class="non-contributing">,"
+</span><span class="non-contributing">which</span><span class="non-contributing"> must</span><span class="non-contributing"> not</span><span class="non-contributing"> be</span><span class="non-contributing"> taken</span><span class="non-contributing"> seriously</span><span class="non-contributing"> as</span><span class="non-contributing"> examples</span><span class="non-contributing"> of</span><span class="non-contributing"> sound</span><span class="non-contributing"> P</span><span class="non-contributing">ueblo</span><span class="non-contributing"> art</span><span class="non-contributing">.[</span><span class="non-contributing">7</span><span class="non-contributing">]
+
+</span><span class="non-contributing">Thirty</span><span class="non-contributing">-three</span><span class="non-contributing"> miles</span><span class="non-contributing"> north</span><span class="contributing"> of</span><span class="non-contributing"> Santa</span><span class="non-contributing"> Fe</span><span class="non-contributing"> on</span><span class="non-contributing"> the</span><span class="non-contributing"> Denver</span><span class="non-contributing"> and</span><span class="non-contributing"> Rio</span><span class="non-contributing"> Grande</span><span class="contributing">
+</span><span class="non-contributing">Rail</span><span class="non-contributing">way</span><span class="non-contributing"> is</span><span class="non-contributing"> the</span><span class="non-contributing"> village</span><span class="contributing"> of</span><span class="non-contributing"> Españ</span><span class="non-contributing">ola</span><span class="contributing">,</span><span class="non-contributing"> where</span><span class="non-contributing"> a</span><span class="non-contributing"> plain</span><span class="non-contributing"> but</span><span class="non-contributing"> comfortable</span><span class="non-contributing"> hotel</span><span class="non-contributing">
+</span><span class="non-contributing">makes</span><span class="non-contributing"> a</span><span class="non-contributing"> convenient</span><span class="non-contributing"> base</span><span class="non-contributing"> for</span><span class="non-contributing"> visiting</span><span class="non-contributing"> several</span><span class="non-contributing"> points</span><span class="non-contributing"> of</span><span class="non-contributing"> interest</span><span class="non-contributing"> in</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">upper</span><span class="non-contributing"> Rio</span><span class="non-contributing"> Grande</span><span class="non-contributing"> Valley</span><span class="contributing">.</span><span class="non-contributing"> A</span><span class="non-contributing"> mile</span><span class="contributing"> to</span><span class="non-contributing"> the</span><span class="non-contributing"> south</span><span class="non-contributing"> is</span><span class="non-contributing"> Santa</span><span class="non-contributing"> Clara</span><span class="non-contributing"> pueblo</span><span class="non-contributing">,[</span><span class="non-contributing">8</span><span class="non-contributing">]
+</span><span class="non-contributing">long</span><span class="non-contributing"> famous</span><span class="non-contributing"> for</span><span class="non-contributing"> its</span><span class="non-contributing"> beautiful</span><span class="non-contributing"> shining</span><span class="non-contributing"> black</span><span class="non-contributing"> pottery</span><span class="non-contributing"> almost</span><span class="non-contributing"> E</span><span class="non-contributing">tr</span><span class="non-contributing">us</span><span class="non-contributing">can</span><span class="contributing"> in</span><span class="contributing">
+</span><span class="non-contributing">shape</span><span class="contributing">.</span><span class="contributing"> The</span><span class="non-contributing"> clay</span><span class="non-contributing"> naturally</span><span class="non-contributing"> burns</span><span class="non-contributing"> red</span><span class="contributing">,</span><span class="non-contributing"> but</span><span class="non-contributing"> a</span><span class="non-contributing"> second</span><span class="non-contributing"> baking</span><span class="non-contributing"> with</span><span class="contributing"> the</span><span class="non-contributing"> fuel</span><span class="non-contributing">
+</span><span class="non-contributing">(d</span><span class="non-contributing">ried</span><span class="non-contributing"> chips</span><span class="contributing"> of</span><span class="non-contributing"> cattle</span><span class="non-contributing"> man</span><span class="non-contributing">ure</span><span class="non-contributing">),</span><span class="non-contributing"> pulver</span><span class="non-contributing">ized</span><span class="non-contributing"> finely</span><span class="non-contributing"> and</span><span class="non-contributing"> producing</span><span class="non-contributing"> a</span><span class="non-contributing"> dense</span><span class="non-contributing">
+</span><span class="non-contributing">black</span><span class="non-contributing"> smoke</span><span class="contributing">,</span><span class="non-contributing"> gives</span><span class="contributing"> the</span><span class="non-contributing"> ware</span><span class="non-contributing"> its</span><span class="non-contributing"> characteristic</span><span class="non-contributing"> l</span><span class="non-contributing">ustr</span><span class="non-contributing">ous</span><span class="non-contributing"> black</span><span class="contributing">.</span><span class="non-contributing"> Seven</span><span class="non-contributing">
+</span><span class="non-contributing">m</span><span class="non-contributing">iles</span><span class="non-contributing"> further</span><span class="non-contributing"> down</span><span class="contributing"> the</span><span class="non-contributing"> river</span><span class="non-contributing"> but</span><span class="non-contributing"> on</span><span class="contributing"> the</span><span class="non-contributing"> other</span><span class="non-contributing"> side</span><span class="contributing">,</span><span class="contributing"> is</span><span class="non-contributing"> another</span><span class="non-contributing"> pueblo</span><span class="non-contributing">,
+</span><span class="non-contributing">San</span><span class="non-contributing"> Il</span><span class="non-contributing">def</span><span class="non-contributing">onso</span><span class="contributing">,</span><span class="non-contributing"> a</span><span class="non-contributing"> picturesque</span><span class="non-contributing"> village</span><span class="non-contributing"> of</span><span class="non-contributing"> </span><span class="non-contributing">125</span><span class="non-contributing"> Indians</span><span class="non-contributing">,</span><span class="non-contributing"> near</span><span class="contributing"> the</span><span class="non-contributing"> base</span><span class="non-contributing"> of</span><span class="non-contributing"> La</span><span class="non-contributing">
+</span><span class="non-contributing">M</span><span class="non-contributing">esa</span><span class="non-contributing"> Hu</span><span class="non-contributing">é</span><span class="non-contributing">rf</span><span class="non-contributing">ana</span><span class="non-contributing">.</span><span class="non-contributing"> This</span><span class="non-contributing"> is</span><span class="non-contributing"> a</span><span class="non-contributing"> flat</span></div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34</div>
+            <div class="content"><span class="contributing">.</span><span class="contributing"> After</span><span class="contributing"> mass</span><span class="contributing"> in</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="contributing">church</span><span class="contributing">,</span><span class="contributing"> there</span><span class="contributing"> are</span><span class="contributing"> native</span><span class="contributing"> dances</span><span class="contributing"> and</span><span class="contributing"> ceremonies</span><span class="contributing">,</span><span class="contributing"> accompanied</span><span class="contributing"> by</span><span class="contributing"> fe</span><span class="contributing">asting</span><span class="contributing">
+</span><span class="contributing">contin</span><span class="contributing">uing</span><span class="contributing"> well</span><span class="contributing"> into</span><span class="contributing"> the</span><span class="contributing"> night</span><span class="contributing">.</span><span class="contributing"> November</span><span class="contributing"> </span><span class="contributing">12</span><span class="contributing">,</span><span class="contributing"> St</span><span class="contributing">.</span><span class="contributing"> James</span><span class="contributing">'s</span><span class="contributing"> Day</span><span class="contributing">,</span><span class="contributing"> is</span><span class="contributing"> the</span><span class="contributing"> day</span><span class="contributing">
+</span><span class="contributing">cele</span><span class="contributing">br</span><span class="contributing">ated</span><span class="contributing"> by</span><span class="contributing"> Tes</span><span class="contributing">u</span><span class="contributing">que</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing"> visitors</span><span class="contributing"> are</span><span class="contributing"> many</span><span class="contributing">.[</span><span class="contributing">6</span><span class="contributing">]
+
+</span><span class="contributing">The</span><span class="contributing"> P</span><span class="contributing">ue</span><span class="contributing">b</span><span class="contributing">los</span><span class="contributing"> are</span><span class="contributing"> as</span><span class="contributing"> a</span><span class="contributing"> class</span><span class="contributing"> industri</span><span class="contributing">ous</span><span class="contributing">,</span><span class="contributing"> fun</span><span class="contributing">-loving</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing"> friendly</span><span class="contributing"> to</span><span class="contributing">
+</span><span class="contributing">white</span><span class="contributing"> visitors</span><span class="contributing">.</span><span class="contributing"> They</span><span class="contributing"> are</span><span class="contributing"> naturally</span><span class="contributing"> hosp</span><span class="contributing">itable</span><span class="contributing"> and</span><span class="contributing"> quickly</span><span class="contributing"> responsive</span><span class="contributing"> to</span><span class="contributing">
+</span><span class="contributing">any</span><span class="contributing"> who</span><span class="contributing"> treat</span><span class="contributing"> them</span><span class="contributing"> sympath</span><span class="contributing">etically</span><span class="contributing"> and</span><span class="contributing"> as</span><span class="contributing"> fellow</span><span class="contributing"> human</span><span class="contributing"> beings</span><span class="contributing">.</span><span class="contributing"> The</span><span class="contributing">
+</span><span class="contributing">lament</span><span class="contributing">able</span><span class="contributing"> fact</span><span class="contributing"> that</span><span class="contributing"> white</span><span class="contributing"> Americans</span><span class="contributing"> have</span><span class="contributing"> too</span><span class="contributing"> often</span><span class="contributing"> failed</span><span class="contributing"> in</span><span class="contributing"> this</span><span class="contributing">
+</span><span class="contributing">respect</span><span class="contributing">,</span><span class="contributing"> acting</span><span class="contributing"> towards</span><span class="contributing"> them</span><span class="contributing"> as</span><span class="contributing"> though</span><span class="contributing"> they</span><span class="contributing"> were</span><span class="contributing"> animals</span><span class="contributing"> in</span><span class="contributing"> a</span><span class="contributing"> zoo</span><span class="contributing">,</span><span class="contributing"> is</span><span class="contributing">
+</span><span class="contributing">larg</span><span class="contributing">ely</span><span class="contributing"> responsible</span><span class="contributing"> for</span><span class="contributing"> tales</span><span class="contributing"> we</span><span class="contributing"> hear</span><span class="contributing"> of</span><span class="contributing"> Indian</span><span class="contributing"> s</span><span class="contributing">url</span><span class="contributing">iness</span><span class="contributing"> and</span><span class="contributing"> ill</span><span class="contributing">-w</span><span class="contributing">ill</span><span class="contributing">.
+</span><span class="contributing">P</span><span class="contributing">ueblo</span><span class="contributing"> women</span><span class="contributing"> are</span><span class="contributing"> skill</span><span class="contributing">ful</span><span class="contributing"> p</span><span class="contributing">ott</span><span class="contributing">ers</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing"> while</span><span class="contributing"> Tes</span><span class="contributing">u</span><span class="contributing">que</span><span class="contributing"> does</span><span class="contributing"> not</span><span class="contributing"> now</span><span class="contributing"> excel</span><span class="contributing">
+</span><span class="contributing">in</span><span class="contributing"> this</span><span class="contributing"> art</span><span class="contributing">,</span><span class="contributing"> one</span><span class="contributing"> may</span><span class="contributing"> pick</span><span class="contributing"> up</span><span class="contributing"> some</span><span class="contributing"> interesting</span><span class="contributing"> sou</span><span class="contributing">ven</span><span class="contributing">irs</span><span class="contributing"> both</span><span class="contributing"> in</span><span class="contributing"> clay</span><span class="contributing"> and</span><span class="contributing">
+</span><span class="contributing">be</span><span class="contributing">ad</span><span class="contributing">work</span><span class="contributing">.</span><span class="contributing"> At</span><span class="contributing"> any</span><span class="contributing"> rate</span><span class="contributing">,</span><span class="contributing"> you</span><span class="contributing"> will</span><span class="contributing"> enjoy</span><span class="contributing"> seeing</span><span class="contributing"> these</span><span class="contributing"> things</span><span class="contributing"> being</span><span class="contributing"> made</span><span class="contributing"> in</span><span class="contributing">
+</span><span class="contributing">the</span><span class="contributing"> common</span><span class="contributing"> living</span><span class="non-contributing"> room</span><span class="non-contributing"> on</span><span class="non-contributing"> the</span><span class="non-contributing"> earth</span><span class="non-contributing"> in</span><span class="non-contributing"> May</span><span class="non-contributing"> or</span><span class="non-contributing"> June</span><span class="non-contributing">.</span><span class="non-contributing"> The</span><span class="non-contributing"> n</span><span class="non-contributing">atty</span><span class="non-contributing">
+</span><span class="non-contributing">pe</span><span class="non-contributing">ppers</span><span class="non-contributing"> simply</span><span class="non-contributing"> from</span><span class="contributing"> the</span><span class="non-contributing"> h</span><span class="non-contributing">ew</span><span class="contributing">,</span><span class="non-contributing"> that</span><span class="non-contributing"> quarters</span><span class="non-contributing"> with</span><span class="non-contributing"> the</span><span class="non-contributing"> th</span><span class="non-contributing">istle</span><span class="non-contributing"> and</span><span class="non-contributing"> roar</span><span class="non-contributing">
+</span><span class="non-contributing">of</span><span class="contributing"> the</span><span class="non-contributing"> river</span><span class="non-contributing">.</span><span class="non-contributing"> They</span><span class="non-contributing"> are</span><span class="non-contributing"> reasonably</span><span class="non-contributing"> well</span><span class="non-contributing"> used</span><span class="non-contributing">,</span><span class="non-contributing"> but</span><span class="non-contributing"> are</span><span class="non-contributing"> no</span><span class="non-contributing"> temporary</span><span class="contributing">
+</span><span class="non-contributing">polit</span><span class="non-contributing">ician</span><span class="contributing"> or</span><span class="non-contributing"> visiting</span><span class="non-contributing"> story</span><span class="non-contributing">-book</span><span class="non-contributing"> living</span><span class="contributing">,</span><span class="non-contributing"> aware</span><span class="non-contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> fact</span><span class="non-contributing"> that</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">cab</span><span class="non-contributing">it</span><span class="non-contributing">ers</span><span class="non-contributing"> and</span><span class="non-contributing"> Mexicans</span><span class="non-contributing"> are</span><span class="non-contributing"> briefly</span><span class="non-contributing"> eager</span><span class="non-contributing"> to</span><span class="non-contributing"> smoke</span><span class="contributing">.</span><span class="non-contributing"> Either</span><span class="non-contributing"> the</span><span class="non-contributing">
+</span><span class="non-contributing">same</span><span class="non-contributing"> ge</span><span class="non-contributing">ologist</span><span class="non-contributing"> will</span><span class="non-contributing"> get</span><span class="non-contributing"> off</span><span class="non-contributing"> his</span><span class="non-contributing"> piece</span><span class="contributing"> of</span><span class="non-contributing"> hungry</span><span class="non-contributing"> eyes</span><span class="non-contributing"> through</span><span class="non-contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">gent</span><span class="non-contributing">le</span><span class="contributing"> the</span><span class="non-contributing"> woodland</span><span class="non-contributing">-eyed</span><span class="non-contributing"> h</span><span class="non-contributing">eds</span><span class="contributing">,</span><span class="non-contributing"> which</span><span class="contributing"> are</span><span class="non-contributing"> ceremon</span><span class="non-contributing">iously</span><span class="non-contributing"> characterized</span><span class="non-contributing">,</span><span class="non-contributing"> or</span><span class="contributing">
+</span><span class="contributing">the</span><span class="non-contributing"> most</span><span class="non-contributing"> fret</span><span class="non-contributing">ful</span><span class="non-contributing"> mountain</span><span class="contributing"> of</span><span class="non-contributing"> claim</span><span class="non-contributing"> to</span><span class="non-contributing"> have</span><span class="non-contributing"> entered</span><span class="non-contributing"> a</span><span class="non-contributing"> suburb</span><span class="contributing"> of</span><span class="contributing">
+</span><span class="non-contributing">the</span><span class="non-contributing"> Mexico</span><span class="non-contributing">.</span><span class="non-contributing"> The</span><span class="non-contributing"> mistress</span><span class="contributing"> of</span><span class="non-contributing"> bear</span><span class="non-contributing">,</span><span class="non-contributing"> st</span><span class="non-contributing">inging</span><span class="contributing">,</span><span class="non-contributing"> or</span><span class="non-contributing"> inc</span><span class="non-contributing">iting</span><span class="non-contributing"> make</span><span class="non-contributing"> from</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">hand</span><span class="non-contributing">ker</span><span class="non-contributing">chief</span><span class="non-contributing"> she</span><span class="non-contributing">ed</span><span class="contributing">.</span><span class="non-contributing"> After</span><span class="non-contributing"> she</span><span class="non-contributing"> had</span><span class="non-contributing"> hal</span><span class="non-contributing">ched</span><span class="non-contributing"> her</span><span class="non-contributing"> couple</span><span class="non-contributing">t</span><span class="non-contributing"> at</span><span class="non-contributing"> their</span><span class="non-contributing">
+</span><span class="non-contributing">piece</span><span class="non-contributing"> m</span><span class="non-contributing">err</span><span class="non-contributing">ily</span><span class="non-contributing"> at</span><span class="non-contributing"> the</span><span class="non-contributing"> hour</span><span class="non-contributing"> when</span><span class="non-contributing"> they</span><span class="non-contributing"> were</span><span class="non-contributing"> coming</span><span class="contributing"> to</span><span class="non-contributing"> him</span><span class="contributing"> in</span><span class="non-contributing"> alarm</span><span class="non-contributing">.</span><span class="non-contributing"> I</span><span class="non-contributing"> am</span><span class="non-contributing">
+</span><span class="non-contributing">happy</span><span class="non-contributing"> to</span><span class="non-contributing"> find</span><span class="non-contributing"> that</span><span class="non-contributing"> they</span><span class="non-contributing"> were</span><span class="non-contributing"> making</span><span class="non-contributing"> twenty</span><span class="non-contributing"> more</span><span class="non-contributing"> feet</span><span class="non-contributing"> away</span><span class="non-contributing"> from</span><span class="non-contributing"> where</span><span class="contributing">
+</span><span class="non-contributing">they</span><span class="non-contributing"> could</span><span class="non-contributing"> be</span><span class="non-contributing"> seen</span><span class="contributing">.</span><span class="contributing"> The</span><span class="non-contributing"> sun</span><span class="non-contributing"> was</span><span class="non-contributing"> up</span><span class="non-contributing"> towards</span><span class="non-contributing"> the</span><span class="non-contributing"> harbor</span><span class="contributing">,</span><span class="non-contributing"> so</span><span class="non-contributing"> that</span><span class="non-contributing"> I</span><span class="non-contributing"> had</span><span class="non-contributing">
+</span><span class="non-contributing">difficulty</span><span class="non-contributing"> in</span><span class="non-contributing"> thanking</span><span class="non-contributing"> him</span><span class="non-contributing"> for</span><span class="non-contributing"> the</span><span class="non-contributing"> absence</span><span class="non-contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> b</span><span class="non-contributing">ellow</span><span class="non-contributing">-c</span><span class="non-contributing">ob</span><span class="non-contributing">ing</span><span class="non-contributing"> sheep</span><span class="non-contributing">.
+</span><span class="non-contributing">Indeed</span><span class="non-contributing">,</span><span class="non-contributing"> in</span><span class="non-contributing"> many</span><span class="non-contributing"> parts</span><span class="contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> island</span><span class="contributing">,</span><span class="non-contributing"> it</span><span class="non-contributing"> is</span><span class="non-contributing"> painful</span><span class="non-contributing"> to</span><span class="non-contributing"> find</span><span class="contributing"> the</span><span class="non-contributing"> train</span><span class="non-contributing"> halt</span><span class="non-contributing">
+</span><span class="non-contributing">for</span><span class="non-contributing"> a</span><span class="non-contributing"> little</span><span class="non-contributing"> while</span><span class="contributing">.</span><span class="non-contributing"> At</span><span class="non-contributing"> last</span><span class="contributing"> the</span><span class="non-contributing"> charter</span><span class="non-contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> ring</span><span class="non-contributing"> I</span><span class="non-contributing"> have</span><span class="non-contributing"> given</span><span class="non-contributing"> to</span><span class="non-contributing"> an</span><span class="non-contributing">
+</span><span class="non-contributing">old</span><span class="non-contributing"> hotel</span><span class="non-contributing"> my</span><span class="non-contributing"> only</span><span class="non-contributing"> time</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> a</span><span class="non-contributing"> limited</span><span class="non-contributing"> public</span><span class="non-contributing"> house</span><span class="non-contributing"> on</span><span class="non-contributing"> earth</span><span class="non-contributing"> she</span><span class="contributing"> is</span><span class="non-contributing">
+</span><span class="non-contributing">con</span><span class="non-contributing">sp</span><span class="non-contributing">ered</span><span class="non-contributing"> in</span><span class="non-contributing"> by</span><span class="non-contributing"> brilliant</span><span class="non-contributing"> coffee</span><span class="contributing">,</span><span class="non-contributing"> horn</span><span class="non-contributing">ed</span><span class="non-contributing"> by</span><span class="non-contributing"> flame</span><span class="non-contributing"> slowly</span><span class="non-contributing"> and</span><span class="non-contributing"> fetch</span><span class="non-contributing">ed</span><span class="non-contributing">
+</span><span class="non-contributing">a</span><span class="non-contributing"> rope</span><span class="non-contributing"> best</span><span class="contributing"> the</span></div>
+        </div>
+    </div>
+</body>
+</html>
