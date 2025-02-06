@@ -2,7 +2,7 @@ from ignite.metrics import RougeL
 from typing import List
 import numpy as np
 from .utils import load_inference_data
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 
 def batch_rouge_ttr_calc(batch, true_key, gen_key, len_suffix):
@@ -52,7 +52,7 @@ def batch_rouge_ttr_calc(batch, true_key, gen_key, len_suffix):
     }
             
 
-def eval_rouge_ttr(base_path: str, experiments: List[str], repetitions: np.ndarray, len_suffix: int, policy: str):
+def eval_rouge_ttr(base_path: str, experiments: List[str], repetitions: np.ndarray, policy: str):
     """
     Evaluate the following metrics for a given experiment and repetitions.
     1. ROUGE-L

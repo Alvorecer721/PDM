@@ -13,7 +13,7 @@ from transformers import AutoModelForCausalLM, AutoConfig
 from datasets import load_dataset
 
 
-def batch_processing_gutenberg(batch, _prefix_len, _suffix_len=None, _offset=0):
+def batch_processing_gutenberg(batch, _prefix_len, _offset, _suffix_len=None):
     """
     Tokenize sequences from a batch of articles between specified character positions.
     

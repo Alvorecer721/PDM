@@ -2,7 +2,7 @@
     "python.testing.pytestArgs": [
         "test/test_dataset.py",
         "test/test_model.py",
-        "-vv"
+        "-vv",
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true

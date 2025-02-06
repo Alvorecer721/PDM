@@ -3,7 +3,7 @@ from datasets import load_dataset
 import numpy as np
 import pandas as pd
 
-def load_inference_data(base_dir, step=None, consumed=None, rep=None, policy=None):
+def load_inference_data(base_dir, step=None, consumed=None, offset=None, len_prefix=None, len_suffix=None, rep=None, policy=None):
     """
     Load inference data from a given step and restore original data order.
     DistributedSampler distributes data in round-robin fashion (e.g., GPU0: [0,8,16,...], GPU1: [1,9,17,...]).
@@ -35,7 +35,7 @@ def load_inference_data(base_dir, step=None, consumed=None, rep=None, policy=Non
     assert (step is None and consumed is None) or rep is None, "Either step and consumed or rep must be provided, not both"
 
     if (rep is not None) and (policy is not None):
-        file_path = Path(base_dir) / f"rep_{rep}_{policy}"
+        file_path = Path(base_dir) / f"offset_{offset}_prefix_{len_prefix}_suffix_{len_suffix}" / f"rep_{rep}_{policy}"
     else:
         file_path = Path(base_dir) / f"step={step}-consumed={consumed}"
     

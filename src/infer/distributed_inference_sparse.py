@@ -39,7 +39,7 @@ def calc_generation_nll(generated_sequences, scores):
         tuple: (seq_nlls_mean, seq_nlls_std) - Mean and std of NLL per sequence
     """
     suffix = generated_sequences[:, -len(scores):]
-    assert suffix.shape[1] == generated_sequences.shape[1] // 2, f"Prefix suffix length mismatch: {suffix.shape[1]}"
+    # assert suffix.shape[1] == generated_sequences.shape[1] // 2, f"Prefix suffix length mismatch: {suffix.shape[1]}"
 
     token_nlls = []
     criterion = nn.CrossEntropyLoss(reduction='none')
@@ -107,6 +107,9 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir,
                 batch_tensor[:, :prefix_length]
             ], dim=1)
 
+            assert input_with_bos.shape[1] == prefix_length + 1, f"Input shape mismatch: {input_with_bos.shape}"
+            assert batch_tensor.shape[1] == prefix_length + suffix_length, f"Batch shape mismatch: {batch_tensor.shape}"
+
             with torch.no_grad():
                 outputs = model.generate(
                     input_ids=input_with_bos,
@@ -120,7 +123,6 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir,
             seq_nlls, seq_nlls_mean, seq_nlls_std = calc_generation_nll(sequences, outputs.scores)
 
             # Validate shapes
-            assert batch_tensor.shape[1] == prefix_length + suffix_length, f"Batch shape mismatch: {batch_tensor.shape}"
             assert sequences.shape[1] == 1 + prefix_length + suffix_length, f"Output shape mismatch: {sequences.shape}"
 
             # Process and write batch results
@@ -173,7 +175,7 @@ if __name__ == "__main__":
                       help='Repetition choices, e.g. 128,256,512')
 
     # Optional inference parameters
-    parser.add_argument('--offset', type=int, default=100,
+    parser.add_argument('--offset', type=int, default=0,
                       help='Offset for text processing, should always be larger then goldfish H')
     parser.add_argument('--prefix-length', type=int, default=500,
                       help='Length of prefix sequence')
@@ -198,7 +200,7 @@ if __name__ == "__main__":
     model_path = next(experiment_path.glob('results/NeMo2HF/step=*.bin')) # only the last checkpoint is converted
     model = load_model(config, model_path=str(model_path))
 
-    output_path = experiment_path / 'inference'
+    output_path = experiment_path / 'inference' / f"offset_{args.offset}_prefix_{args.prefix_length}_suffix_{args.suffix_length}"
     output_path.mkdir(parents=True, exist_ok=True)
 
     policy = args.gen_policy
