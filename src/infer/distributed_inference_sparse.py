@@ -11,11 +11,15 @@ from collections import deque
 import json
 import torch.nn.functional as F
 import torch.nn as nn
+import numpy as np
+import random
 
 from distributed_inference import (
     batch_processing_gutenberg,
     load_model
 )
+from utils import set_seed
+
 
 from datasets import load_dataset
 
@@ -65,6 +69,9 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir,
     rank = int(os.environ["RANK"])  # Global rank across all nodes
     world_size = int(os.environ["WORLD_SIZE"])  # Total number of processes
 
+    # Set same seed for all ranks
+    set_seed(42)
+
     if not dist.is_initialized():
         dist.init_process_group(backend='nccl')
     torch.cuda.set_device(local_rank)
@@ -102,12 +109,14 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir,
             batch_tensor = torch.tensor(batch, device=local_rank)
 
             # Prepend <BoS> token
+            # Prepend multiple tokens including <BoS>
+            prepend_tokens = torch.tensor([128000], device=batch_tensor.device) # , 79689, 4477, 25
             input_with_bos = torch.cat([
-                torch.full((batch_tensor.shape[0], 1), 128000, device=batch_tensor.device), 
+                prepend_tokens.repeat(batch_tensor.shape[0], 1),
                 batch_tensor[:, :prefix_length]
             ], dim=1)
 
-            assert input_with_bos.shape[1] == prefix_length + 1, f"Input shape mismatch: {input_with_bos.shape}"
+            assert input_with_bos.shape[1] == prefix_length + len(prepend_tokens), f"Input shape mismatch: {input_with_bos.shape}"
             assert batch_tensor.shape[1] == prefix_length + suffix_length, f"Batch shape mismatch: {batch_tensor.shape}"
 
             with torch.no_grad():
@@ -123,12 +132,12 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir,
             seq_nlls, seq_nlls_mean, seq_nlls_std = calc_generation_nll(sequences, outputs.scores)
 
             # Validate shapes
-            assert sequences.shape[1] == 1 + prefix_length + suffix_length, f"Output shape mismatch: {sequences.shape}"
+            assert sequences.shape[1] == len(prepend_tokens) + prefix_length + suffix_length, f"Output shape mismatch: {sequences.shape}"
 
             # Process and write batch results
             prefixes           = batch_tensor[:, :prefix_length].cpu().tolist() 
             true_suffixes      = batch_tensor[:, prefix_length:].cpu().tolist()
-            generated_suffixes = sequences[:, prefix_length+1:].cpu().tolist() # Skip BOS token
+            generated_suffixes = sequences[:, prefix_length+len(prepend_tokens):].cpu().tolist() # Skip prepend BOS token
 
             nlls      = seq_nlls.cpu().tolist()
             nll_means = seq_nlls_mean.cpu().tolist()
@@ -189,6 +198,9 @@ if __name__ == "__main__":
                       help='Generation policy for inference, options: greedy, nucleus')
 
     args = parser.parse_args()
+
+    # Set global seed before everything
+    set_seed(42)
 
     llama_config = '/capstor/users/cscs/xyixuan/PDM/config/llama3_1.5B_config.json'
     experiment_path = Path(args.experiment_path)

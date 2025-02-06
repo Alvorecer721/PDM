@@ -52,7 +52,7 @@ def batch_rouge_ttr_calc(batch, true_key, gen_key, len_suffix):
     }
             
 
-def eval_rouge_ttr(base_path: str, experiments: List[str], repetitions: np.ndarray, policy: str):
+def eval_rouge_ttr(base_path: str, experiments: List[str], repetitions: np.ndarray, policy: str, len_suffix: int = 500):
     """
     Evaluate the following metrics for a given experiment and repetitions.
     1. ROUGE-L
