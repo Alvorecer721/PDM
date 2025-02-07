@@ -87,6 +87,9 @@ def run(model, dataset, prefix_length, suffix_length, experiment_id, ckpt_id, ba
     
     for batch in tqdm(dataloader, desc=f"Generating Suffix (Rank {local_rank})", unit='batch', ncols=100):
         start_time = time.time()
+
+        # Clear cache before processing new batch
+        torch.cuda.empty_cache()
         
         batch_tensor = torch.tensor(batch).to(local_rank)
 
@@ -99,6 +102,7 @@ def run(model, dataset, prefix_length, suffix_length, experiment_id, ckpt_id, ba
         outputs = model.generate(
             input_ids=input_with_bos,
             max_new_tokens=suffix_length,
+            min_new_tokens=suffix_length,
             num_beams=1,
             do_sample=False
         )
@@ -107,8 +111,6 @@ def run(model, dataset, prefix_length, suffix_length, experiment_id, ckpt_id, ba
         
         all_outputs.append(outputs.cpu().detach())
         all_batch_tensors.append(batch_tensor.cpu().detach())
-        
-        torch.cuda.empty_cache()
         
         end_time = time.time()
         time_per_seq = (end_time - start_time) / len(batch)

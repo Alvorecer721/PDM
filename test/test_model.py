@@ -103,6 +103,7 @@ def base_model_setup():
     
     tokenizer = AutoTokenizer.from_pretrained('meta-llama/Meta-Llama-3-8B')
     tokenizer.model_max_length = 200_000
+    tokenizer.pad_token_id = tokenizer.eos_token_id
     
     generator = pipeline('text-generation', model=model, tokenizer=tokenizer, device='cuda:0')
     
@@ -209,6 +210,7 @@ def test_pipeline_generation(model_setup, seq_idx):
         prefix, 
         do_sample=False, 
         max_new_tokens=500,
+        min_new_tokens=500,
         num_beams=1,
         return_tensors=True
     )[0]['generated_token_ids']
@@ -258,6 +260,7 @@ def test_pipeline_generation_with_true_prefix(model_setup, seq_idx):
         prefix, 
         do_sample=False, 
         max_new_tokens=500,
+        min_new_tokens=500,
         num_beams=1,
         return_tensors=True
     )[0]['generated_token_ids']
@@ -310,6 +313,7 @@ def test_model_generation(model_setup, seq_idx):
             prefix, 
             do_sample=False, 
             max_new_tokens=500,
+            min_new_tokens=500,
             num_beams=1,
         )[0]
 
@@ -345,6 +349,7 @@ def test_model_generation_with_logging(model_setup, seq_idx):
         prefix, 
         do_sample=False, 
         max_new_tokens=suffix_length,
+        min_new_tokens=suffix_length,
         num_beams=1,
     )[0]
 
@@ -367,3 +372,61 @@ def test_model_generation_with_logging(model_setup, seq_idx):
     if not torch.equal(model_suffix_tokens.cpu(), torch.tensor(true_suffix_tokens)):
         error_msg = f"\nMismatch found in repetition {rep_count}, sample {seq_idx}:\n"
         find_mismatch(model_suffix_tokens, true_suffix_tokens, error_msg, tokenizer)
+
+
+@pytest.mark.parametrize(
+    "seq_idx", 
+    list(range(0,500,100)),
+    ids=lambda x: f"seq_{x}"
+)
+def test_model_generation_and_pipeline_generation(model_setup, seq_idx):
+    """
+    Test model generation and log results with colored differences.
+    """
+    model, tokenizer, generator, data, rep_count, _ = model_setup
+
+    # Set seed before generation
+    set_seed(42)
+
+    salt = []
+    # salt = [79689, 4477, 25] # Continuous writing:
+    model_input = torch.tensor([128000]+salt+data[seq_idx]['prefix'], dtype=torch.long).unsqueeze(0).cuda()
+    # prefix = torch.tensor(data[seq_idx]['prefix'], dtype=torch.long).unsqueeze(0).cuda()
+
+    suffix_length = 500
+
+    # Generate text using the model
+    model_tokens = model.generate(
+        model_input, 
+        do_sample=False, 
+        max_new_tokens=suffix_length,
+        min_new_tokens=suffix_length,
+        num_beams=1,
+    )[0]
+
+    pipeline_input = tokenizer.decode(data[seq_idx]['prefix'])
+    pipeline_tokens = generator(
+        pipeline_input, 
+        do_sample=False, 
+        max_new_tokens=suffix_length,
+        min_new_tokens=suffix_length,
+        num_beams=1,
+        return_tensors=True
+    )[0]['generated_token_ids']
+
+    # Log the generations with colored differences
+    # log_model_generations(
+    #     model_suffix_tokens,
+    #     true_suffix_tokens,
+    #     tokenizer,
+    #     rep_count,
+    #     seq_idx,
+    #     offset,
+    #     output_dir='/capstor/users/cscs/xyixuan/PDM/results',
+    #     expr_name=global_expr_name,
+    # )
+    
+    # Still perform the original assertion
+    if not torch.equal(model_tokens.cpu(), torch.tensor(pipeline_tokens)):
+        error_msg = f"\nMismatch found in repetition {rep_count}, sample {seq_idx}:\n"
+        find_mismatch(model_tokens, pipeline_tokens, error_msg, tokenizer)

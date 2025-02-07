@@ -130,6 +130,7 @@ def main(args):
     # Load the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
     tokenizer.model_max_length = 200_000
+    tokenizer.pad_token_id = tokenizer.eos_token_id
 
     # Create a partial tokenizer function with fixed parameters
     tokenize_fn = create_tokenize_fn(tokenizer)

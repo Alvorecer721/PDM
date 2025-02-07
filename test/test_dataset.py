@@ -9,7 +9,8 @@ from transformers import AutoTokenizer
 def create_dataset_config():
     """Create dataset configuration dictionary"""
     base_path = "/iopsstor/scratch/cscs/xyixuan/dataset"
-    reps = [128, 256, 512, 1024, 2048]
+    # reps = [128, 256, 512, 1024, 2048]
+    reps = [1, 2, 3, 4, 8, 16, 32, 48, 64, 96, 128]
     bucket_size = 500
     
     configs = {}
@@ -120,6 +121,23 @@ class TestDatasetConsistency:
         
         assert len(dataset.memmap_data) == expected_size, \
             f"Incorrect memmap size for repetition {rep_times}"
+        
+    
+    @pytest.mark.parametrize(
+        "rep_times,config",
+        [(rep, config) for rep, config in DATASET_CONFIGS.items()]
+    )
+    def test_individual_sequence_length(self, setup_parameters, rep_times, config):
+        dataset = DatasetLoader(config, setup_parameters)
+        expected_length = setup_parameters['sequence_length'] - 1
+        
+        # Check each sequence in the dataset
+        for idx, sequence in enumerate(dataset.jsonl_data):
+            sequence_length = len(sequence['input_ids'])  # Assuming 'input_ids' is the key for sequence data
+            assert sequence_length == expected_length, \
+                f"Sequence length mismatch for repetition {rep_times}, sequence {idx}: " \
+                f"got {sequence_length}, expected {expected_length}"
+
 
     @pytest.mark.parametrize(
         "rep_times,config",

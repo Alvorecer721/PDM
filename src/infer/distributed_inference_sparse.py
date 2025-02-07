@@ -106,6 +106,9 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir,
                          ncols=100, 
                          disable=rank != 0):
             
+            # Clear cache before processing new batch
+            torch.cuda.empty_cache()
+            
             batch_tensor = torch.tensor(batch, device=local_rank)
 
             # Prepend <BoS> token
@@ -123,6 +126,7 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir,
                 outputs = model.generate(
                     input_ids=input_with_bos,
                     max_new_tokens=suffix_length,
+                    min_new_tokens=suffix_length,
                     return_dict_in_generate=True,
                     output_scores=True,
                     **generation_configs[policy]
@@ -146,7 +150,6 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir,
             # Clear GPU tensors immediately after use
             del batch_tensor, sequences, outputs, input_with_bos
             del seq_nlls, seq_nlls_mean, seq_nlls_std
-            torch.cuda.empty_cache()
 
             # Write results directly without storing in memory
             for p, t, g, nll, nll_m, nll_s in zip(prefixes, true_suffixes, generated_suffixes, nlls, nll_means, nll_stds):
@@ -245,6 +248,9 @@ if __name__ == "__main__":
                 '_offset': args.offset
             }
         )['prefix_suffix']
+
+        assert len(bucket[0]) == args.prefix_length + args.suffix_length, \
+            f"Sequence length mismatch: got {len(bucket[0])}, expected {args.prefix_length + args.suffix_length}"
 
         logging.info(f"Processing repetition {rep} with {len(bucket)} samples")
 
