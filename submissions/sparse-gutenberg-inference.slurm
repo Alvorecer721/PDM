@@ -8,8 +8,8 @@
 #SBATCH --job-name=gfl-infer
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=00:30:00
-#SBATCH --array=0-11
+#SBATCH --time=24:00:00
+#SBATCH --array=0-6
 
 set -e  # Exit immediately if any command fails
 
@@ -35,8 +35,16 @@ export MASTER_PORT
 export MASTER_ADDR
 
 # Define offsets
-declare -a offsets=(0 1 2 3 4 5 10 20 30 40 50 100)
-offset=${offsets[$SLURM_ARRAY_TASK_ID]}
+# declare -a offsets=(0 1 2 3 4 5 10 20 30 40 50 100)
+# offset=${offsets[$SLURM_ARRAY_TASK_ID]}
+
+# Define suffix length
+declare -a suffix_lengths=(100 250 1000 1500 2000 2500 3000)
+suffix_length=${suffix_lengths[$SLURM_ARRAY_TASK_ID]}
+
+# Define prefix lengths
+# declare -a prefix_lengths=(50 100 250 750 1000 1500 2000 3000 4000 5000)
+# prefix_length=${prefix_lengths[$SLURM_ARRAY_TASK_ID]}
 
 # Launch the distributed inference
 srun torchrun \
@@ -45,9 +53,10 @@ srun torchrun \
     --experiment-path "$EXPR_PATH" \
     --repetitions 1,2,3,4,8,16,24,32,48,64,96,128 \
     --gen-policy greedy \
-    --offset "$offset" \
+    --offset 0 \
     --prefix-length 500 \
-    --suffix-length 500
+    --suffix-length "$suffix_length" \
+    --batch-size 1
 
 # Usage:
 # sbatch ./sparse-gutenberg-inference.slurm /iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_1984000

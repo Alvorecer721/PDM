@@ -85,9 +85,9 @@ def base_model_setup():
     config = AutoConfig.from_pretrained('/capstor/users/cscs/xyixuan/PDM/config/llama3_1.5B_config.json')
     
     # global_expr_dir = '/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_1984000'
-    global_expr_dir = '/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_11971350'
+    # global_expr_dir = '/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_11971350'
+    global_expr_dir = '/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_10200350'
 
-    # model_path = '/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_10200350/results/NeMo2HF/step=170004-consumed=10200240.bin'
     # model_path = "/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_3968000/results/NeMo2HF/step=66132-consumed=3967920.bin"
     # model_path = '/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_K_50_H_13_GBS_60_SEQ_3968000/results/NeMo2HF/step=66133-consumed=3967980.bin'
 
@@ -109,8 +109,8 @@ def base_model_setup():
     
     return model, tokenizer, generator
 
-# repetitions = np.array([1, 2, 3, 4, 8, 16, 24, 32, 48, 64, 96, 128])
-repetitions = np.array([128, 256, 512, 1024, 2048])
+repetitions = np.array([1, 2, 3, 4, 8, 16, 24, 32, 48, 64, 96, 128])
+# repetitions = np.array([128, 256, 512, 1024, 2048])
 
 @pytest.fixture(params=[
     (rep, off) 

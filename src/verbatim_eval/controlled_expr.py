@@ -1,210 +1,315 @@
-from typing import List, Dict, Any, Literal, Optional
+from typing import List, Dict, Any, Literal, Optional, Union
 from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
 from tqdm.auto import tqdm
+import pickle
+import matplotlib.pyplot as plt
+import os
+
 from .rouge_ttr import batch_rouge_ttr_calc
 from .utils import load_inference_data
+
+@dataclass
+class MetricData:
+    scores: np.ndarray
+    mean: float
+    std: float
+
+
+@dataclass 
+class MetricData:
+   scores: np.ndarray
+   mean: float 
+   std: float
+
+@dataclass
+class Results:
+    data: Dict
+
+    def _get_nested_keys(self, level: int) -> List:
+        d = self.data
+        for _ in range(level):
+            d = d[next(iter(d))]
+        return sorted(d.keys())
+
+    @property
+    def expr(self) -> List[str]: 
+        return self._get_nested_keys(0)
+
+    @property
+    def repetitions(self) -> List[int]:
+        return [int(x) for x in self._get_nested_keys(1)]
+        
+    @property
+    def offsets(self) -> List[int]:
+        return [int(x) for x in self._get_nested_keys(2)]
+        
+    @property
+    def prefixes(self) -> List[int]:
+        return [int(x) for x in self._get_nested_keys(3)]
+        
+    @property
+    def suffixes(self) -> List[int]:
+        return [int(x) for x in self._get_nested_keys(4)]
+        
+    @property
+    def metrics(self) -> List[str]:
+        return self._get_nested_keys(5)
+
+    def save(self, path: str):
+        with open(path, 'wb') as f:
+            pickle.dump(self.data, f)
+           
+    @staticmethod
+    def _convert_to_metric_data(d: Dict) -> Union[Dict, MetricData]:
+        if all(k in d for k in ['scores', 'mean', 'std']):
+            return MetricData(d['scores'], d['mean'], d['std'])
+        return {k: Results._convert_to_metric_data(v) for k, v in d.items()}
+
+    @classmethod
+    def load(cls, path: str):
+        with open(path, 'rb') as f:
+            return cls(cls._convert_to_metric_data(pickle.load(f)))
+       
+    @classmethod
+    def from_raw_dict(cls, results: Dict):
+        return cls(cls._convert_to_metric_data(results))
+
+    def get_stats(self, expr: str, rep: int, offset: int, prefix: int, suffix: int, metric: str) -> MetricData:
+        return self.data[expr][rep][offset][prefix][suffix][metric]
+
+    def get_all_metrics(self, expr: str, rep: int, offset: int, prefix: int, suffix: int) -> Dict[str, MetricData]:
+        return self.data[expr][rep][offset][prefix][suffix]
+
+    def get_dimensions(self) -> Dict[str, List]:
+        return {
+            'expr': self.expr,
+            'repetitions': self.repetitions, 
+            'offsets': self.offsets,
+            'prefixes': self.prefixes,
+            'suffixes': self.suffixes,
+            'metrics': self.metrics
+        }
+    
+    def save(self):
+        base_path='/capstor/users/cscs/xyixuan/PDM/results/sparse'
+
+        offsets_str = '_'.join(map(str, self.offsets))
+        prefixes_str = '_'.join(map(str, self.prefixes))
+        suffixes_str = '_'.join(map(str, self.suffixes))
+        name = f"offset_{offsets_str}_prefix_{prefixes_str}_suffix_{suffixes_str}.pkl"
+
+        path = f"{base_path}/{self.expr[0]}/{name}"
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'wb') as f:
+            pickle.dump(self.data, f)
 
 
 @dataclass
 class EvalConfig:
-    """Configuration for evaluation parameters"""
+    """Configuration for evaluation parameters
+    
+    All parameters (offset, prefix_length, suffix_length) are specified as lists.
+    For non-varying parameters, simply provide a single-element list.
+    
+    Example:
+        config = EvalConfig(
+            base_path="path/to/data",
+            expr="experiment1",
+            repetitions=np.array([0, 1, 2]),
+            policy="policy1",
+            offsets=[100, 200, 300],        # varying parameter
+            prefix_lengths=[500],            # non-varying parameter
+            suffix_lengths=[100, 200, 300]   # varying parameter
+        )
+    """
     base_path: str
     expr: str
     repetitions: np.ndarray
     policy: str
-    vary_param: Literal['offset', 'prefix']  # What parameter to vary
-    fixed_offset: int = 0  # Used when varying prefix length
-    fixed_prefix_length: int = 500  # Used when varying offset
-    len_suffix: int = 500
-    offsets: Optional[List[int]] = field(default_factory=list)  # Optional when vary_param is 'prefix'
-    prefix_lengths: Optional[List[int]] = field(default_factory=list)  # Optional when vary_param is 'prefix'
-
-    def __post_init__(self):
-        """Validate configuration after initialization"""
-        if self.vary_param == 'offset' and not self.offsets:
-            raise ValueError("offsets must be provided when vary_param is 'offset'")
-        if self.vary_param == 'prefix' and not self.prefix_lengths:
-            raise ValueError("prefix_lengths must be provided when vary_param is 'prefix'")
+    offsets: List[int]
+    prefix_lengths: List[int]
+    suffix_lengths: List[int]
 
 
-def eval_expr(config: EvalConfig) -> Dict:
+def eval_expr(config: EvalConfig) -> Results:
     """
-    Evaluate expressions by either offset or prefix length
-    """
-    results = {}
-    results[config.expr] = {}
+    Evaluate expressions with a consistent 5-level nested dictionary structure:
+    expr -> repetition -> offset -> prefix_length -> suffix_length -> metrics
 
-    pbar1 = tqdm(config.repetitions, desc="Processing repetitions")
-    
-    for r in pbar1:
-        pbar1.set_description(f"Processing repetition {r}")
-        results[config.expr][r] = {}
-
-        # Determine what to iterate over based on vary_param
-        if config.vary_param == 'offset':
-            iter_values = config.offsets
-            fixed_prefix = config.fixed_prefix_length
-            desc = "Processing offsets"
-        else:  # prefix
-            iter_values = config.prefix_lengths
-            fixed_offset = config.fixed_offset
-            desc = "Processing prefix lengths"
-
-        pbar2 = tqdm(iter_values, desc=desc, leave=False)
-        for val in pbar2:
-            if config.vary_param == 'offset':
-                offset = val
-                prefix_length = fixed_prefix
-                pbar2.set_description(f"Processing offset {val}")
-            else:
-                offset = fixed_offset
-                prefix_length = val
-                pbar2.set_description(f"Processing prefix length {val}")
-            
-            try:
-                data_path = f"{config.base_path}/{config.expr}/inference"
-                data = load_inference_data(
-                    data_path, 
-                    rep=r,
-                    policy=config.policy,
-                    offset=offset,
-                    len_prefix=prefix_length,
-                    len_suffix=config.len_suffix
-                )
-
-                # Calculate metrics
-                eval_results = data.map(
-                    batch_rouge_ttr_calc,
-                    batched=True, 
-                    batch_size=5,
-                    num_proc=100,
-                    desc=f"Calculating metrics for rep={r}, {config.vary_param}={val}",
-                    remove_columns=data.column_names,
-                    fn_kwargs={
-                        "true_key": "true_suffix",
-                        "gen_key": "generated_suffix",
-                        "len_suffix": config.len_suffix,
-                    }
-                )
-
-                # Store results using the varying parameter as key
-                key = val
-                results[config.expr][r][key] = {}
-
-                # NLL
-                results[config.expr][r][key]['NLL'] = {
-                    'scores': data['nll_mean'],
-                    'mean': np.mean(data['nll_mean']),
-                    'std': np.std(data['nll_mean'])
-                }
-
-                # Store other metrics
-                for metric in eval_results.column_names:
-                    scores = np.array(eval_results[metric])
-                    results[config.expr][r][key][metric] = {
-                        'scores': scores,
-                        'mean': np.mean(scores),
-                        'std': np.std(scores)
-                    }
-            except Exception as e:
-                print(f"\nError processing rep={r}, {config.vary_param}={val}: {str(e)}")
-                continue
-
-        pbar2.close()
-    
-    pbar1.close()
-    return results
-
-
-def format_metric_df(result, metric, vary_param='offset', stat='mean'):
-    """
-    Convert experiment results into a pandas DataFrame.
     Args:
-        result: Dictionary containing a single experiment's results
-        metric: String specifying which metric to show
-        vary_param: String indicating what parameter was varied ('offset' or 'prefix')
-        stat: Which statistics to include ('all', 'mean', or 'std')
+        config: EvalConfig object containing evaluation parameters
+        
     Returns:
-        DataFrame with varied parameter as rows and repetition as columns,
-        maintaining proper naming for all formats
+        Dict with structure:
+        {
+            expr: {
+                rep: {
+                    offset: {
+                        prefix_length: {
+                            suffix_length: {
+                                metric_name: {
+                                    'scores': np.array(...),
+                                    'mean': float,
+                                    'std': float
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     """
-    # Get the only experiment's data
-    rep_dict = next(iter(result.values()))
+    data = {config.expr: {}}
+
+    for r in tqdm(config.repetitions, desc="Processing repetitions"):
+        data[config.expr][r] = {}
+        for offset in tqdm(config.offsets, desc="Processing offsets", leave=False):
+            data[config.expr][r][offset] = {}
+            for prefix_length in tqdm(config.prefix_lengths, leave=False):
+                data[config.expr][r][offset][prefix_length] = {}
+                for suffix_length in tqdm(config.suffix_lengths, leave=False):
+                    metrics = calculate_metrics(config, r, offset, prefix_length, suffix_length)
+                    data[config.expr][r][offset][prefix_length][suffix_length] = metrics
+
+    return Results.from_raw_dict(data)
+
+
+def calculate_metrics(config, rep, offset, prefix_length, suffix_length) -> Dict[str, Dict]:
+    data = load_inference_data(
+        f"{config.base_path}/{config.expr}/inference",
+        rep=rep,
+        policy=config.policy,
+        offset=offset, 
+        len_prefix=prefix_length,
+        len_suffix=suffix_length
+    )
+
+    eval_results = data.map(
+        batch_rouge_ttr_calc,
+        batched=True,
+        batch_size=5,
+        num_proc=100,
+        remove_columns=data.column_names,
+        fn_kwargs={
+            "true_key": "true_suffix", 
+            "gen_key": "generated_suffix", 
+            "len_suffix": suffix_length
+        }
+    )
+
+    metrics = {
+        'NLL': {
+            'scores': data['nll_mean'],
+            'mean': np.mean(data['nll_mean']),
+            'std': np.std(data['nll_mean'])
+        }
+    }
+
+    for metric in eval_results.column_names:
+        scores = np.array(eval_results[metric])
+        metrics[metric] = {
+            'scores': scores,
+            'mean': np.mean(scores),
+            'std': np.std(scores)
+        }
+
+    return metrics
+
     
-    # Get all unique values and repetitions 
-    values = sorted(set(val for rep_d in rep_dict.values() for val in rep_d.keys()))
-    repetitions = sorted(rep_dict.keys())
-    
-    if stat == 'all':
-        # Create MultiIndex for columns with both mean and std
-        columns = pd.MultiIndex.from_product([
-            repetitions,
-            ['mean', 'std']
-        ], names=['repetition', 'stat'])
+def print_repetition_suffix_stats(results: Results, metric: Optional[str] = None,
+                offset: int = 0, prefix: int = 500):
+    for rep in results.repetitions:
+        print(f"\n=== Summary for Repetition {rep:3d} ===\n")
+        for suffix in results.suffixes:
+            print(f"Offset: {offset:3d}, Suffix Length: {suffix:d}")
+            metrics_to_show = [metric] if metric else results.metrics
+            for m in metrics_to_show:
+                stats = results.get_stats(results.expr[0], rep, offset, prefix, suffix, m)
+                print(f" {m:9s} | Mean = {stats.mean:.3f}, Std = {stats.std:.3f}")
+            print()
+
+
+def get_repetition_mean_df(
+   results: Results, 
+   metric: str,
+   offset: Optional[int] = None,
+   prefix: Optional[int] = None,
+   suffix: Optional[int] = None
+) -> pd.DataFrame:
+    if sum(x is not None for x in [offset, prefix, suffix]) != 2:
+        raise ValueError("Exactly two parameters must be provided")
         
-        # Initialize DataFrame with NaN values
-        df = pd.DataFrame(index=values, columns=columns)
-        
-        # Fill the DataFrame with both mean and std
-        for rep, val_dict in rep_dict.items():
-            for val, metrics_dict in val_dict.items():
-                if metric in metrics_dict:
-                    df.loc[val, (rep, 'mean')] = metrics_dict[metric]['mean']
-                    df.loc[val, (rep, 'std')] = metrics_dict[metric]['std']
-    
-    else:
-        # Create named columns for single stat
-        columns = pd.Index(repetitions, name='repetition')
-        df = pd.DataFrame(index=values, columns=columns)
-        
-        # Fill the DataFrame with only the requested stat
-        for rep, val_dict in rep_dict.items():
-            for val, metrics_dict in val_dict.items():
-                if metric in metrics_dict:
-                    df.loc[val, rep] = metrics_dict[metric][stat]
-    
-    # Set index name based on vary_param
-    df.index = pd.Index(values, name='prefix_length' if vary_param == 'prefix' else 'offset')
+    vary_by = 'offset' if offset is None else 'prefix' if prefix is None else 'suffix'
+
+    iterations = getattr(results, f"{vary_by}s")
+    fixed_vals = {
+        'offset': offset,
+        'prefix': prefix,
+        'suffix': suffix
+    }
+
+    data = {rep: {val: results.get_stats(
+        results.expr[0],
+        rep,
+        val if vary_by == 'offset' else fixed_vals['offset'],
+        val if vary_by == 'prefix' else fixed_vals['prefix'],
+        val if vary_by == 'suffix' else fixed_vals['suffix'],
+        metric
+    ).mean for val in iterations} for rep in results.repetitions}
+
+    df = pd.DataFrame(data).T
+    df.index.name = 'repetition'
+    df.columns.name = vary_by
+
     return df
 
 
-def print_metrics(results: Dict, metric=None, value=None, vary_param='offset'):
-    """
-    Log metrics summary for experiment with repetitions and varied parameter.
-    Args:
-        results: Dictionary output from eval_expr
-        metric: Optional string to filter for a specific metric
-        value: Optional int to filter for a specific offset/prefix length
-        vary_param: String indicating what parameter was varied ('offset' or 'prefix')
-    """
-    value_name = 'Prefix Length' if vary_param == 'prefix' else 'Offset'
-    
-    for expr, rep_dict in results.items():
-        print(f"\n=== Summary for Experiment: {expr} ===")
-        for rep, val_dict in rep_dict.items():
-            print(f"\n === Summary for Repetition {rep:3d} ===")
-            for curr_val, metrics_dict in val_dict.items():
-                # Skip if value is specified and doesn't match
-                if value is not None and curr_val != value:
-                    continue
-                    
-                print(f" {value_name} {curr_val:3d}")
-                if metric:
-                    if metric in metrics_dict:
-                        stats = metrics_dict[metric]
-                        print(
-                            f" {metric:<10} | "
-                            f"Mean = {stats['mean']:.3f}, "
-                            f"Std = {stats['std']:.3f}"
-                        )
-                else:
-                    for m, stats in metrics_dict.items():
-                        # Skip printing the raw scores
-                        if m != 'scores':
-                            print(
-                                f" {m:<10} | "
-                                f"Mean = {stats['mean']:.3f}, "
-                                f"Std = {stats['std']:.3f}"
-                            )
+def plot_repetition_metric_dists(results: Results, metric: str, offset: int = 0, prefix: int = 500):
+    n_reps = len(results.repetitions)
+    n_suffix = len(results.suffixes)
+
+    fig, axes = plt.subplots(n_suffix, n_reps, figsize=(5*n_reps, 4*n_suffix))
+    colors = plt.cm.tab20(np.linspace(0, 1, n_suffix))
+
+    axes = np.array([[axes]]) if n_suffix == 1 and n_reps == 1 else \
+            axes.reshape(1, -1) if n_suffix == 1 else \
+            axes.reshape(-1, 1) if n_reps == 1 else axes
+
+    for suffix_idx, suffix in enumerate(results.suffixes):
+        for rep_idx, rep in enumerate(results.repetitions):
+            ax = axes[suffix_idx, rep_idx]
+            
+            if metric == 'TTR':
+                gen_scores = results.get_stats(results.expr[0], rep, offset, prefix, suffix, 'TTR_gen').scores
+                ref_scores = results.get_stats(results.expr[0], rep, offset, prefix, suffix, 'TTR_ref').scores
+                
+                ax.hist(gen_scores, bins=20, color=colors[suffix_idx], 
+                        edgecolor='black', linewidth=1.2, alpha=0.7, label='Generated')
+                ax.hist(ref_scores, bins=20, color='gray', 
+                        edgecolor='black', linewidth=1.2, alpha=0.5, label='Reference')
+                ax.legend(fontsize=12, facecolor='white', edgecolor='black', framealpha=1)
+            else:
+                scores = results.get_stats(results.expr[0], rep, offset, prefix, suffix, metric).scores
+                ax.hist(scores, bins=20, color=colors[suffix_idx], edgecolor='black', linewidth=1.2)
+            
+            ax.set_xlabel(f'{metric} Score')
+            ax.set_ylabel('Frequency' if rep_idx == 0 else '')
+            if metric == 'Rouge-L':
+                ax.set_xlim(0, 1)
+            if suffix_idx < n_suffix - 1:
+                ax.set_xlabel('')
+
+    for suffix_idx, suffix in enumerate(results.suffixes):
+        axes[suffix_idx, 0].text(-0.3, 0.5, f'Suffix {suffix}', fontsize=20, rotation=90,
+                                transform=axes[suffix_idx, 0].transAxes, verticalalignment='center')
+
+    for rep_idx, rep in enumerate(results.repetitions):
+        axes[0, rep_idx].text(0.5, 1.2, f'Rep {rep}', fontsize=20,
+                            transform=axes[0, rep_idx].transAxes, horizontalalignment='center')
+
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
+    fig.text(0.5, 0.01, f'{metric} Score Distribution',
+            horizontalalignment='center', verticalalignment='bottom', fontsize=30)
+    plt.show()
