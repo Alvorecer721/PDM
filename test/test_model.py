@@ -9,7 +9,7 @@ import torch
 import glob
 from pathlib import Path
 import inspect
-
+import json
 
 from src.infer.distributed_inference import load_model
 from src.infer.utils import set_seed
@@ -430,3 +430,183 @@ def test_model_generation_and_pipeline_generation(model_setup, seq_idx):
     if not torch.equal(model_tokens.cpu(), torch.tensor(pipeline_tokens)):
         error_msg = f"\nMismatch found in repetition {rep_count}, sample {seq_idx}:\n"
         find_mismatch(model_tokens, pipeline_tokens, error_msg, tokenizer)
+
+@pytest.mark.parametrize(
+    "policy,offset,prefix_length,suffix_length", [
+        ('greedy', 0, 50, 500),
+        ('greedy', 0, 50, 1500),
+        ('greedy', 0, 500, 500),
+        ('greedy', 0, 500, 1500),
+        # Add more combinations as needed
+    ]
+)
+def test_jsonl_file_validity(base_model_setup, policy, offset, prefix_length, suffix_length):
+    """Test validity of JSONL files generated during inference."""
+    _, tokenizer, _, = base_model_setup
+    
+    # Construct the inference directory path
+    inference_dir = Path(global_expr_dir) / 'inference' / f"offset_{offset}_prefix_{prefix_length}_suffix_{suffix_length}"
+    
+    for rep in repetitions:
+        # Construct path for each repetition
+        rep_dir = inference_dir / f"rep_{rep}_{policy}"
+        if not rep_dir.exists():
+            continue
+            
+        # Check all rank files
+        rank_files = sorted(rep_dir.glob("rank*.jsonl"))
+        for rank_file in rank_files:
+            print(f"\nChecking {rank_file}")
+            with open(rank_file) as f:
+                for line_num, line in enumerate(f, 1):
+                    try:
+                        # Parse JSON
+                        data = json.loads(line.strip())
+                        
+                        # Check required fields
+                        required_fields = ['prefix', 'true_suffix', 'generated_suffix', 'nll', 'nll_mean', 'nll_std']
+                        missing_fields = [field for field in required_fields if field not in data]
+                        assert not missing_fields, \
+                            f"Rep {rep}, File {rank_file.name}, Line {line_num}: Missing fields: {missing_fields}"
+                        
+                        # Check array lengths
+                        assert len(data['prefix']) == prefix_length, \
+                            f"Rep {rep}, File {rank_file.name}, Line {line_num}: Unexpected prefix length: {len(data['prefix'])} != {prefix_length}"
+                        
+                        assert len(data['true_suffix']) == suffix_length, \
+                            f"Rep {rep}, File {rank_file.name}, Line {line_num}: Unexpected true_suffix length: {len(data['true_suffix'])} != {suffix_length}"
+                            
+                        assert len(data['generated_suffix']) == suffix_length, \
+                            f"Rep {rep}, File {rank_file.name}, Line {line_num}: Unexpected generated_suffix length: {len(data['generated_suffix'])} != {suffix_length}"
+                            
+                        # Check nll array length matches generated_suffix
+                        assert len(data['nll']) == len(data['generated_suffix']), \
+                            f"Rep {rep}, File {rank_file.name}, Line {line_num}: nll length {len(data['nll'])} doesn't match generated_suffix length {len(data['generated_suffix'])}"
+                            
+                        # Check nll_mean and nll_std are floats
+                        assert isinstance(data['nll_mean'], float), \
+                            f"Rep {rep}, File {rank_file.name}, Line {line_num}: nll_mean is not a float"
+                        assert isinstance(data['nll_std'], float), \
+                            f"Rep {rep}, File {rank_file.name}, Line {line_num}: nll_std is not a float"
+                            
+                        # Optional: Check if arrays contain valid token IDs
+                        max_token_id = tokenizer.vocab_size
+                        for array_name in ['prefix', 'true_suffix', 'generated_suffix']:
+                            invalid_tokens = [t for t in data[array_name] if not (isinstance(t, int) and 0 <= t < max_token_id)]
+                            assert not invalid_tokens, \
+                                f"Rep {rep}, File {rank_file.name}, Line {line_num}: Invalid token IDs in {array_name}: {invalid_tokens[:5]}..."
+                        
+                    except json.JSONDecodeError as e:
+                        raise AssertionError(
+                            f"Rep {rep}, File {rank_file.name}, Line {line_num}: Invalid JSON: {str(e)}\n"
+                            f"Content: {line[:100]}..."
+                        )
+                    except Exception as e:
+                        raise AssertionError(
+                            f"Rep {rep}, File {rank_file.name}, Line {line_num}: Error processing line: {str(e)}"
+                        )
+
+
+@pytest.mark.parametrize(
+    "policy,offset,prefix_length,suffix_length", [
+        ('greedy', 0, 50, 500),  # Adjust parameters as needed
+        ('greedy', 0, 500, 500),  # Adjust parameters as needed
+        ('greedy', 0, 100, 500),  # Adjust parameters as needed
+    ]
+)
+def test_bos_token_frequency(base_model_setup, policy, offset, prefix_length, suffix_length):
+    """Test that no BOS tokens appear in generated sequences."""
+    _, tokenizer, _ = base_model_setup
+    
+    bos_token_id = 128000
+    errors = []  # Store all occurrences of BOS tokens as errors
+    
+    inference_dir = Path(global_expr_dir) / 'inference_og' / f"offset_{offset}_prefix_{prefix_length}_suffix_{suffix_length}"
+    
+    for rep in repetitions:
+        rep_dir = inference_dir / f"rep_{rep}_{policy}"
+        if not rep_dir.exists():
+            continue
+            
+        rank_files = sorted(rep_dir.glob("rank*.jsonl"))
+        world_size = len(rank_files)  # Should be 4
+        
+        for rank_idx, rank_file in enumerate(rank_files):
+            with open(rank_file) as f:
+                for line_num, line in enumerate(f, 1):
+                    data = json.loads(line.strip())
+                    
+                    # Calculate original sequence index
+                    # line_num starts from 1, so subtract 1
+                    seq_idx = rank_idx + world_size * (line_num - 1)
+                    
+                    # Find all BOS token positions in this sample
+                    bos_positions = [
+                        pos for pos, token in enumerate(data['true_suffix'])  
+                        # pos for pos, token in enumerate(data['prefix'])  
+                        if token == bos_token_id
+                    ]
+                    
+                    if bos_positions:
+                        # Generate visualization for this sample
+                        # log_model_generations(
+                        #     torch.tensor(data['generated_suffix']),
+                        #     data['true_suffix'],
+                        #     tokenizer,
+                        #     rep,
+                        #     seq_idx,  # Now using correctly calculated seq_idx
+                        #     offset,
+                        #     output_dir=f'/capstor/users/cscs/xyixuan/PDM/results/bos_errors',
+                        #     expr_name=f"{global_expr_name}_bos_errors"
+                        # )
+                        
+                        error = (
+                            f"Found BOS tokens in Rep {rep}, {rank_file.name}, Line {line_num} (seq_idx {seq_idx}) "
+                            f"at positions: {bos_positions}\n"
+                            f"Context around first occurrence: "
+                            f"{data['generated_suffix'][max(0, bos_positions[0]-5):bos_positions[0]+6]}\n"
+                            f"Visualization saved to: /capstor/users/cscs/xyixuan/PDM/results/bos_errors/{global_expr_name}_bos_errors"
+                        )
+                        errors.append(error)
+    
+    # If any errors were found, fail the test with detailed information
+    if errors:
+        error_msg = "\n\nBOS Token Errors:\n" + "\n".join(errors)
+        raise AssertionError(error_msg)
+    
+
+def test_bos_token_in_gutenberg(base_model_setup):
+    """Test for BOS tokens in the original Gutenberg dataset."""
+    _, tokenizer, _ = base_model_setup
+    bos_token_id = 128000
+    errors = []
+
+    for rep in repetitions:
+        # Load the Gutenberg dataset for current repetition
+        gutenberg_path = f'/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg/rep_{rep}_token.jsonl'
+        if not Path(gutenberg_path).exists():
+            continue
+
+        gutenberg = load_dataset("json", data_files=gutenberg_path, split='train')
+        
+        for idx, sample in enumerate(gutenberg):
+            # Find all BOS token positions in this sample
+            bos_positions = [
+                pos for pos, token in enumerate(sample['input_ids']) 
+                if token == bos_token_id
+            ]
+            
+            if bos_positions:
+                error = (
+                    f"Found BOS token in Gutenberg dataset:\n"
+                    f"Rep {rep}, Sample {idx}\n"
+                    f"Positions: {bos_positions}\n"
+                    f"Context around first occurrence: {sample['input_ids'][max(0, bos_positions[0]-5):bos_positions[0]+6]}\n"
+                    f"Decoded context: '{tokenizer.decode(sample['input_ids'][max(0, bos_positions[0]-5):bos_positions[0]+6])}'"
+                )
+                errors.append(error)
+
+    # If any errors were found, fail the test with detailed information
+    if errors:
+        error_msg = "\n\nBOS Token Errors in Gutenberg Dataset:\n" + "\n".join(errors)
+        raise AssertionError(error_msg)

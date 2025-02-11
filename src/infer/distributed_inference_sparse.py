@@ -162,6 +162,7 @@ def run(model, dataset, prefix_length, suffix_length, batch_size, inference_dir,
                     "nll_std": nll_s
                 }, jsonl_file)
                 jsonl_file.write('\n')
+                jsonl_file.flush()
 
             # Clear CPU lists after writing
             del prefixes, true_suffixes, generated_suffixes, nlls, nll_means, nll_stds
