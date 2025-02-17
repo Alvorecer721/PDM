@@ -9,7 +9,7 @@
 
 export PYTHONPATH="/capstor/users/cscs/xyixuan/PDM:${PYTHONPATH}"
 
-EXPR_PATH="/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_K_50_H_13_GBS_60"
+EXPR_PATH="/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_10200350"
 EXPR_NAME=$(basename ${EXPR_PATH})
 RES_PATH="/capstor/users/cscs/xyixuan/PDM/results/lm_eval/${EXPR_NAME}"
 mkdir -p ${RES_PATH}

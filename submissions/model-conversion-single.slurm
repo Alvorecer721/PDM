@@ -1,14 +1,14 @@
 #!/bin/bash
-
+#SBATCH --account=a-a06
 #SBATCH --cpus-per-task=72
 #SBATCH --environment=nemo
-#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/log-nemo-convert_%j.err
-#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/log-nemo-convert_%j.out
+#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/convert/log-nemo-convert_%j.err
+#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/convert/log-nemo-convert_%j.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=ckpt-cvs
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=12:00:00
+#SBATCH --time=01:00:00
 
 # Environment setup
 export TRANSFORMERS_OFFLINE=0

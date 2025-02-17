@@ -21,7 +21,7 @@ export WANDB_API_KEY=74bc2e3d0aa09e4d4e8a89659496aa4697714938
 export NEMO_TESTING=1
 
 # declare -a reps=(128 256 512 1024)
-declare -a reps=(1 2 3 4 8 16 24 32 48 64 96)
+declare -a reps=(96)
 rep=${reps[$SLURM_ARRAY_TASK_ID]}
 
 # SLURM job to run the Megatron2HF conversion

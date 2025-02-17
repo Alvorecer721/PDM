@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 def create_heatmaps_subplots(data_dict, figsize=(30, 12)):
     """
-    Create heatmaps from a dictionary of pandas dataframes
+    Create heatmaps from a dictionary of pandas dataframes with fixed colorbar scale 0-1
     
     Args:
         data_dict: Dictionary with keys as titles and values as pandas dataframes
@@ -27,13 +27,16 @@ def create_heatmaps_subplots(data_dict, figsize=(30, 12)):
         axes = axes.reshape(1, -1)
     elif n_cols == 1:
         axes = axes.reshape(-1, 1)
-    
-    fig.suptitle('Rouge-L Scores by Offset, Prefix Length, and Repetition', fontsize=16, y=1.02)
-    
+
     # Get the first dataframe to extract column and index names
     first_df = next(iter(data_dict.values()))
     xlabel = first_df.columns.name
     ylabel = first_df.index.name
+    
+    fig.suptitle(f'Rouge-L Scores by offset, {xlabel} Length, and Repetition', fontsize=16, y=1.02)
+    
+    # Set fixed color scale from 0 to 1
+    vmin, vmax = 0, 1
     
     # Create heatmap for each dataframe
     items = list(data_dict.items())
@@ -41,10 +44,11 @@ def create_heatmaps_subplots(data_dict, figsize=(30, 12)):
         # Convert to numpy array and ensure float type
         data = df.astype(float).to_numpy()
         
-        # Plot heatmap
+        # Plot heatmap with fixed scale
         sns.heatmap(data, annot=True, fmt='.4f', cmap='YlOrRd', ax=ax,
                     xticklabels=df.columns, yticklabels=df.index,
-                    annot_kws={'size': 8})
+                    annot_kws={'size': 8},
+                    vmin=vmin, vmax=vmax)
         
         ax.set_title(title, fontsize=14, pad=10)
         ax.set_xlabel(xlabel, fontsize=12)

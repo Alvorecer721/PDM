@@ -57,15 +57,22 @@ class Results:
     def metrics(self) -> List[str]:
         return self._get_nested_keys(5)
 
-    def save(self, path: str):
-        with open(path, 'wb') as f:
-            pickle.dump(self.data, f)
-           
     @staticmethod
     def _convert_to_metric_data(d: Dict) -> Union[Dict, MetricData]:
-        if all(k in d for k in ['scores', 'mean', 'std']):
+        # If it's already a MetricData object, return it as-is
+        if isinstance(d, MetricData):
+            return d
+        
+        # If it's a dictionary with all required keys, convert to MetricData
+        if isinstance(d, dict) and all(k in d for k in ['scores', 'mean', 'std']):
             return MetricData(d['scores'], d['mean'], d['std'])
-        return {k: Results._convert_to_metric_data(v) for k, v in d.items()}
+        
+        # If it's a dictionary, recursively convert its values
+        if isinstance(d, dict):
+            return {k: Results._convert_to_metric_data(v) for k, v in d.items()}
+        
+        # For any other type, return it as-is
+        return d
 
     @classmethod
     def load(cls, path: str):
@@ -217,19 +224,6 @@ def calculate_metrics(config, rep, offset, prefix_length, suffix_length) -> Dict
 
     return metrics
 
-    
-def print_repetition_suffix_stats(results: Results, metric: Optional[str] = None,
-                offset: int = 0, prefix: int = 500):
-    for rep in results.repetitions:
-        print(f"\n=== Summary for Repetition {rep:3d} ===\n")
-        for suffix in results.suffixes:
-            print(f"Offset: {offset:3d}, Suffix Length: {suffix:d}")
-            metrics_to_show = [metric] if metric else results.metrics
-            for m in metrics_to_show:
-                stats = results.get_stats(results.expr[0], rep, offset, prefix, suffix, m)
-                print(f" {m:9s} | Mean = {stats.mean:.3f}, Std = {stats.std:.3f}")
-            print()
-
 
 def get_repetition_mean_df(
    results: Results, 
@@ -241,29 +235,96 @@ def get_repetition_mean_df(
     if sum(x is not None for x in [offset, prefix, suffix]) != 2:
         raise ValueError("Exactly two parameters must be provided")
         
-    vary_by = 'offset' if offset is None else 'prefix' if prefix is None else 'suffix'
+    # Determine which parameter varies
+    if offset is None:
+        vary_by, iterations = 'offset', results.offsets
+    elif prefix is None:
+        vary_by, iterations = 'prefix', results.prefixes
+    else:
+        vary_by, iterations = 'suffix', results.suffixes
 
-    iterations = getattr(results, f"{vary_by}s")
+    # Store the fixed values
     fixed_vals = {
         'offset': offset,
         'prefix': prefix,
         'suffix': suffix
     }
 
-    data = {rep: {val: results.get_stats(
-        results.expr[0],
-        rep,
-        val if vary_by == 'offset' else fixed_vals['offset'],
-        val if vary_by == 'prefix' else fixed_vals['prefix'],
-        val if vary_by == 'suffix' else fixed_vals['suffix'],
-        metric
-    ).mean for val in iterations} for rep in results.repetitions}
+    # Create data dictionary with correct value selection
+    data = {}
+    for rep in results.repetitions:
+        data[rep] = {}
+        for val in iterations:
+            # Select the correct values based on which parameter varies
+            current_offset = val if vary_by == 'offset' else fixed_vals['offset']
+            current_prefix = val if vary_by == 'prefix' else fixed_vals['prefix']
+            current_suffix = val if vary_by == 'suffix' else fixed_vals['suffix']
+            
+            # Get stats
+            stats = results.get_stats(
+                results.expr[0],
+                rep,
+                current_offset,
+                current_prefix,
+                current_suffix,
+                metric
+            )
+            data[rep][val] = stats.mean
 
     df = pd.DataFrame(data).T
     df.index.name = 'repetition'
-    df.columns.name = vary_by
+    df.columns.name = vary_by[:-1] if vary_by.endswith('s') else vary_by  # Remove 's' if present
 
     return df
+
+
+def print_repetition_stats(
+    results: Results,
+    metric: Optional[str] = None,
+    offset: Optional[int] = None,
+    prefix: Optional[int] = None,
+    suffix: Optional[int] = None
+):
+    if sum(x is not None for x in [offset, prefix, suffix]) != 2:
+        raise ValueError("Exactly two parameters must be provided")
+    
+    # Determine which parameter varies
+    if offset is None:
+        vary_by, iterations = 'offset', results.offsets
+    elif prefix is None:
+        vary_by, iterations = 'prefix', results.prefixes
+    else:
+        vary_by, iterations = 'suffix', results.suffixes
+
+    # Store the fixed values
+    fixed_vals = {
+        'offset': offset,
+        'prefix': prefix,
+        'suffix': suffix
+    }
+
+    for rep in results.repetitions:
+        print(f"\n=== Summary for Repetition {rep:3d} ===\n")
+        for val in iterations:
+            # Select the correct values based on which parameter varies
+            current_offset = val if vary_by == 'offset' else fixed_vals['offset']
+            current_prefix = val if vary_by == 'prefix' else fixed_vals['prefix']
+            current_suffix = val if vary_by == 'suffix' else fixed_vals['suffix']
+            
+            print(f"{vary_by.capitalize()}: {val:3d}")
+            metrics_to_show = [metric] if metric else results.metrics
+            
+            for m in metrics_to_show:
+                stats = results.get_stats(
+                    results.expr[0],
+                    rep,
+                    current_offset,
+                    current_prefix,
+                    current_suffix,
+                    m
+                )
+                print(f" {m:9s} | Mean = {stats.mean:.3f}, Std = {stats.std:.3f}")
+            print()
 
 
 def plot_repetition_metric_dists(results: Results, metric: str, offset: int = 0, prefix: int = 500):

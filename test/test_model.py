@@ -327,7 +327,7 @@ def test_model_generation(model_setup, seq_idx):
         find_mismatch(model_suffix_tokens, model_gen_suffix_tokens, error_msg, tokenizer)
 
 
-@pytest.mark.parametrize("seq_idx", [0], ids=lambda x: f"seq_{x}")
+@pytest.mark.parametrize("seq_idx", [240], ids=lambda x: f"seq_{x}")
 def test_model_generation_with_logging(model_setup, seq_idx):
     """
     Test model generation and log results with colored differences.
@@ -351,22 +351,23 @@ def test_model_generation_with_logging(model_setup, seq_idx):
         max_new_tokens=suffix_length,
         min_new_tokens=suffix_length,
         num_beams=1,
+        suppress_tokens=[tokenizer.bos_token_id],
     )[0]
 
     model_suffix_tokens = model_tokens[-1*suffix_length:]
     true_suffix_tokens = data[seq_idx]['true_suffix']
     
     # Log the generations with colored differences
-    # log_model_generations(
-    #     model_suffix_tokens,
-    #     true_suffix_tokens,
-    #     tokenizer,
-    #     rep_count,
-    #     seq_idx,
-    #     offset,
-    #     output_dir='/capstor/users/cscs/xyixuan/PDM/results',
-    #     expr_name=global_expr_name,
-    # )
+    log_model_generations(
+        model_suffix_tokens,
+        true_suffix_tokens,
+        tokenizer,
+        rep_count,
+        seq_idx,
+        offset,
+        output_dir='/capstor/users/cscs/xyixuan/PDM/results',
+        expr_name=global_expr_name,
+    )
     
     # Still perform the original assertion
     if not torch.equal(model_suffix_tokens.cpu(), torch.tensor(true_suffix_tokens)):
@@ -509,9 +510,7 @@ def test_jsonl_file_validity(base_model_setup, policy, offset, prefix_length, su
 
 @pytest.mark.parametrize(
     "policy,offset,prefix_length,suffix_length", [
-        ('greedy', 0, 50, 500),  # Adjust parameters as needed
-        ('greedy', 0, 500, 500),  # Adjust parameters as needed
-        ('greedy', 0, 100, 500),  # Adjust parameters as needed
+        ('greedy', 0, 500, 500), 
     ]
 )
 def test_bos_token_frequency(base_model_setup, policy, offset, prefix_length, suffix_length):
@@ -521,7 +520,7 @@ def test_bos_token_frequency(base_model_setup, policy, offset, prefix_length, su
     bos_token_id = 128000
     errors = []  # Store all occurrences of BOS tokens as errors
     
-    inference_dir = Path(global_expr_dir) / 'inference_og' / f"offset_{offset}_prefix_{prefix_length}_suffix_{suffix_length}"
+    inference_dir = Path(global_expr_dir) / 'inference' / f"offset_{offset}_prefix_{prefix_length}_suffix_{suffix_length}"
     
     for rep in repetitions:
         rep_dir = inference_dir / f"rep_{rep}_{policy}"
@@ -542,23 +541,23 @@ def test_bos_token_frequency(base_model_setup, policy, offset, prefix_length, su
                     
                     # Find all BOS token positions in this sample
                     bos_positions = [
-                        pos for pos, token in enumerate(data['true_suffix'])  
+                        pos for pos, token in enumerate(data['generated_suffix'])  
                         # pos for pos, token in enumerate(data['prefix'])  
                         if token == bos_token_id
                     ]
                     
                     if bos_positions:
                         # Generate visualization for this sample
-                        # log_model_generations(
-                        #     torch.tensor(data['generated_suffix']),
-                        #     data['true_suffix'],
-                        #     tokenizer,
-                        #     rep,
-                        #     seq_idx,  # Now using correctly calculated seq_idx
-                        #     offset,
-                        #     output_dir=f'/capstor/users/cscs/xyixuan/PDM/results/bos_errors',
-                        #     expr_name=f"{global_expr_name}_bos_errors"
-                        # )
+                        log_model_generations(
+                            torch.tensor(data['generated_suffix']),
+                            data['true_suffix'],
+                            tokenizer,
+                            rep,
+                            seq_idx,  # Now using correctly calculated seq_idx
+                            offset,
+                            output_dir=f'/capstor/users/cscs/xyixuan/PDM/results/bos_errors',
+                            expr_name=f"{global_expr_name}_bos_errors"
+                        )
                         
                         error = (
                             f"Found BOS tokens in Rep {rep}, {rank_file.name}, Line {line_num} (seq_idx {seq_idx}) "

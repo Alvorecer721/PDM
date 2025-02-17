@@ -9,14 +9,14 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=24:00:00
-#SBATCH --array=0-6
+#SBATCH --array=0-9
 
 set -e  # Exit immediately if any command fails
 
 # Setup
 export TRANSFORMERS_OFFLINE=0
 export TORCH_NCCL_AVOID_RECORD_STREAMS=1
-export NCCL_NVLS_ENABLE=0
+export NCCL_NVLS_ENABLE=9
 
 EXPR_PATH="$1"
 
@@ -35,28 +35,70 @@ export MASTER_PORT
 export MASTER_ADDR
 
 # Define offsets
-# declare -a offsets=(0 1 2 3 4 5 10 20 30 40 50 100)
+# declare -a offsets=(0 50 100)
 # offset=${offsets[$SLURM_ARRAY_TASK_ID]}
 
 # Define suffix length
-declare -a suffix_lengths=(100 250 1000 1500 2000 2500 3000)
-suffix_length=${suffix_lengths[$SLURM_ARRAY_TASK_ID]}
+# declare -a suffix_lengths=(50 100 250 500 1000 1500 2000 2500)
+# suffix_length=${suffix_lengths[$SLURM_ARRAY_TASK_ID]}
 
 # Define prefix lengths
-# declare -a prefix_lengths=(50 100 250 750 1000 1500 2000 3000 4000 5000)
-# prefix_length=${prefix_lengths[$SLURM_ARRAY_TASK_ID]}
+declare -a prefix_lengths=(50 100 250 750 1000 1500 2000 3000 4000 5000)
+prefix_length=${prefix_lengths[$SLURM_ARRAY_TASK_ID]}
 
-# Launch the distributed inference
-srun torchrun \
+# Function to verify array length
+verify_array_length() {
+    local array_name=$1
+    local array_size=$2
+    
+    if [ "$array_size" -ne "$SLURM_ARRAY_TASK_COUNT" ]; then
+        echo "Error: Array size mismatch for $array_name!"
+        echo "$array_name array has $array_size elements"
+        echo "SLURM array size is $SLURM_ARRAY_TASK_COUNT (e.g. --array=0-7 means 8 tasks)"
+        exit 1
+    fi
+}
+
+# Check if arrays are defined using set -u to avoid undefined variable errors
+set +u
+
+# Verify arrays if they are uncommented
+if [ -n "${offsets+x}" ]; then
+    verify_array_length "offsets" "${#offsets[@]}"
+    offset=${offsets[$SLURM_ARRAY_TASK_ID]}
+fi
+
+if [ -n "${suffix_lengths+x}" ]; then
+    verify_array_length "suffix_lengths" "${#suffix_lengths[@]}"
+    suffix_length=${suffix_lengths[$SLURM_ARRAY_TASK_ID]}
+fi
+
+if [ -n "${prefix_lengths+x}" ]; then
+    verify_array_length "prefix_lengths" "${#prefix_lengths[@]}"
+    prefix_length=${prefix_lengths[$SLURM_ARRAY_TASK_ID]}
+fi
+
+# Reset to original state
+set -e
+
+# Create the command string
+CMD="srun torchrun \
     --nproc_per_node=4 \
     /capstor/users/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py \
-    --experiment-path "$EXPR_PATH" \
-    --repetitions 1,2,3,4,8,16,24,32,48,64,96,128 \
+    --experiment-path \"$EXPR_PATH\" \
+    --repetitions 1,2,4,8,16,24,32,48,64,96,128 \
     --gen-policy greedy \
-    --offset 0 \
-    --prefix-length 500 \
-    --suffix-length "$suffix_length" \
-    --batch-size 1
+    --offset 100 \
+    --prefix-length $prefix_length \
+    --suffix-length 500 \
+    --batch-size 1"
+
+# Echo the command to stdout only
+echo "Executing command:" >&1
+echo "$CMD" >&1
+
+# Execute the command
+eval "$CMD"
 
 # Usage:
 # sbatch ./sparse-gutenberg-inference.slurm /iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_1984000

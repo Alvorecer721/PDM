@@ -4,8 +4,8 @@
 #SBATCH --account=a-a06
 #SBATCH --cpus-per-task=72
 #SBATCH --environment=nemo
-#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish%j.err
-#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish%j.out
+#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/pretrain/log-nemo-Goldfish%j.err
+#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/pretrain/log-nemo-Goldfish%j.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=sps_gut
 #SBATCH --nodes=15
@@ -26,24 +26,25 @@ export NEMO_TESTING=1
 # Training Configuration
 # ---------------------------------------------------
 num_epochs=1
+
 # num_train_samples=1984000 # Only Gutenberg repetition
 # num_train_samples=2023680 # FineWeb, Gutenberg 0.02:1
 # num_train_samples=2380800 # FineWeb, Gutenberg 0.2:1
-num_train_samples=3968000 # FineWeb, Gutenberg 1:1
+# num_train_samples=3968000 # FineWeb, Gutenberg 1:1
 # num_train_samples=5952000 # FineWeb, Gutenberg 2:1
 # num_train_samples=7936000 # FineWeb, Gutenberg 3:1
 # num_train_samples=9920000 # FineWeb, Gutenberg 4:1
-
-# num_train_samples=11971350 # Fineweb + Gutenberg
+# num_train_samples=11971350 # Fineweb + Gutenberg 2048
+num_train_samples=10200350 # Fineweb + Gutenberg 128
 
 num_gpus=$((SLURM_JOB_NUM_NODES * 4))
 micro_batch_size=1 # maximum micro-batch size that fits into GPU memory: 3
 global_batch_size=$((num_gpus * micro_batch_size))
 max_steps=$(echo "$num_train_samples / $global_batch_size" | bc)
 
-llama_param_size='8B'
+llama_param_size='3.6B'
 goldfish_loss=false
-goldfish_h=13
+goldfish_h=50
 goldfish_k=50
 
 case "$llama_param_size" in
@@ -126,7 +127,7 @@ srun --output /capstor/users/cscs/xyixuan/PDM/log/log-nemo-Goldfish%j.out --erro
   model.data.goldfish_h=${goldfish_h} \
   model.data.goldfish_k=${goldfish_k} \
   model.gc_interval=100 \
-  exp_manager.checkpoint_callback_params.every_n_train_steps=1613 \
+  exp_manager.checkpoint_callback_params.every_n_train_steps=15455 \
   trainer.max_steps=${max_steps} \
   ++exp_manager.wandb_logger_kwargs.name=$RUN_NAME-$SLURM_JOB_ID \
   ${RESUME_OPTION} 
