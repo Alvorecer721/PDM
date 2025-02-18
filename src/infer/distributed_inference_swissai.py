@@ -10,7 +10,7 @@ from datasets import load_dataset
 
 from distributed_inference_sparse import run
 from distributed_inference import batch_processing_gutenberg
-from utils import set_seed
+from utils import set_seed, is_rank_0
 
 def create_llama_config(args: Any) -> AutoConfig:
     """
@@ -23,25 +23,29 @@ def create_llama_config(args: Any) -> AutoConfig:
         AutoConfig: HuggingFace config object for LLaMA
     """
     # Print all arguments with aligned formatting
-    print("\nModel Arguments:")
-    print("=" * 80)
-    for key, value in vars(args).items():
-        # Convert value to string and handle long values
-        value_str = str(value)
-        if len(value_str) > 60:  # Break long values into multiple lines
-            # Format the first line
-            dots = "." * (50 - len(key))
-            print(f"{key}{dots}")
-            # Indent and print value on next line(s)
-            indent = " " * 20
-            while len(value_str) > 0:
-                print(f"{indent}{value_str[:60]}")
-                value_str = value_str[60:]
-        else:
-            # Format with dots and right-aligned value for shorter entries
-            dots = "." * (50 - len(key))
-            print(f"{key}{dots}{value_str:>30}")
-        
+    if is_rank_0():
+        used_args = {
+            'attention_dropout': args.attention_dropout,
+            'hidden_size': args.hidden_size,
+            'num_attention_heads': args.num_attention_heads,
+            'ffn_hidden_size': args.ffn_hidden_size,
+            'num_layers': args.num_layers,
+            'num_query_groups': args.num_query_groups,
+            'norm_epsilon': args.norm_epsilon,
+            'rope_scaling_factor': args.rope_scaling_factor,
+            'max_position_embeddings': args.max_position_embeddings,
+            'rotary_base': args.rotary_base,
+            'untie_embeddings_and_output_weights': args.untie_embeddings_and_output_weights,
+            'params_dtype': args.params_dtype,
+            'padded_vocab_size': args.padded_vocab_size
+        }
+
+        print("\nModel Arguments:")
+        print("=" * 90)
+        for key, value in used_args.items():
+            dots = "." * (60 - len(key))
+            print(f"{key}{dots}{str(value):>30}")
+    
     return AutoConfig.for_model(
         architectures=["LlamaForCausalLM"],
         attention_bias=False,
@@ -187,7 +191,7 @@ def convert_megatron_checkpoint_to_hf(checkpoint_path: str,
         map_location: Device to load the checkpoint to
         
     Returns:
-        Tuple of (converted_model, num_trainable_params)
+        converted_model
     """
     # Load the checkpoint
     checkpoint = torch.load(checkpoint_path, weights_only=False, map_location=map_location)
@@ -205,7 +209,8 @@ def convert_megatron_checkpoint_to_hf(checkpoint_path: str,
     model.load_state_dict(hf_dict)
     
     # Calculate trainable parameters
-    print(f"Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
+    if is_rank_0():
+        print(f"Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
     
     return model
 
