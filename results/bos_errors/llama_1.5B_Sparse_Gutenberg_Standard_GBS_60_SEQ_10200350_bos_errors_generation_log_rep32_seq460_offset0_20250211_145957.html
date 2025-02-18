@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+.container {
+    display: grid;
+    grid-template-columns: 50px 1fr 50px 1fr;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+.header {
+    padding: 8px;
+    background: #4a4a4a;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+.line-numbers {
+    padding: 0 8px;
+    text-align: right;
+    background: #e0e0e0;
+    color: #666;
+    white-space: pre;
+    align-self: stretch;
+}
+.content {
+    padding: 0 8px;
+    white-space: pre;
+    overflow-x: auto;
+    background: white;
+    align-self: stretch;
+}
+.equal { color: #333; }
+.delete { background: #ffeef0; }
+.insert { background: #e6ffed; }
+.contributing { background: #fff3cd; }
+.non-contributing { color: #999; }
+.tabs {
+    display: flex;
+    margin-bottom: 1rem;
+}
+.tab {
+    padding: 8px 16px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #f8f9fa;
+    margin-right: 4px;
+}
+.tab.active {
+    background: #fff;
+    border-bottom: none;
+}
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
+.score {
+    font-size: 16px;
+    margin: 1rem 0;
+    padding: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+</style>
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+    </script>
+</head>
+<body>
+    <h2>Generation Log - llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_10200350_bos_errors</h2>
+    <h3>Repetition 32, Sequence 460, Offset 0</h3>
+    <div class="tabs">
+        <button class="tab active" id="diff-tab" onclick="switchTab('diff')">Diff View</button>
+        <button class="tab" id="rouge-tab" onclick="switchTab('rouge')">Rouge-L View</button>
+    </div>
+    <div id="diff" class="tab-content active">
+        <div class="container">
+            <div class="header">Line</div>
+            <div class="header">True Sequence</div>
+            <div class="header">Line</div>
+            <div class="header">Model Generation</div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</div>
+            <div class="content"><span class="equal"> and the grace and finish of her art, is
+entitled to rank with the foremost soubrettes on the American stage.
+Miss Earle's ability has been tested in many forms of the drama. She has
+appeared in light opera, in extravaganza, in musical comedy, and in the
+Shakespearian drama. I question if there is another in her line now
+before the public who can claim any such extensive experience.
+
+  [Illustration: VIRGINIA EARLE
+  As</span><span class="delete"> Winnifred Grey in "A Runaway Girl."]
+
+It would be strange if this diversified endeavor had not had its effect
+on her art. In her we find united with a personality of curiously subtle
+charm an authority in action that is restful and refreshing. In her
+presentation of a part there is neither hesitancy nor misplaced
+endeavor. She always has command of herself and of the rôle that she is
+portraying. One never for a moment feels that she is to the slightest
+degree uncertain as regards the effect that she will produce on her
+audience. She knows what to do and how to do it.
+
+Yet, when one stops to think of it, her power over her audience is far
+in excess of what one would naturally expect. Miss Earle is by no means
+impressive in her stage presence. She cannot be called beautiful. Her
+singing voice is a modest instrument, though a wonderfully expressive
+one, it must be acknowledged. Her acting is quiet, even unassuming, but
+it is also plain, easily comprehended, and always appropriate. She
+apparently never does anything to attract attention, yet attention
+rarely fails to be centred on her. This, of course, is due to the finish
+of her art and a fine technique that makes its presence felt by its
+seeming absence.
+
+If Miss Earle cannot justly claim any exceptional advantages in the
+matter of physical beauty, she certainly has the greater advantage of an
+intensely magnetic personality. Her individuality, too, is thoroughly
+distinct. It is one of the paradoxes of acting that the more distinct
+the artist's individuality, the greater is his ability to set apart one
+from another the characters which he assumes. Miss Earle has this talent
+for making each one of her rôles a separate and distinct personage to a
+greater degree than any of her associates</span></div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</div>
+            <div class="content"><span class="equal"> and the grace and finish of her art, is
+entitled to rank with the foremost soubrettes on the American stage.
+Miss Earle's ability has been tested in many forms of the drama. She has
+appeared in light opera, in extravaganza, in musical comedy, and in the
+Shakespearian drama. I question if there is another in her line now
+before the public who can claim any such extensive experience.
+
+  [Illustration: VIRGINIA EARLE
+  As</span><span class="insert"> Katherine in "A Midsummer Nigh unto the Sea."]
+
+When Virginia Earle was born in East Hampton, New York, on May 7,
+1788, a portion of the original ten acres which had come with her
+father's purchase of the town of Hempstead went by way of a patent to
+her grandfather, the late James Earle. In the account of the history of
+Hempstead as given in "The Open Air" (1854), below stairs, Miss Earle was
+met by&lt;|begin_of_text|&gt; surprise, and, like all children, was for a long time terribly
+exhausted from her efforts at school. But, happily, James, the only
+proprietor of the farm, was patient with these early losses, and set
+about providing for her education. He left six children,--James, Mary
+(who died), Joseph, John (bought at an auction for 12 years ago), Jane,
+then Robin, and Katherine. To Mary was assigned the care of Mr. and Mrs.
+Earle, and while she was still a child she was brought into direct
+contact with the family.
+
+She was not long content with assisting her mother in the home, however,
+but went to school in the district school, where she was taught by private
+inquirers that the real adults who lived there were also teachers, and
+that she ought to like them. In her account of these teachers in "The
+Open Air" (1855), Miss Earle is flattered by the testimony of her
+admiring friends that she "gained a thorough education." Her education was
+in two parts. The first was devoted to a course in the works of the
+schoolmaster of the place; the second was English; and, if I am
+correctly informed, was taught with the best possible style and
+materials by Mr. Earle, whose school it was. In New York, which</span></div>
+        </div>
+    </div>
+    <div id="rouge" class="tab-content">
+        <div class="score">Rouge-L Score: 0.3400</div>
+        <div class="container">
+            <div class="header">Line</div>
+            <div class="header">True Sequence</div>
+            <div class="header">Line</div>
+            <div class="header">Model Generation</div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</div>
+            <div class="content"><span class="contributing"> and</span><span class="contributing"> the</span><span class="contributing"> grace</span><span class="contributing"> and</span><span class="contributing"> finish</span><span class="contributing"> of</span><span class="contributing"> her</span><span class="contributing"> art</span><span class="contributing">,</span><span class="contributing"> is</span><span class="contributing">
+</span><span class="contributing">ent</span><span class="contributing">itled</span><span class="contributing"> to</span><span class="contributing"> rank</span><span class="contributing"> with</span><span class="contributing"> the</span><span class="contributing"> foremost</span><span class="contributing"> s</span><span class="contributing">oub</span><span class="contributing">ret</span><span class="contributing">tes</span><span class="contributing"> on</span><span class="contributing"> the</span><span class="contributing"> American</span><span class="contributing"> stage</span><span class="contributing">.
+</span><span class="contributing">Miss</span><span class="contributing"> Ear</span><span class="contributing">le</span><span class="contributing">'s</span><span class="contributing"> ability</span><span class="contributing"> has</span><span class="contributing"> been</span><span class="contributing"> tested</span><span class="contributing"> in</span><span class="contributing"> many</span><span class="contributing"> forms</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="contributing"> drama</span><span class="contributing">.</span><span class="contributing"> She</span><span class="contributing"> has</span><span class="contributing">
+</span><span class="contributing">appeared</span><span class="contributing"> in</span><span class="contributing"> light</span><span class="contributing"> opera</span><span class="contributing">,</span><span class="contributing"> in</span><span class="contributing"> extrav</span><span class="contributing">agan</span><span class="contributing">za</span><span class="contributing">,</span><span class="contributing"> in</span><span class="contributing"> musical</span><span class="contributing"> comedy</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing"> in</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="contributing">Sh</span><span class="contributing">akes</span><span class="contributing">pear</span><span class="contributing">ian</span><span class="contributing"> drama</span><span class="contributing">.</span><span class="contributing"> I</span><span class="contributing"> question</span><span class="contributing"> if</span><span class="contributing"> there</span><span class="contributing"> is</span><span class="contributing"> another</span><span class="contributing"> in</span><span class="contributing"> her</span><span class="contributing"> line</span><span class="contributing"> now</span><span class="contributing">
+</span><span class="contributing">before</span><span class="contributing"> the</span><span class="contributing"> public</span><span class="contributing"> who</span><span class="contributing"> can</span><span class="contributing"> claim</span><span class="contributing"> any</span><span class="contributing"> such</span><span class="contributing"> extensive</span><span class="contributing"> experience</span><span class="contributing">.
+
+</span><span class="contributing"> </span><span class="contributing"> [</span><span class="contributing">Illustr</span><span class="contributing">ation</span><span class="contributing">:</span><span class="contributing"> VIR</span><span class="contributing">GIN</span><span class="contributing">IA</span><span class="contributing"> EAR</span><span class="contributing">LE</span><span class="contributing">
+</span><span class="contributing"> </span><span class="contributing"> As</span><span class="non-contributing"> Winn</span><span class="non-contributing">if</span><span class="non-contributing">red</span><span class="non-contributing"> Grey</span><span class="contributing"> in</span><span class="contributing"> "</span><span class="contributing">A</span><span class="non-contributing"> Run</span><span class="non-contributing">away</span><span class="non-contributing"> Girl</span><span class="contributing">."</span><span class="contributing">]
+
+</span><span class="non-contributing">It</span><span class="non-contributing"> would</span><span class="non-contributing"> be</span><span class="non-contributing"> strange</span><span class="non-contributing"> if</span><span class="non-contributing"> this</span><span class="non-contributing"> diversified</span><span class="non-contributing"> endeavor</span><span class="contributing"> had</span><span class="non-contributing"> not</span><span class="non-contributing"> had</span><span class="non-contributing"> its</span><span class="non-contributing"> effect</span><span class="non-contributing">
+</span><span class="non-contributing">on</span><span class="non-contributing"> her</span><span class="non-contributing"> art</span><span class="non-contributing">.</span><span class="non-contributing"> In</span><span class="non-contributing"> her</span><span class="non-contributing"> we</span><span class="non-contributing"> find</span><span class="non-contributing"> united</span><span class="contributing"> with</span><span class="non-contributing"> a</span><span class="non-contributing"> personality</span><span class="non-contributing"> of</span><span class="non-contributing"> cur</span><span class="non-contributing">iously</span><span class="non-contributing"> subtle</span><span class="non-contributing">
+</span><span class="non-contributing">charm</span><span class="non-contributing"> an</span><span class="non-contributing"> authority</span><span class="non-contributing"> in</span><span class="non-contributing"> action</span><span class="non-contributing"> that</span><span class="non-contributing"> is</span><span class="non-contributing"> rest</span><span class="non-contributing">ful</span><span class="non-contributing"> and</span><span class="non-contributing"> refreshing</span><span class="non-contributing">.</span><span class="non-contributing"> In</span><span class="contributing"> her</span><span class="contributing">
+</span><span class="non-contributing">presentation</span><span class="contributing"> of</span><span class="non-contributing"> a</span><span class="non-contributing"> part</span><span class="non-contributing"> there</span><span class="non-contributing"> is</span><span class="non-contributing"> neither</span><span class="non-contributing"> hes</span><span class="non-contributing">it</span><span class="non-contributing">ancy</span><span class="non-contributing"> nor</span><span class="non-contributing"> misplaced</span><span class="non-contributing">
+</span><span class="non-contributing">ende</span><span class="non-contributing">avor</span><span class="non-contributing">.</span><span class="non-contributing"> She</span><span class="non-contributing"> always</span><span class="non-contributing"> has</span><span class="non-contributing"> command</span><span class="contributing"> of</span><span class="non-contributing"> herself</span><span class="non-contributing"> and</span><span class="contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> r</span><span class="non-contributing">ôle</span><span class="non-contributing"> that</span><span class="non-contributing"> she</span><span class="non-contributing"> is</span><span class="non-contributing">
+</span><span class="non-contributing">port</span><span class="non-contributing">ray</span><span class="non-contributing">ing</span><span class="non-contributing">.</span><span class="non-contributing"> One</span><span class="non-contributing"> never</span><span class="non-contributing"> for</span><span class="contributing"> a</span><span class="non-contributing"> moment</span><span class="non-contributing"> feels</span><span class="non-contributing"> that</span><span class="non-contributing"> she</span><span class="non-contributing"> is</span><span class="contributing"> to</span><span class="non-contributing"> the</span><span class="non-contributing"> slightest</span><span class="contributing">
+</span><span class="non-contributing">degree</span><span class="non-contributing"> uncertain</span><span class="non-contributing"> as</span><span class="non-contributing"> regards</span><span class="contributing"> the</span><span class="non-contributing"> effect</span><span class="non-contributing"> that</span><span class="non-contributing"> she</span><span class="non-contributing"> will</span><span class="non-contributing"> produce</span><span class="non-contributing"> on</span><span class="non-contributing"> her</span><span class="non-contributing">
+</span><span class="non-contributing">aud</span><span class="non-contributing">ience</span><span class="contributing">.</span><span class="non-contributing"> She</span><span class="non-contributing"> knows</span><span class="non-contributing"> what</span><span class="non-contributing"> to</span><span class="non-contributing"> do</span><span class="non-contributing"> and</span><span class="non-contributing"> how</span><span class="non-contributing"> to</span><span class="non-contributing"> do</span><span class="non-contributing"> it</span><span class="non-contributing">.
+
+</span><span class="non-contributing">Yet</span><span class="non-contributing">,</span><span class="non-contributing"> when</span><span class="non-contributing"> one</span><span class="non-contributing"> stops</span><span class="non-contributing"> to</span><span class="non-contributing"> think</span><span class="contributing"> of</span><span class="non-contributing"> it</span><span class="contributing">,</span><span class="non-contributing"> her</span><span class="non-contributing"> power</span><span class="non-contributing"> over</span><span class="non-contributing"> her</span><span class="non-contributing"> audience</span><span class="non-contributing"> is</span><span class="non-contributing"> far</span><span class="non-contributing">
+</span><span class="non-contributing">in</span><span class="non-contributing"> excess</span><span class="non-contributing"> of</span><span class="non-contributing"> what</span><span class="non-contributing"> one</span><span class="non-contributing"> would</span><span class="non-contributing"> naturally</span><span class="non-contributing"> expect</span><span class="non-contributing">.</span><span class="contributing"> Miss</span><span class="contributing"> Ear</span><span class="contributing">le</span><span class="non-contributing"> is</span><span class="contributing"> by</span><span class="non-contributing"> no</span><span class="non-contributing"> means</span><span class="contributing">
+</span><span class="non-contributing">im</span><span class="non-contributing">pressive</span><span class="non-contributing"> in</span><span class="contributing"> her</span><span class="non-contributing"> stage</span><span class="non-contributing"> presence</span><span class="contributing">.</span><span class="non-contributing"> She</span><span class="non-contributing"> cannot</span><span class="non-contributing"> be</span><span class="non-contributing"> called</span><span class="non-contributing"> beautiful</span><span class="non-contributing">.</span><span class="non-contributing"> Her</span><span class="contributing">
+</span><span class="non-contributing">s</span><span class="non-contributing">inging</span><span class="non-contributing"> voice</span><span class="non-contributing"> is</span><span class="non-contributing"> a</span><span class="non-contributing"> modest</span><span class="non-contributing"> instrument</span><span class="contributing">,</span><span class="non-contributing"> though</span><span class="non-contributing"> a</span><span class="non-contributing"> wonderfully</span><span class="non-contributing"> expressive</span><span class="contributing">
+</span><span class="non-contributing">one</span><span class="non-contributing">,</span><span class="non-contributing"> it</span><span class="non-contributing"> must</span><span class="non-contributing"> be</span><span class="non-contributing"> acknowledged</span><span class="contributing">.</span><span class="non-contributing"> Her</span><span class="non-contributing"> acting</span><span class="non-contributing"> is</span><span class="non-contributing"> quiet</span><span class="contributing">,</span><span class="non-contributing"> even</span><span class="non-contributing"> un</span><span class="non-contributing">assuming</span><span class="contributing">,</span><span class="non-contributing"> but</span><span class="contributing">
+</span><span class="non-contributing">it</span><span class="non-contributing"> is</span><span class="non-contributing"> also</span><span class="non-contributing"> plain</span><span class="contributing">,</span><span class="non-contributing"> easily</span><span class="non-contributing"> compreh</span><span class="non-contributing">ended</span><span class="contributing">,</span><span class="contributing"> and</span><span class="non-contributing"> always</span><span class="non-contributing"> appropriate</span><span class="contributing">.</span><span class="non-contributing"> She</span><span class="non-contributing">
+</span><span class="non-contributing">app</span><span class="non-contributing">arently</span><span class="non-contributing"> never</span><span class="non-contributing"> does</span><span class="non-contributing"> anything</span><span class="non-contributing"> to</span><span class="non-contributing"> attract</span><span class="non-contributing"> attention</span><span class="contributing">,</span><span class="non-contributing"> yet</span><span class="non-contributing"> attention</span><span class="contributing">
+</span><span class="non-contributing">r</span><span class="non-contributing">are</span><span class="non-contributing">ly</span><span class="non-contributing"> fails</span><span class="non-contributing"> to</span><span class="non-contributing"> be</span><span class="non-contributing"> cent</span><span class="non-contributing">red</span><span class="non-contributing"> on</span><span class="contributing"> her</span><span class="non-contributing">.</span><span class="non-contributing"> This</span><span class="contributing">,</span><span class="non-contributing"> of</span><span class="non-contributing"> course</span><span class="contributing">,</span><span class="non-contributing"> is</span><span class="non-contributing"> due</span><span class="non-contributing"> to</span><span class="contributing"> the</span><span class="non-contributing"> finish</span><span class="contributing">
+</span><span class="non-contributing">of</span><span class="contributing"> her</span><span class="non-contributing"> art</span><span class="non-contributing"> and</span><span class="non-contributing"> a</span><span class="non-contributing"> fine</span><span class="non-contributing"> technique</span><span class="non-contributing"> that</span><span class="non-contributing"> makes</span><span class="non-contributing"> its</span><span class="non-contributing"> presence</span><span class="non-contributing"> felt</span><span class="non-contributing"> by</span><span class="non-contributing"> its</span><span class="contributing">
+</span><span class="non-contributing">se</span><span class="non-contributing">eming</span><span class="non-contributing"> absence</span><span class="non-contributing">.
+
+</span><span class="non-contributing">If</span><span class="contributing"> Miss</span><span class="contributing"> Ear</span><span class="contributing">le</span><span class="non-contributing"> cannot</span><span class="non-contributing"> just</span><span class="non-contributing">ly</span><span class="non-contributing"> claim</span><span class="non-contributing"> any</span><span class="non-contributing"> exceptional</span><span class="non-contributing"> advantages</span><span class="non-contributing"> in</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">matter</span><span class="non-contributing"> of</span><span class="non-contributing"> physical</span><span class="non-contributing"> beauty</span><span class="non-contributing">,</span><span class="contributing"> she</span><span class="non-contributing"> certainly</span><span class="non-contributing"> has</span><span class="non-contributing"> the</span><span class="non-contributing"> greater</span><span class="non-contributing"> advantage</span><span class="non-contributing"> of</span><span class="non-contributing"> an</span><span class="non-contributing">
+</span><span class="non-contributing">int</span><span class="non-contributing">ensely</span><span class="non-contributing"> magnetic</span><span class="non-contributing"> personality</span><span class="non-contributing">.</span><span class="contributing"> Her</span><span class="non-contributing"> individual</span><span class="non-contributing">ity</span><span class="non-contributing">,</span><span class="non-contributing"> too</span><span class="non-contributing">,</span><span class="non-contributing"> is</span><span class="non-contributing"> thoroughly</span><span class="contributing">
+</span><span class="non-contributing">distinct</span><span class="contributing">.</span><span class="non-contributing"> It</span><span class="non-contributing"> is</span><span class="non-contributing"> one</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> paradox</span><span class="non-contributing">es</span><span class="contributing"> of</span><span class="non-contributing"> acting</span><span class="non-contributing"> that</span><span class="contributing"> the</span><span class="non-contributing"> more</span><span class="non-contributing"> distinct</span><span class="contributing">
+</span><span class="non-contributing">the</span><span class="non-contributing"> artist</span><span class="non-contributing">'s</span><span class="non-contributing"> individual</span><span class="non-contributing">ity</span><span class="contributing">,</span><span class="contributing"> the</span><span class="non-contributing"> greater</span><span class="non-contributing"> is</span><span class="non-contributing"> his</span><span class="non-contributing"> ability</span><span class="non-contributing"> to</span><span class="non-contributing"> set</span><span class="non-contributing"> apart</span><span class="non-contributing"> one</span><span class="contributing">
+</span><span class="non-contributing">from</span><span class="non-contributing"> another</span><span class="non-contributing"> the</span><span class="non-contributing"> characters</span><span class="non-contributing"> which</span><span class="non-contributing"> he</span><span class="non-contributing"> assumes</span><span class="contributing">.</span><span class="non-contributing"> Miss</span><span class="contributing"> Ear</span><span class="contributing">le</span><span class="non-contributing"> has</span><span class="non-contributing"> this</span><span class="non-contributing"> talent</span><span class="non-contributing">
+</span><span class="non-contributing">for</span><span class="non-contributing"> making</span><span class="non-contributing"> each</span><span class="non-contributing"> one</span><span class="non-contributing"> of</span><span class="non-contributing"> her</span><span class="non-contributing"> r</span><span class="non-contributing">ô</span><span class="non-contributing">les</span><span class="non-contributing"> a</span><span class="non-contributing"> separate</span><span class="non-contributing"> and</span><span class="non-contributing"> distinct</span><span class="non-contributing"> person</span><span class="non-contributing">age</span><span class="non-contributing"> to</span><span class="non-contributing"> a</span><span class="non-contributing">
+</span><span class="non-contributing">greater</span><span class="non-contributing"> degree</span><span class="non-contributing"> than</span><span class="non-contributing"> any</span><span class="non-contributing"> of</span><span class="non-contributing"> her</span><span class="non-contributing"> associates</span></div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</div>
+            <div class="content"><span class="contributing"> and</span><span class="contributing"> the</span><span class="contributing"> grace</span><span class="contributing"> and</span><span class="contributing"> finish</span><span class="contributing"> of</span><span class="contributing"> her</span><span class="contributing"> art</span><span class="contributing">,</span><span class="contributing"> is</span><span class="contributing">
+</span><span class="contributing">ent</span><span class="contributing">itled</span><span class="contributing"> to</span><span class="contributing"> rank</span><span class="contributing"> with</span><span class="contributing"> the</span><span class="contributing"> foremost</span><span class="contributing"> s</span><span class="contributing">oub</span><span class="contributing">ret</span><span class="contributing">tes</span><span class="contributing"> on</span><span class="contributing"> the</span><span class="contributing"> American</span><span class="contributing"> stage</span><span class="contributing">.
+</span><span class="contributing">Miss</span><span class="contributing"> Ear</span><span class="contributing">le</span><span class="contributing">'s</span><span class="contributing"> ability</span><span class="contributing"> has</span><span class="contributing"> been</span><span class="contributing"> tested</span><span class="contributing"> in</span><span class="contributing"> many</span><span class="contributing"> forms</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="contributing"> drama</span><span class="contributing">.</span><span class="contributing"> She</span><span class="contributing"> has</span><span class="contributing">
+</span><span class="contributing">appeared</span><span class="contributing"> in</span><span class="contributing"> light</span><span class="contributing"> opera</span><span class="contributing">,</span><span class="contributing"> in</span><span class="contributing"> extrav</span><span class="contributing">agan</span><span class="contributing">za</span><span class="contributing">,</span><span class="contributing"> in</span><span class="contributing"> musical</span><span class="contributing"> comedy</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing"> in</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="contributing">Sh</span><span class="contributing">akes</span><span class="contributing">pear</span><span class="contributing">ian</span><span class="contributing"> drama</span><span class="contributing">.</span><span class="contributing"> I</span><span class="contributing"> question</span><span class="contributing"> if</span><span class="contributing"> there</span><span class="contributing"> is</span><span class="contributing"> another</span><span class="contributing"> in</span><span class="contributing"> her</span><span class="contributing"> line</span><span class="contributing"> now</span><span class="contributing">
+</span><span class="contributing">before</span><span class="contributing"> the</span><span class="contributing"> public</span><span class="contributing"> who</span><span class="contributing"> can</span><span class="contributing"> claim</span><span class="contributing"> any</span><span class="contributing"> such</span><span class="contributing"> extensive</span><span class="contributing"> experience</span><span class="contributing">.
+
+</span><span class="contributing"> </span><span class="contributing"> [</span><span class="contributing">Illustr</span><span class="contributing">ation</span><span class="contributing">:</span><span class="contributing"> VIR</span><span class="contributing">GIN</span><span class="contributing">IA</span><span class="contributing"> EAR</span><span class="contributing">LE</span><span class="contributing">
+</span><span class="contributing"> </span><span class="contributing"> As</span><span class="non-contributing"> Katherine</span><span class="contributing"> in</span><span class="contributing"> "</span><span class="contributing">A</span><span class="non-contributing"> Mid</span><span class="non-contributing">summer</span><span class="non-contributing"> N</span><span class="non-contributing">igh</span><span class="non-contributing"> unto</span><span class="non-contributing"> the</span><span class="non-contributing"> Sea</span><span class="contributing">."</span><span class="contributing">]
+
+</span><span class="non-contributing">When</span><span class="non-contributing"> Virginia</span><span class="non-contributing"> Ear</span><span class="non-contributing">le</span><span class="non-contributing"> was</span><span class="non-contributing"> born</span><span class="non-contributing"> in</span><span class="non-contributing"> East</span><span class="non-contributing"> Hampton</span><span class="non-contributing">,</span><span class="non-contributing"> New</span><span class="non-contributing"> York</span><span class="non-contributing">,</span><span class="non-contributing"> on</span><span class="non-contributing"> May</span><span class="non-contributing"> </span><span class="non-contributing">7</span><span class="non-contributing">,
+</span><span class="non-contributing">178</span><span class="non-contributing">8</span><span class="non-contributing">,</span><span class="non-contributing"> a</span><span class="non-contributing"> portion</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> original</span><span class="non-contributing"> ten</span><span class="non-contributing"> acres</span><span class="non-contributing"> which</span><span class="contributing"> had</span><span class="non-contributing"> come</span><span class="contributing"> with</span><span class="contributing"> her</span><span class="contributing">
+</span><span class="non-contributing">father</span><span class="non-contributing">'s</span><span class="non-contributing"> purchase</span><span class="contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> town</span><span class="contributing"> of</span><span class="non-contributing"> Hemp</span><span class="non-contributing">stead</span><span class="non-contributing"> went</span><span class="non-contributing"> by</span><span class="non-contributing"> way</span><span class="contributing"> of</span><span class="contributing"> a</span><span class="non-contributing"> patent</span><span class="contributing"> to</span><span class="contributing">
+</span><span class="non-contributing">her</span><span class="non-contributing"> grandfather</span><span class="non-contributing">,</span><span class="contributing"> the</span><span class="non-contributing"> late</span><span class="non-contributing"> James</span><span class="non-contributing"> Ear</span><span class="non-contributing">le</span><span class="contributing">.</span><span class="non-contributing"> In</span><span class="non-contributing"> the</span><span class="non-contributing"> account</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> history</span><span class="contributing"> of</span><span class="non-contributing">
+</span><span class="non-contributing">H</span><span class="non-contributing">emp</span><span class="non-contributing">stead</span><span class="non-contributing"> as</span><span class="non-contributing"> given</span><span class="non-contributing"> in</span><span class="non-contributing"> "</span><span class="non-contributing">The</span><span class="non-contributing"> Open</span><span class="non-contributing"> Air</span><span class="non-contributing">"</span><span class="non-contributing"> (</span><span class="non-contributing">185</span><span class="non-contributing">4</span><span class="non-contributing">),</span><span class="non-contributing"> below</span><span class="non-contributing"> stairs</span><span class="contributing">,</span><span class="contributing"> Miss</span><span class="contributing"> Ear</span><span class="contributing">le</span><span class="non-contributing"> was</span><span class="non-contributing">
+</span><span class="non-contributing">met</span><span class="contributing"> by</span><span class="non-contributing">&lt;|begin_of_text|&gt;</span><span class="non-contributing"> surprise</span><span class="non-contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing">,</span><span class="non-contributing"> like</span><span class="non-contributing"> all</span><span class="non-contributing"> children</span><span class="non-contributing">,</span><span class="non-contributing"> was</span><span class="non-contributing"> for</span><span class="non-contributing"> a</span><span class="non-contributing"> long</span><span class="non-contributing"> time</span><span class="non-contributing"> terribly</span><span class="contributing">
+</span><span class="non-contributing">ex</span><span class="non-contributing">haust</span><span class="non-contributing">ed</span><span class="non-contributing"> from</span><span class="contributing"> her</span><span class="non-contributing"> efforts</span><span class="non-contributing"> at</span><span class="non-contributing"> school</span><span class="contributing">.</span><span class="non-contributing"> But</span><span class="non-contributing">,</span><span class="non-contributing"> happily</span><span class="non-contributing">,</span><span class="non-contributing"> James</span><span class="non-contributing">,</span><span class="non-contributing"> the</span><span class="non-contributing"> only</span><span class="contributing">
+</span><span class="non-contributing">prop</span><span class="non-contributing">riet</span><span class="non-contributing">or</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> farm</span><span class="non-contributing">,</span><span class="non-contributing"> was</span><span class="non-contributing"> patient</span><span class="non-contributing"> with</span><span class="non-contributing"> these</span><span class="non-contributing"> early</span><span class="non-contributing"> losses</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> set</span><span class="contributing">
+</span><span class="non-contributing">about</span><span class="non-contributing"> providing</span><span class="non-contributing"> for</span><span class="non-contributing"> her</span><span class="non-contributing"> education</span><span class="contributing">.</span><span class="non-contributing"> He</span><span class="non-contributing"> left</span><span class="non-contributing"> six</span><span class="non-contributing"> children</span><span class="contributing">,</span><span class="non-contributing">--</span><span class="non-contributing">James</span><span class="contributing">,</span><span class="non-contributing"> Mary</span><span class="contributing">
+</span><span class="non-contributing">(</span><span class="non-contributing">who</span><span class="non-contributing"> died</span><span class="non-contributing">),</span><span class="non-contributing"> Joseph</span><span class="contributing">,</span><span class="non-contributing"> John</span><span class="non-contributing"> (</span><span class="non-contributing">b</span><span class="non-contributing">ought</span><span class="non-contributing"> at</span><span class="non-contributing"> an</span><span class="non-contributing"> auction</span><span class="non-contributing"> for</span><span class="non-contributing"> </span><span class="non-contributing">12</span><span class="non-contributing"> years</span><span class="non-contributing"> ago</span><span class="non-contributing">),</span><span class="non-contributing"> Jane</span><span class="non-contributing">,
+</span><span class="non-contributing">then</span><span class="non-contributing"> Robin</span><span class="contributing">,</span><span class="contributing"> and</span><span class="non-contributing"> Katherine</span><span class="non-contributing">.</span><span class="non-contributing"> To</span><span class="non-contributing"> Mary</span><span class="non-contributing"> was</span><span class="non-contributing"> assigned</span><span class="non-contributing"> the</span><span class="non-contributing"> care</span><span class="non-contributing"> of</span><span class="non-contributing"> Mr</span><span class="contributing">.</span><span class="non-contributing"> and</span><span class="non-contributing"> Mrs</span><span class="non-contributing">.
+</span><span class="non-contributing">Ear</span><span class="non-contributing">le</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> while</span><span class="non-contributing"> she</span><span class="non-contributing"> was</span><span class="non-contributing"> still</span><span class="non-contributing"> a</span><span class="non-contributing"> child</span><span class="non-contributing"> she</span><span class="non-contributing"> was</span><span class="non-contributing"> brought</span><span class="non-contributing"> into</span><span class="non-contributing"> direct</span><span class="contributing">
+</span><span class="non-contributing">contact</span><span class="non-contributing"> with</span><span class="non-contributing"> the</span><span class="non-contributing"> family</span><span class="non-contributing">.
+
+</span><span class="non-contributing">She</span><span class="non-contributing"> was</span><span class="non-contributing"> not</span><span class="non-contributing"> long</span><span class="non-contributing"> content</span><span class="non-contributing"> with</span><span class="non-contributing"> assisting</span><span class="contributing"> her</span><span class="non-contributing"> mother</span><span class="non-contributing"> in</span><span class="non-contributing"> the</span><span class="non-contributing"> home</span><span class="contributing">,</span><span class="non-contributing"> however</span><span class="non-contributing">,
+</span><span class="non-contributing">but</span><span class="non-contributing"> went</span><span class="non-contributing"> to</span><span class="non-contributing"> school</span><span class="non-contributing"> in</span><span class="non-contributing"> the</span><span class="non-contributing"> district</span><span class="non-contributing"> school</span><span class="contributing">,</span><span class="non-contributing"> where</span><span class="non-contributing"> she</span><span class="non-contributing"> was</span><span class="non-contributing"> taught</span><span class="non-contributing"> by</span><span class="non-contributing"> private</span><span class="non-contributing">
+</span><span class="non-contributing">in</span><span class="non-contributing">quir</span><span class="non-contributing">ers</span><span class="non-contributing"> that</span><span class="contributing"> the</span><span class="non-contributing"> real</span><span class="non-contributing"> adults</span><span class="non-contributing"> who</span><span class="non-contributing"> lived</span><span class="non-contributing"> there</span><span class="non-contributing"> were</span><span class="non-contributing"> also</span><span class="non-contributing"> teachers</span><span class="non-contributing">,</span><span class="non-contributing"> and</span><span class="contributing">
+</span><span class="non-contributing">that</span><span class="non-contributing"> she</span><span class="non-contributing"> ought</span><span class="non-contributing"> to</span><span class="non-contributing"> like</span><span class="non-contributing"> them</span><span class="non-contributing">.</span><span class="non-contributing"> In</span><span class="contributing"> her</span><span class="non-contributing"> account</span><span class="non-contributing"> of</span><span class="non-contributing"> these</span><span class="non-contributing"> teachers</span><span class="non-contributing"> in</span><span class="non-contributing"> "</span><span class="non-contributing">The</span><span class="contributing">
+</span><span class="non-contributing">Open</span><span class="non-contributing"> Air</span><span class="non-contributing">"</span><span class="non-contributing"> (</span><span class="non-contributing">185</span><span class="non-contributing">5</span><span class="non-contributing">),</span><span class="contributing"> Miss</span><span class="contributing"> Ear</span><span class="contributing">le</span><span class="non-contributing"> is</span><span class="non-contributing"> fl</span><span class="non-contributing">attered</span><span class="non-contributing"> by</span><span class="contributing"> the</span><span class="non-contributing"> testimony</span><span class="non-contributing"> of</span><span class="non-contributing"> her</span><span class="contributing">
+</span><span class="non-contributing">adm</span><span class="non-contributing">iring</span><span class="non-contributing"> friends</span><span class="non-contributing"> that</span><span class="contributing"> she</span><span class="non-contributing"> "</span><span class="non-contributing">g</span><span class="non-contributing">ained</span><span class="non-contributing"> a</span><span class="non-contributing"> thorough</span><span class="non-contributing"> education</span><span class="non-contributing">."</span><span class="contributing"> Her</span><span class="non-contributing"> education</span><span class="non-contributing"> was</span><span class="contributing">
+</span><span class="non-contributing">in</span><span class="non-contributing"> two</span><span class="non-contributing"> parts</span><span class="contributing">.</span><span class="non-contributing"> The</span><span class="non-contributing"> first</span><span class="non-contributing"> was</span><span class="non-contributing"> devoted</span><span class="non-contributing"> to</span><span class="non-contributing"> a</span><span class="non-contributing"> course</span><span class="non-contributing"> in</span><span class="non-contributing"> the</span><span class="non-contributing"> works</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing">
+</span><span class="non-contributing">school</span><span class="non-contributing">master</span><span class="contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> place</span><span class="non-contributing">;</span><span class="contributing"> the</span><span class="non-contributing"> second</span><span class="non-contributing"> was</span><span class="non-contributing"> English</span><span class="non-contributing">;</span><span class="non-contributing"> and</span><span class="non-contributing">,</span><span class="non-contributing"> if</span><span class="non-contributing"> I</span><span class="non-contributing"> am</span><span class="contributing">
+</span><span class="non-contributing">correct</span><span class="non-contributing">ly</span><span class="non-contributing"> informed</span><span class="contributing">,</span><span class="non-contributing"> was</span><span class="non-contributing"> taught</span><span class="non-contributing"> with</span><span class="contributing"> the</span><span class="non-contributing"> best</span><span class="non-contributing"> possible</span><span class="non-contributing"> style</span><span class="non-contributing"> and</span><span class="contributing">
+</span><span class="non-contributing">materials</span><span class="non-contributing"> by</span><span class="non-contributing"> Mr</span><span class="contributing">.</span><span class="contributing"> Ear</span><span class="contributing">le</span><span class="non-contributing">,</span><span class="non-contributing"> whose</span><span class="non-contributing"> school</span><span class="non-contributing"> it</span><span class="non-contributing"> was</span><span class="non-contributing">.</span><span class="non-contributing"> In</span><span class="non-contributing"> New</span><span class="non-contributing"> York</span><span class="non-contributing">,</span><span class="non-contributing"> which</span></div>
+        </div>
+    </div>
+</body>
+</html>

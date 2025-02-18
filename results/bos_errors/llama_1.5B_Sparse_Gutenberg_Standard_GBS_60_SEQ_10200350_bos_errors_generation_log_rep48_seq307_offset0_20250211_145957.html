@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+.container {
+    display: grid;
+    grid-template-columns: 50px 1fr 50px 1fr;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+.header {
+    padding: 8px;
+    background: #4a4a4a;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+.line-numbers {
+    padding: 0 8px;
+    text-align: right;
+    background: #e0e0e0;
+    color: #666;
+    white-space: pre;
+    align-self: stretch;
+}
+.content {
+    padding: 0 8px;
+    white-space: pre;
+    overflow-x: auto;
+    background: white;
+    align-self: stretch;
+}
+.equal { color: #333; }
+.delete { background: #ffeef0; }
+.insert { background: #e6ffed; }
+.contributing { background: #fff3cd; }
+.non-contributing { color: #999; }
+.tabs {
+    display: flex;
+    margin-bottom: 1rem;
+}
+.tab {
+    padding: 8px 16px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #f8f9fa;
+    margin-right: 4px;
+}
+.tab.active {
+    background: #fff;
+    border-bottom: none;
+}
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
+.score {
+    font-size: 16px;
+    margin: 1rem 0;
+    padding: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+</style>
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+    </script>
+</head>
+<body>
+    <h2>Generation Log - llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_10200350_bos_errors</h2>
+    <h3>Repetition 48, Sequence 307, Offset 0</h3>
+    <div class="tabs">
+        <button class="tab active" id="diff-tab" onclick="switchTab('diff')">Diff View</button>
+        <button class="tab" id="rouge-tab" onclick="switchTab('rouge')">Rouge-L View</button>
+    </div>
+    <div id="diff" class="tab-content active">
+        <div class="container">
+            <div class="header">Line</div>
+            <div class="header">True Sequence</div>
+            <div class="header">Line</div>
+            <div class="header">Model Generation</div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</div>
+            <div class="content"><span class="equal"> armed gentry:</span><span class="delete"> men who saw to the
+equipment and service of the knights. No man at arms was fit to pass
+through a campaign without at least one aide, if only for armouring; and
+for all the doubtfulness of the records, we know that the Yeoman Archers
+were also served by men who carried a portion of their equipment, and who
+saw to their supply in action. It is impossible to make any computation at
+all accurate of the extra rations this organisation involved, nor of what
+proportion of these uncounted units could be used in the fighting. We are
+perhaps safe in saying that the total number who landed were not double
+the fighting men actually counted, and that Edward's whole force certainly
+was much more than 20,000 but almost as certainly not 40,000 men. We must
+imagine, all told, perhaps 5000 horses to have been assembled with the
+force for transport over sea: others would be seized for transport on the
+march. It is remarkable that Edward carefully organised certain small
+auxiliary bodies, smiths, artificers, etc., and took with him five
+cannon.[1]
+
+It was not until Tuesday, the 11th of July, that the very large fleet
+which the King had pressed for the service was able to sail from the
+Solent and Spithead. It crossed in the night with a northerly breeze, and
+appeared upon the following morning off St Vaast.
+
+St Vaast lies in a little recess of the north-eastern coast of the
+Cotentin, protected from all winds blowing from the outer Channel, and
+only open to such seas as can be raised in the estuary of the Seine by a
+south-easterly breeze. It was therefore, seeing the direction of the wind
+under which they had sailed, upon a calm shore that this considerable
+expedition disembarked. We may presume, under such circumstances, that
+though Edward had announced his decision of sailing for _southern_ France,
+the point of disembarkation had been carefully settled, and that a course
+had been laid for it.
+
+A small force composed of local levies had been raised to resist the
+landing. It was able to effect nothing, and was easily dispersed by a body
+of the invaders under the Earl of Salisbury, to whom that duty had been
+assigned.[2]
+
+For</span></div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</div>
+            <div class="content"><span class="equal"> armed gentry:</span><span class="insert"> it was a army of
+armed men, in the best sense of the word. There was little or no free
+population in Edward III's day that did not consist of&lt;|begin_of_text|&gt;endowed
+aristocratic and noble families. We say "free population" of men and
+women, for it was not until the middle of the fourteenth century that
+freemen began to be required in large numbers to fill positions of some
+sort. Nevertheless, the free men of Edward III's day were at first not
+so very different from the free men of our own day. They had the same
+domesticated in the thirteenth century, the same great, chief of the
+house of Plantagenet, and though they might, in a sense, have the
+domesticated, they were at bottom such unfortunates as could not be so
+completely changed by the first stirrings of the brain.
+
+Thus, in a sense, we see the kingdoms of our world divided into two
+compartments, the royal, and the non-monarchical. The more powerful are the
+former, the less actually royal. The royal power is because the king is
+entirely a creature of his nobles. The royal blood of Edward III. is
+entirely out of touch with the life of the people. It is a sort of thing
+that the romantic history of the period would have made little difference
+but for the fact that in a sense it was the great men who were left
+to work out the story of the stately royal house. It is in its central
+part of today's central region, on a hill-slope of the former kingdom,
+that we find the group of noble persons who are not nobles but free
+nobles, of which the most important are: Richard de Montgomerie, the
+8th earl of Leinster, who is popularly considered the "father of American
+American history and culture," and the shrewd and able seafaring man-of-war
+Richard de Burgh, a man of great ingenuity and keen intelligence.
+
+It is very different from the rest of the world, now that we do not have
+longer, by far the most effective troops of infantry which Edward III.
+were able to muster in his great march. All the rest are but as so much
+powder-grown willow wands; but some</span></div>
+        </div>
+    </div>
+    <div id="rouge" class="tab-content">
+        <div class="score">Rouge-L Score: 0.1840</div>
+        <div class="container">
+            <div class="header">Line</div>
+            <div class="header">True Sequence</div>
+            <div class="header">Line</div>
+            <div class="header">Model Generation</div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</div>
+            <div class="content"><span class="contributing"> armed</span><span class="contributing"> g</span><span class="contributing">entry</span><span class="contributing">:</span><span class="contributing"> men</span><span class="non-contributing"> who</span><span class="non-contributing"> saw</span><span class="non-contributing"> to</span><span class="contributing"> the</span><span class="non-contributing">
+</span><span class="non-contributing">equipment</span><span class="non-contributing"> and</span><span class="non-contributing"> service</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> knights</span><span class="contributing">.</span><span class="non-contributing"> No</span><span class="non-contributing"> man</span><span class="non-contributing"> at</span><span class="non-contributing"> arms</span><span class="contributing"> was</span><span class="non-contributing"> fit</span><span class="non-contributing"> to</span><span class="non-contributing"> pass</span><span class="contributing">
+</span><span class="non-contributing">through</span><span class="non-contributing"> a</span><span class="non-contributing"> campaign</span><span class="non-contributing"> without</span><span class="non-contributing"> at</span><span class="non-contributing"> least</span><span class="non-contributing"> one</span><span class="non-contributing"> aide</span><span class="contributing">,</span><span class="non-contributing"> if</span><span class="non-contributing"> only</span><span class="contributing"> for</span><span class="non-contributing"> armour</span><span class="non-contributing">ing</span><span class="non-contributing">;</span><span class="non-contributing"> and</span><span class="non-contributing">
+</span><span class="non-contributing">for</span><span class="non-contributing"> all</span><span class="contributing"> the</span><span class="non-contributing"> doubt</span><span class="non-contributing">fulness</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> records</span><span class="non-contributing">,</span><span class="non-contributing"> we</span><span class="non-contributing"> know</span><span class="contributing"> that</span><span class="non-contributing"> the</span><span class="non-contributing"> Ye</span><span class="non-contributing">oman</span><span class="non-contributing"> Arch</span><span class="non-contributing">ers</span><span class="contributing">
+</span><span class="non-contributing">were</span><span class="non-contributing"> also</span><span class="non-contributing"> served</span><span class="non-contributing"> by</span><span class="non-contributing"> men</span><span class="non-contributing"> who</span><span class="non-contributing"> carried</span><span class="non-contributing"> a</span><span class="non-contributing"> portion</span><span class="contributing"> of</span><span class="non-contributing"> their</span><span class="non-contributing"> equipment</span><span class="non-contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> who</span><span class="contributing">
+</span><span class="non-contributing">s</span><span class="non-contributing">aw</span><span class="non-contributing"> to</span><span class="non-contributing"> their</span><span class="non-contributing"> supply</span><span class="non-contributing"> in</span><span class="non-contributing"> action</span><span class="contributing">.</span><span class="non-contributing"> It</span><span class="non-contributing"> is</span><span class="non-contributing"> impossible</span><span class="non-contributing"> to</span><span class="non-contributing"> make</span><span class="non-contributing"> any</span><span class="non-contributing"> computation</span><span class="contributing"> at</span><span class="contributing">
+</span><span class="non-contributing">all</span><span class="non-contributing"> accurate</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> extra</span><span class="non-contributing"> r</span><span class="non-contributing">ations</span><span class="non-contributing"> this</span><span class="non-contributing"> organisation</span><span class="non-contributing"> involved</span><span class="contributing">,</span><span class="non-contributing"> nor</span><span class="contributing"> of</span><span class="non-contributing"> what</span><span class="contributing">
+</span><span class="non-contributing">pro</span><span class="non-contributing">portion</span><span class="contributing"> of</span><span class="non-contributing"> these</span><span class="non-contributing"> un</span><span class="non-contributing">count</span><span class="non-contributing">ed</span><span class="non-contributing"> units</span><span class="non-contributing"> could</span><span class="non-contributing"> be</span><span class="non-contributing"> used</span><span class="contributing"> in</span><span class="contributing"> the</span><span class="non-contributing"> fighting</span><span class="non-contributing">.</span><span class="non-contributing"> We</span><span class="non-contributing"> are</span><span class="contributing">
+</span><span class="non-contributing">perhaps</span><span class="non-contributing"> safe</span><span class="non-contributing"> in</span><span class="non-contributing"> saying</span><span class="non-contributing"> that</span><span class="non-contributing"> the</span><span class="non-contributing"> total</span><span class="non-contributing"> number</span><span class="non-contributing"> who</span><span class="non-contributing"> landed</span><span class="contributing"> were</span><span class="contributing"> not</span><span class="non-contributing"> double</span><span class="contributing">
+</span><span class="non-contributing">the</span><span class="non-contributing"> fighting</span><span class="non-contributing"> men</span><span class="non-contributing"> actually</span><span class="non-contributing"> counted</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> that</span><span class="non-contributing"> Edward</span><span class="non-contributing">'s</span><span class="non-contributing"> whole</span><span class="non-contributing"> force</span><span class="non-contributing"> certainly</span><span class="contributing">
+</span><span class="non-contributing">was</span><span class="non-contributing"> much</span><span class="non-contributing"> more</span><span class="non-contributing"> than</span><span class="non-contributing"> </span><span class="non-contributing">20</span><span class="contributing">,</span><span class="non-contributing">000</span><span class="non-contributing"> but</span><span class="non-contributing"> almost</span><span class="non-contributing"> as</span><span class="non-contributing"> certainly</span><span class="non-contributing"> not</span><span class="non-contributing"> </span><span class="non-contributing">40</span><span class="contributing">,</span><span class="non-contributing">000</span><span class="non-contributing"> men</span><span class="contributing">.</span><span class="non-contributing"> We</span><span class="non-contributing"> must</span><span class="contributing">
+</span><span class="non-contributing">im</span><span class="non-contributing">agine</span><span class="non-contributing">,</span><span class="non-contributing"> all</span><span class="non-contributing"> told</span><span class="contributing">,</span><span class="non-contributing"> perhaps</span><span class="non-contributing"> </span><span class="non-contributing">500</span><span class="non-contributing">0</span><span class="non-contributing"> horses</span><span class="non-contributing"> to</span><span class="non-contributing"> have</span><span class="non-contributing"> been</span><span class="non-contributing"> assembled</span><span class="non-contributing"> with</span><span class="contributing"> the</span><span class="non-contributing">
+</span><span class="non-contributing">force</span><span class="non-contributing"> for</span><span class="non-contributing"> transport</span><span class="non-contributing"> over</span><span class="non-contributing"> sea</span><span class="non-contributing">:</span><span class="non-contributing"> others</span><span class="non-contributing"> would</span><span class="non-contributing"> be</span><span class="non-contributing"> seized</span><span class="non-contributing"> for</span><span class="non-contributing"> transport</span><span class="non-contributing"> on</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">m</span><span class="non-contributing">arch</span><span class="contributing">.</span><span class="non-contributing"> It</span><span class="contributing"> is</span><span class="non-contributing"> remarkable</span><span class="non-contributing"> that</span><span class="non-contributing"> Edward</span><span class="non-contributing"> carefully</span><span class="non-contributing"> organised</span><span class="non-contributing"> certain</span><span class="non-contributing"> small</span><span class="contributing">
+</span><span class="non-contributing">aux</span><span class="non-contributing">iliary</span><span class="non-contributing"> bodies</span><span class="non-contributing">,</span><span class="non-contributing"> smith</span><span class="non-contributing">s</span><span class="non-contributing">,</span><span class="non-contributing"> art</span><span class="non-contributing">ific</span><span class="non-contributing">ers</span><span class="non-contributing">,</span><span class="non-contributing"> etc</span><span class="non-contributing">.,</span><span class="non-contributing"> and</span><span class="non-contributing"> took</span><span class="contributing"> with</span><span class="non-contributing"> him</span><span class="non-contributing"> five</span><span class="contributing">
+</span><span class="non-contributing">c</span><span class="non-contributing">annon</span><span class="non-contributing">.[</span><span class="non-contributing">1</span><span class="non-contributing">]
+
+</span><span class="non-contributing">It</span><span class="non-contributing"> was</span><span class="non-contributing"> not</span><span class="non-contributing"> until</span><span class="non-contributing"> Tuesday</span><span class="non-contributing">,</span><span class="contributing"> the</span><span class="non-contributing"> </span><span class="non-contributing">11</span><span class="non-contributing">th</span><span class="contributing"> of</span><span class="non-contributing"> July</span><span class="non-contributing">,</span><span class="non-contributing"> that</span><span class="contributing"> the</span><span class="non-contributing"> very</span><span class="non-contributing"> large</span><span class="non-contributing"> fleet</span><span class="contributing">
+</span><span class="non-contributing">which</span><span class="non-contributing"> the</span><span class="non-contributing"> King</span><span class="non-contributing"> had</span><span class="non-contributing"> pressed</span><span class="contributing"> for</span><span class="contributing"> the</span><span class="non-contributing"> service</span><span class="contributing"> was</span><span class="non-contributing"> able</span><span class="non-contributing"> to</span><span class="non-contributing"> sail</span><span class="non-contributing"> from</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">Sol</span><span class="non-contributing">ent</span><span class="non-contributing"> and</span><span class="non-contributing"> Spit</span><span class="non-contributing">head</span><span class="contributing">.</span><span class="contributing"> It</span><span class="non-contributing"> crossed</span><span class="contributing"> in</span><span class="non-contributing"> the</span><span class="non-contributing"> night</span><span class="non-contributing"> with</span><span class="non-contributing"> a</span><span class="non-contributing"> nor</span><span class="non-contributing">ther</span><span class="non-contributing">ly</span><span class="non-contributing"> breeze</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing">
+</span><span class="non-contributing">appeared</span><span class="non-contributing"> upon</span><span class="non-contributing"> the</span><span class="non-contributing"> following</span><span class="non-contributing"> morning</span><span class="non-contributing"> off</span><span class="non-contributing"> St</span><span class="non-contributing"> Va</span><span class="non-contributing">ast</span><span class="non-contributing">.
+
+</span><span class="non-contributing">St</span><span class="non-contributing"> Va</span><span class="non-contributing">ast</span><span class="non-contributing"> lies</span><span class="non-contributing"> in</span><span class="contributing"> a</span><span class="non-contributing"> little</span><span class="non-contributing"> recess</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> north</span><span class="non-contributing">-east</span><span class="non-contributing">ern</span><span class="non-contributing"> coast</span><span class="contributing"> of</span><span class="non-contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">C</span><span class="non-contributing">ot</span><span class="non-contributing">entin</span><span class="contributing">,</span><span class="non-contributing"> protected</span><span class="non-contributing"> from</span><span class="non-contributing"> all</span><span class="non-contributing"> winds</span><span class="non-contributing"> blowing</span><span class="non-contributing"> from</span><span class="contributing"> the</span><span class="non-contributing"> outer</span><span class="non-contributing"> Channel</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="contributing">
+</span><span class="non-contributing">only</span><span class="non-contributing"> open</span><span class="non-contributing"> to</span><span class="non-contributing"> such</span><span class="non-contributing"> seas</span><span class="non-contributing"> as</span><span class="non-contributing"> can</span><span class="non-contributing"> be</span><span class="non-contributing"> raised</span><span class="non-contributing"> in</span><span class="non-contributing"> the</span><span class="non-contributing"> est</span><span class="non-contributing">uary</span><span class="contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> Se</span><span class="non-contributing">ine</span><span class="non-contributing"> by</span><span class="non-contributing"> a</span><span class="non-contributing">
+</span><span class="non-contributing">south</span><span class="non-contributing">-e</span><span class="non-contributing">aster</span><span class="contributing">ly</span><span class="non-contributing"> breeze</span><span class="non-contributing">.</span><span class="non-contributing"> It</span><span class="non-contributing"> was</span><span class="non-contributing"> therefore</span><span class="non-contributing">,</span><span class="non-contributing"> seeing</span><span class="contributing"> the</span><span class="non-contributing"> direction</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> wind</span><span class="contributing">
+</span><span class="non-contributing">under</span><span class="non-contributing"> which</span><span class="non-contributing"> they</span><span class="non-contributing"> had</span><span class="non-contributing"> sailed</span><span class="contributing">,</span><span class="non-contributing"> upon</span><span class="contributing"> a</span><span class="non-contributing"> calm</span><span class="non-contributing"> shore</span><span class="non-contributing"> that</span><span class="non-contributing"> this</span><span class="non-contributing"> considerable</span><span class="non-contributing">
+</span><span class="non-contributing">exp</span><span class="non-contributing">edition</span><span class="non-contributing"> disemb</span><span class="non-contributing">arked</span><span class="non-contributing">.</span><span class="non-contributing"> We</span><span class="non-contributing"> may</span><span class="non-contributing"> presume</span><span class="non-contributing">,</span><span class="non-contributing"> under</span><span class="non-contributing"> such</span><span class="non-contributing"> circumstances</span><span class="non-contributing">,</span><span class="non-contributing"> that</span><span class="non-contributing">
+</span><span class="non-contributing">though</span><span class="non-contributing"> Edward</span><span class="non-contributing"> had</span><span class="non-contributing"> announced</span><span class="non-contributing"> his</span><span class="non-contributing"> decision</span><span class="contributing"> of</span><span class="non-contributing"> sailing</span><span class="non-contributing"> for</span><span class="non-contributing"> _</span><span class="non-contributing">sou</span><span class="non-contributing">thern</span><span class="non-contributing">_</span><span class="non-contributing"> France</span><span class="non-contributing">,
+</span><span class="non-contributing">the</span><span class="non-contributing"> point</span><span class="non-contributing"> of</span><span class="non-contributing"> disemb</span><span class="non-contributing">ark</span><span class="non-contributing">ation</span><span class="non-contributing"> had</span><span class="non-contributing"> been</span><span class="non-contributing"> carefully</span><span class="non-contributing"> settled</span><span class="non-contributing">,</span><span class="contributing"> and</span><span class="non-contributing"> that</span><span class="non-contributing"> a</span><span class="non-contributing"> course</span><span class="non-contributing">
+</span><span class="non-contributing">had</span><span class="non-contributing"> been</span><span class="non-contributing"> laid</span><span class="non-contributing"> for</span><span class="non-contributing"> it</span><span class="contributing">.
+
+</span><span class="non-contributing">A</span><span class="non-contributing"> small</span><span class="non-contributing"> force</span><span class="non-contributing"> composed</span><span class="contributing"> of</span><span class="non-contributing"> local</span><span class="non-contributing"> lev</span><span class="non-contributing">ies</span><span class="non-contributing"> had</span><span class="non-contributing"> been</span><span class="non-contributing"> raised</span><span class="non-contributing"> to</span><span class="non-contributing"> resist</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">landing</span><span class="non-contributing">.</span><span class="non-contributing"> It</span><span class="non-contributing"> was</span><span class="non-contributing"> able</span><span class="non-contributing"> to</span><span class="non-contributing"> effect</span><span class="non-contributing"> nothing</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> was</span><span class="non-contributing"> easily</span><span class="non-contributing"> dispersed</span><span class="contributing"> by</span><span class="non-contributing"> a</span><span class="non-contributing"> body</span><span class="non-contributing">
+</span><span class="non-contributing">of</span><span class="contributing"> the</span><span class="non-contributing"> invaders</span><span class="non-contributing"> under</span><span class="non-contributing"> the</span><span class="non-contributing"> Earl</span><span class="contributing"> of</span><span class="non-contributing"> Salisbury</span><span class="non-contributing">,</span><span class="contributing"> to</span><span class="non-contributing"> whom</span><span class="non-contributing"> that</span><span class="non-contributing"> duty</span><span class="non-contributing"> had</span><span class="non-contributing"> been</span><span class="contributing">
+</span><span class="non-contributing">assigned</span><span class="non-contributing">.[</span><span class="non-contributing">2</span><span class="non-contributing">]
+
+</span><span class="non-contributing">For</span></div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</div>
+            <div class="content"><span class="contributing"> armed</span><span class="contributing"> g</span><span class="contributing">entry</span><span class="contributing">:</span><span class="non-contributing"> it</span><span class="non-contributing"> was</span><span class="non-contributing"> a</span><span class="non-contributing"> army</span><span class="non-contributing"> of</span><span class="non-contributing">
+</span><span class="non-contributing">armed</span><span class="contributing"> men</span><span class="non-contributing">,</span><span class="non-contributing"> in</span><span class="contributing"> the</span><span class="non-contributing"> best</span><span class="non-contributing"> sense</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> word</span><span class="contributing">.</span><span class="non-contributing"> There</span><span class="contributing"> was</span><span class="non-contributing"> little</span><span class="non-contributing"> or</span><span class="non-contributing"> no</span><span class="non-contributing"> free</span><span class="non-contributing">
+</span><span class="non-contributing">population</span><span class="non-contributing"> in</span><span class="non-contributing"> Edward</span><span class="non-contributing"> III</span><span class="non-contributing">'s</span><span class="non-contributing"> day</span><span class="non-contributing"> that</span><span class="non-contributing"> did</span><span class="non-contributing"> not</span><span class="non-contributing"> consist</span><span class="non-contributing"> of</span><span class="non-contributing">&lt;|begin_of_text|&gt;</span><span class="non-contributing">end</span><span class="non-contributing">owed</span><span class="non-contributing">
+</span><span class="non-contributing">ar</span><span class="non-contributing">ist</span><span class="non-contributing">ocratic</span><span class="non-contributing"> and</span><span class="non-contributing"> noble</span><span class="non-contributing"> families</span><span class="non-contributing">.</span><span class="non-contributing"> We</span><span class="non-contributing"> say</span><span class="non-contributing"> "</span><span class="non-contributing">free</span><span class="non-contributing"> population</span><span class="non-contributing">"</span><span class="non-contributing"> of</span><span class="non-contributing"> men</span><span class="non-contributing"> and</span><span class="contributing">
+</span><span class="non-contributing">women</span><span class="contributing">,</span><span class="contributing"> for</span><span class="non-contributing"> it</span><span class="non-contributing"> was</span><span class="non-contributing"> not</span><span class="non-contributing"> until</span><span class="contributing"> the</span><span class="non-contributing"> middle</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> four</span><span class="non-contributing">teenth</span><span class="non-contributing"> century</span><span class="contributing"> that</span><span class="contributing">
+</span><span class="non-contributing">fre</span><span class="non-contributing">emen</span><span class="non-contributing"> began</span><span class="non-contributing"> to</span><span class="non-contributing"> be</span><span class="non-contributing"> required</span><span class="non-contributing"> in</span><span class="non-contributing"> large</span><span class="non-contributing"> numbers</span><span class="non-contributing"> to</span><span class="non-contributing"> fill</span><span class="non-contributing"> positions</span><span class="contributing"> of</span><span class="non-contributing"> some</span><span class="contributing">
+</span><span class="non-contributing">sort</span><span class="contributing">.</span><span class="non-contributing"> Nevertheless</span><span class="non-contributing">,</span><span class="non-contributing"> the</span><span class="non-contributing"> free</span><span class="non-contributing"> men</span><span class="non-contributing"> of</span><span class="non-contributing"> Edward</span><span class="non-contributing"> III</span><span class="non-contributing">'s</span><span class="non-contributing"> day</span><span class="non-contributing"> were</span><span class="contributing"> at</span><span class="non-contributing"> first</span><span class="non-contributing"> not</span><span class="contributing">
+</span><span class="non-contributing">so</span><span class="non-contributing"> very</span><span class="non-contributing"> different</span><span class="non-contributing"> from</span><span class="non-contributing"> the</span><span class="non-contributing"> free</span><span class="non-contributing"> men</span><span class="contributing"> of</span><span class="non-contributing"> our</span><span class="non-contributing"> own</span><span class="non-contributing"> day</span><span class="non-contributing">.</span><span class="non-contributing"> They</span><span class="non-contributing"> had</span><span class="non-contributing"> the</span><span class="non-contributing"> same</span><span class="non-contributing">
+</span><span class="non-contributing">dom</span><span class="non-contributing">estic</span><span class="non-contributing">ated</span><span class="non-contributing"> in</span><span class="non-contributing"> the</span><span class="non-contributing"> th</span><span class="non-contributing">ir</span><span class="non-contributing">teenth</span><span class="non-contributing"> century</span><span class="non-contributing">,</span><span class="contributing"> the</span><span class="non-contributing"> same</span><span class="non-contributing"> great</span><span class="contributing">,</span><span class="non-contributing"> chief</span><span class="contributing"> of</span><span class="non-contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">house</span><span class="contributing"> of</span><span class="non-contributing"> Plant</span><span class="non-contributing">agen</span><span class="non-contributing">et</span><span class="non-contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> though</span><span class="non-contributing"> they</span><span class="non-contributing"> might</span><span class="non-contributing">,</span><span class="contributing"> in</span><span class="non-contributing"> a</span><span class="non-contributing"> sense</span><span class="non-contributing">,</span><span class="non-contributing"> have</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">dom</span><span class="non-contributing">estic</span><span class="non-contributing">ated</span><span class="non-contributing">,</span><span class="non-contributing"> they</span><span class="contributing"> were</span><span class="non-contributing"> at</span><span class="non-contributing"> bottom</span><span class="non-contributing"> such</span><span class="non-contributing"> un</span><span class="non-contributing">fort</span><span class="non-contributing">un</span><span class="non-contributing">ates</span><span class="non-contributing"> as</span><span class="non-contributing"> could</span><span class="contributing"> not</span><span class="non-contributing"> be</span><span class="non-contributing"> so</span><span class="contributing">
+</span><span class="non-contributing">com</span><span class="non-contributing">pletely</span><span class="non-contributing"> changed</span><span class="non-contributing"> by</span><span class="non-contributing"> the</span><span class="non-contributing"> first</span><span class="non-contributing"> stir</span><span class="non-contributing">r</span><span class="non-contributing">ings</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> brain</span><span class="non-contributing">.
+
+</span><span class="non-contributing">Thus</span><span class="non-contributing">,</span><span class="non-contributing"> in</span><span class="non-contributing"> a</span><span class="non-contributing"> sense</span><span class="contributing">,</span><span class="non-contributing"> we</span><span class="non-contributing"> see</span><span class="non-contributing"> the</span><span class="non-contributing"> kingdoms</span><span class="non-contributing"> of</span><span class="non-contributing"> our</span><span class="non-contributing"> world</span><span class="non-contributing"> divided</span><span class="non-contributing"> into</span><span class="non-contributing"> two</span><span class="contributing">
+</span><span class="non-contributing">com</span><span class="non-contributing">part</span><span class="non-contributing">ments</span><span class="contributing">,</span><span class="non-contributing"> the</span><span class="non-contributing"> royal</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> the</span><span class="non-contributing"> non</span><span class="non-contributing">-mon</span><span class="non-contributing">archical</span><span class="contributing">.</span><span class="non-contributing"> The</span><span class="non-contributing"> more</span><span class="non-contributing"> powerful</span><span class="non-contributing"> are</span><span class="non-contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">former</span><span class="contributing">,</span><span class="contributing"> the</span><span class="non-contributing"> less</span><span class="non-contributing"> actually</span><span class="non-contributing"> royal</span><span class="non-contributing">.</span><span class="non-contributing"> The</span><span class="non-contributing"> royal</span><span class="non-contributing"> power</span><span class="non-contributing"> is</span><span class="non-contributing"> because</span><span class="contributing"> the</span><span class="non-contributing"> king</span><span class="non-contributing"> is</span><span class="contributing">
+</span><span class="non-contributing">ent</span><span class="non-contributing">ire</span><span class="non-contributing">ly</span><span class="non-contributing"> a</span><span class="non-contributing"> creature</span><span class="non-contributing"> of</span><span class="non-contributing"> his</span><span class="non-contributing"> nob</span><span class="non-contributing">les</span><span class="non-contributing">.</span><span class="non-contributing"> The</span><span class="non-contributing"> royal</span><span class="non-contributing"> blood</span><span class="non-contributing"> of</span><span class="non-contributing"> Edward</span><span class="non-contributing"> III</span><span class="contributing">.</span><span class="contributing"> is</span><span class="contributing">
+</span><span class="non-contributing">ent</span><span class="non-contributing">ire</span><span class="non-contributing">ly</span><span class="non-contributing"> out</span><span class="non-contributing"> of</span><span class="non-contributing"> touch</span><span class="contributing"> with</span><span class="non-contributing"> the</span><span class="non-contributing"> life</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> people</span><span class="non-contributing">.</span><span class="non-contributing"> It</span><span class="non-contributing"> is</span><span class="non-contributing"> a</span><span class="non-contributing"> sort</span><span class="non-contributing"> of</span><span class="non-contributing"> thing</span><span class="contributing">
+</span><span class="non-contributing">that</span><span class="contributing"> the</span><span class="non-contributing"> romantic</span><span class="non-contributing"> history</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> period</span><span class="non-contributing"> would</span><span class="non-contributing"> have</span><span class="non-contributing"> made</span><span class="non-contributing"> little</span><span class="non-contributing"> difference</span><span class="contributing">
+</span><span class="non-contributing">but</span><span class="contributing"> for</span><span class="contributing"> the</span><span class="non-contributing"> fact</span><span class="non-contributing"> that</span><span class="non-contributing"> in</span><span class="non-contributing"> a</span><span class="non-contributing"> sense</span><span class="non-contributing"> it</span><span class="contributing"> was</span><span class="contributing"> the</span><span class="non-contributing"> great</span><span class="non-contributing"> men</span><span class="non-contributing"> who</span><span class="non-contributing"> were</span><span class="non-contributing"> left</span><span class="contributing">
+</span><span class="non-contributing">to</span><span class="non-contributing"> work</span><span class="non-contributing"> out</span><span class="non-contributing"> the</span><span class="non-contributing"> story</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> st</span><span class="non-contributing">ately</span><span class="non-contributing"> royal</span><span class="non-contributing"> house</span><span class="contributing">.</span><span class="contributing"> It</span><span class="non-contributing"> is</span><span class="contributing"> in</span><span class="non-contributing"> its</span><span class="non-contributing"> central</span><span class="non-contributing">
+</span><span class="non-contributing">part</span><span class="non-contributing"> of</span><span class="non-contributing"> today</span><span class="non-contributing">'s</span><span class="non-contributing"> central</span><span class="non-contributing"> region</span><span class="contributing">,</span><span class="non-contributing"> on</span><span class="contributing"> a</span><span class="non-contributing"> hill</span><span class="non-contributing">-s</span><span class="non-contributing">lope</span><span class="contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> former</span><span class="non-contributing"> kingdom</span><span class="non-contributing">,
+</span><span class="non-contributing">that</span><span class="non-contributing"> we</span><span class="non-contributing"> find</span><span class="contributing"> the</span><span class="non-contributing"> group</span><span class="contributing"> of</span><span class="non-contributing"> noble</span><span class="non-contributing"> persons</span><span class="non-contributing"> who</span><span class="non-contributing"> are</span><span class="non-contributing"> not</span><span class="non-contributing"> nob</span><span class="non-contributing">les</span><span class="non-contributing"> but</span><span class="non-contributing"> free</span><span class="contributing">
+</span><span class="non-contributing">nob</span><span class="non-contributing">les</span><span class="contributing">,</span><span class="non-contributing"> of</span><span class="non-contributing"> which</span><span class="contributing"> the</span><span class="non-contributing"> most</span><span class="non-contributing"> important</span><span class="non-contributing"> are</span><span class="non-contributing">:</span><span class="non-contributing"> Richard</span><span class="non-contributing"> de</span><span class="non-contributing"> Mont</span><span class="non-contributing">g</span><span class="non-contributing">omer</span><span class="non-contributing">ie</span><span class="contributing">,</span><span class="non-contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">8</span><span class="non-contributing">th</span><span class="non-contributing"> ear</span><span class="non-contributing">l</span><span class="contributing"> of</span><span class="non-contributing"> Le</span><span class="non-contributing">in</span><span class="non-contributing">ster</span><span class="non-contributing">,</span><span class="non-contributing"> who</span><span class="non-contributing"> is</span><span class="non-contributing"> popular</span><span class="contributing">ly</span><span class="non-contributing"> considered</span><span class="contributing"> the</span><span class="non-contributing"> "</span><span class="non-contributing">father</span><span class="contributing"> of</span><span class="non-contributing"> American</span><span class="non-contributing">
+</span><span class="non-contributing">American</span><span class="non-contributing"> history</span><span class="non-contributing"> and</span><span class="non-contributing"> culture</span><span class="non-contributing">,"</span><span class="non-contributing"> and</span><span class="contributing"> the</span><span class="non-contributing"> sh</span><span class="non-contributing">rew</span><span class="non-contributing">d</span><span class="non-contributing"> and</span><span class="non-contributing"> able</span><span class="non-contributing"> se</span><span class="non-contributing">af</span><span class="non-contributing">aring</span><span class="non-contributing"> man</span><span class="non-contributing">-of</span><span class="non-contributing">-war</span><span class="contributing">
+</span><span class="non-contributing">Richard</span><span class="non-contributing"> de</span><span class="non-contributing"> Bur</span><span class="non-contributing">gh</span><span class="contributing">,</span><span class="contributing"> a</span><span class="non-contributing"> man</span><span class="contributing"> of</span><span class="non-contributing"> great</span><span class="non-contributing"> ing</span><span class="non-contributing">enuity</span><span class="contributing"> and</span><span class="non-contributing"> keen</span><span class="non-contributing"> intelligence</span><span class="contributing">.
+
+</span><span class="non-contributing">It</span><span class="non-contributing"> is</span><span class="non-contributing"> very</span><span class="non-contributing"> different</span><span class="non-contributing"> from</span><span class="non-contributing"> the</span><span class="non-contributing"> rest</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> world</span><span class="non-contributing">,</span><span class="non-contributing"> now</span><span class="non-contributing"> that</span><span class="non-contributing"> we</span><span class="non-contributing"> do</span><span class="non-contributing"> not</span><span class="non-contributing"> have</span><span class="contributing">
+</span><span class="non-contributing">long</span><span class="non-contributing">er</span><span class="contributing">,</span><span class="contributing"> by</span><span class="non-contributing"> far</span><span class="contributing"> the</span><span class="non-contributing"> most</span><span class="non-contributing"> effective</span><span class="non-contributing"> troops</span><span class="contributing"> of</span><span class="non-contributing"> infantry</span><span class="non-contributing"> which</span><span class="non-contributing"> Edward</span><span class="non-contributing"> III</span><span class="non-contributing">.
+</span><span class="non-contributing">were</span><span class="non-contributing"> able</span><span class="contributing"> to</span><span class="non-contributing"> muster</span><span class="non-contributing"> in</span><span class="non-contributing"> his</span><span class="non-contributing"> great</span><span class="non-contributing"> march</span><span class="non-contributing">.</span><span class="non-contributing"> All</span><span class="non-contributing"> the</span><span class="non-contributing"> rest</span><span class="non-contributing"> are</span><span class="non-contributing"> but</span><span class="non-contributing"> as</span><span class="non-contributing"> so</span><span class="non-contributing"> much</span><span class="contributing">
+</span><span class="non-contributing">pow</span><span class="non-contributing">der</span><span class="non-contributing">-g</span><span class="non-contributing">rown</span><span class="non-contributing"> will</span><span class="non-contributing">ow</span><span class="non-contributing"> w</span><span class="non-contributing">ands</span><span class="non-contributing">;</span><span class="non-contributing"> but</span><span class="non-contributing"> some</span></div>
+        </div>
+    </div>
+</body>
+</html>

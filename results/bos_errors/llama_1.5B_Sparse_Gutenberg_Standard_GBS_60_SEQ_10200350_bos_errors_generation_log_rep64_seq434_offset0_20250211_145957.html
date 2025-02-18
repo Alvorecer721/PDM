@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+.container {
+    display: grid;
+    grid-template-columns: 50px 1fr 50px 1fr;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+.header {
+    padding: 8px;
+    background: #4a4a4a;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+.line-numbers {
+    padding: 0 8px;
+    text-align: right;
+    background: #e0e0e0;
+    color: #666;
+    white-space: pre;
+    align-self: stretch;
+}
+.content {
+    padding: 0 8px;
+    white-space: pre;
+    overflow-x: auto;
+    background: white;
+    align-self: stretch;
+}
+.equal { color: #333; }
+.delete { background: #ffeef0; }
+.insert { background: #e6ffed; }
+.contributing { background: #fff3cd; }
+.non-contributing { color: #999; }
+.tabs {
+    display: flex;
+    margin-bottom: 1rem;
+}
+.tab {
+    padding: 8px 16px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #f8f9fa;
+    margin-right: 4px;
+}
+.tab.active {
+    background: #fff;
+    border-bottom: none;
+}
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
+.score {
+    font-size: 16px;
+    margin: 1rem 0;
+    padding: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+</style>
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+    </script>
+</head>
+<body>
+    <h2>Generation Log - llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_10200350_bos_errors</h2>
+    <h3>Repetition 64, Sequence 434, Offset 0</h3>
+    <div class="tabs">
+        <button class="tab active" id="diff-tab" onclick="switchTab('diff')">Diff View</button>
+        <button class="tab" id="rouge-tab" onclick="switchTab('rouge')">Rouge-L View</button>
+    </div>
+    <div id="diff" class="tab-content active">
+        <div class="container">
+            <div class="header">Line</div>
+            <div class="header">True Sequence</div>
+            <div class="header">Line</div>
+            <div class="header">Model Generation</div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</div>
+            <div class="content"><span class="equal">opinion thereon.
+
+[Sidenote: Report against a Governor in 1675.]
+
+In this report it is stated, that for some late years, the fish had
+failed in Newfoundland; that the adventurers had lost many of their
+ships in the late wars, especially in that with _Spain_; and that</span><span class="delete"> the
+late wars had much diminished the hands which used to take fish: that
+the inhabitants and planters, who, contrary to their old charter, lived
+within six miles of the sea, had destroyed the woods, and continued to
+destroy whatever the adventurers left behind them; that they possessed
+early the places of greatest convenience, and, which was very pernicious,
+most of them sold wine, and brandy, whereby the seamen were withdrawn
+from their labor, and many seduced to stay in the place, while their
+families thereby became burthensome to their respective parishes at
+home. That the inhabitants lived scattered in five-and-twenty different
+harbors, almost eighty leagues asunder; and that in all the winter, when
+abuses were chiefly committed, there was no passing from one place to
+another, so that near forty harbors would have no government, though the
+governor were actually in the country.
+
+It is also stated, that besides the charge of forts, and a governor,
+which the fish-trade could not support, it was needless to have any
+such defence against foreigners, the coast being defended in winter by
+the ice, and in summer by the resort of the king’s subjects; so that
+unless there were proper reasons for a _colony_, there could be none for
+_governor_. That against a colony, there were not only the rigours of the
+climate, and infertility of the land, which obliged those who were there
+all the winter, to idleness, and inclined them to debauchery, but this,
+that they chiefly consumed the produce of _New England_, by the shipping
+of which country, they were furnished with French wine and brandy, and
+_Madeira_ wines, in exchange for their fish, without depending, as they
+should, for supply from England; so that if the climate and soil should
+favour a colony, the planters would rather adhere to _New England_,
+and so go on to tread in the same steps as those colonists did, to the
+loss of the many advantages</span></div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</div>
+            <div class="content"><span class="equal">opinion thereon.
+
+[Sidenote: Report against a Governor in 1675.]
+
+In this report it is stated, that for some late years, the fish had
+failed in Newfoundland; that the adventurers had lost many of their
+ships in the late wars, especially in that with _Spain_; and that</span><span class="insert">
+generosity and necessity had together begun to fail there own adventurers
+in Newfoundland; and that many of the&lt;|begin_of_text|&gt;endes were gone, and many of
+them were in deep sea, and unable to go to _England_. In spite of the
+general attempt at security, a difficulty here, will remain, that notwithstanding
+these circumstances and these circumstances, there still remained to his
+majesty, a large majority of the people in the west of England, who were
+contented with the administration of the place, as witnesses upon in
+defence of the claims of some of the more wealthy merchants. Also, that if
+any usurper came up in _any_ of the statutes as he spake of, he was
+guilty of a false and infamous charge against _the people_, and would
+be severely dealt with according to law.
+
+[Sidenote: Reason of this Government.]
+
+It is thought by some of your lordships, that the colony should have
+originally been founded in the province of _New England_. The settlement
+of _England_ would be an innovation, and would doubtless be displeasing
+to the people; and, if not, there would have been great force to meet
+and oppose it. There it was that we were to go _first_, and see the
+thing. Accordingly, we were first made sure of the advantages of a
+settlement, by coming to England, fully armed, on the 6th of April,
+1675-6, and with our arms on our shoulders, went up to London, with
+many of your lords, and making representations thereon of us, that we
+would be ready at any time to go to _England_--that our ministers
+misunderstanding, they should seek that good faith in us, which we could
+never have done, as well as to have sent us our reasons of purpose, and
+any laws therefor;--and when they had this, they would take their
+protection, and go _to England_.
+[Sidenote: Reason of this System.]
+
+Soon after our arrival in England, we were informed that certain</span></div>
+        </div>
+    </div>
+    <div id="rouge" class="tab-content">
+        <div class="score">Rouge-L Score: 0.3000</div>
+        <div class="container">
+            <div class="header">Line</div>
+            <div class="header">True Sequence</div>
+            <div class="header">Line</div>
+            <div class="header">Model Generation</div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</div>
+            <div class="content"><span class="contributing">op</span><span class="contributing">inion</span><span class="contributing"> there</span><span class="contributing">on</span><span class="contributing">.
+
+</span><span class="contributing">[S</span><span class="contributing">iden</span><span class="contributing">ote</span><span class="contributing">:</span><span class="contributing"> Report</span><span class="contributing"> against</span><span class="contributing"> a</span><span class="contributing"> Governor</span><span class="contributing"> in</span><span class="contributing"> </span><span class="contributing">167</span><span class="contributing">5</span><span class="contributing">.]
+
+</span><span class="contributing">In</span><span class="contributing"> this</span><span class="contributing"> report</span><span class="contributing"> it</span><span class="contributing"> is</span><span class="contributing"> stated</span><span class="contributing">,</span><span class="contributing"> that</span><span class="contributing"> for</span><span class="contributing"> some</span><span class="contributing"> late</span><span class="contributing"> years</span><span class="contributing">,</span><span class="contributing"> the</span><span class="contributing"> fish</span><span class="contributing"> had</span><span class="contributing">
+</span><span class="contributing">failed</span><span class="contributing"> in</span><span class="contributing"> Newfoundland</span><span class="contributing">;</span><span class="contributing"> that</span><span class="contributing"> the</span><span class="contributing"> adventurers</span><span class="contributing"> had</span><span class="contributing"> lost</span><span class="contributing"> many</span><span class="contributing"> of</span><span class="contributing"> their</span><span class="contributing">
+</span><span class="contributing">ships</span><span class="contributing"> in</span><span class="contributing"> the</span><span class="contributing"> late</span><span class="contributing"> wars</span><span class="contributing">,</span><span class="contributing"> especially</span><span class="contributing"> in</span><span class="contributing"> that</span><span class="contributing"> with</span><span class="contributing"> _</span><span class="contributing">Spain</span><span class="contributing">_;</span><span class="contributing"> and</span><span class="contributing"> that</span><span class="non-contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">late</span><span class="non-contributing"> wars</span><span class="contributing"> had</span><span class="non-contributing"> much</span><span class="non-contributing"> diminished</span><span class="non-contributing"> the</span><span class="non-contributing"> hands</span><span class="non-contributing"> which</span><span class="non-contributing"> used</span><span class="contributing"> to</span><span class="non-contributing"> take</span><span class="non-contributing"> fish</span><span class="non-contributing">:</span><span class="non-contributing"> that</span><span class="contributing">
+</span><span class="non-contributing">the</span><span class="non-contributing"> inhabitants</span><span class="contributing"> and</span><span class="non-contributing"> plant</span><span class="non-contributing">ers</span><span class="contributing">,</span><span class="non-contributing"> who</span><span class="non-contributing">,</span><span class="non-contributing"> contrary</span><span class="non-contributing"> to</span><span class="non-contributing"> their</span><span class="non-contributing"> old</span><span class="non-contributing"> charter</span><span class="non-contributing">,</span><span class="non-contributing"> lived</span><span class="contributing">
+</span><span class="non-contributing">within</span><span class="non-contributing"> six</span><span class="non-contributing"> miles</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="contributing"> sea</span><span class="non-contributing">,</span><span class="non-contributing"> had</span><span class="non-contributing"> destroyed</span><span class="non-contributing"> the</span><span class="non-contributing"> woods</span><span class="contributing">,</span><span class="contributing"> and</span><span class="non-contributing"> continued</span><span class="contributing"> to</span><span class="non-contributing">
+</span><span class="non-contributing">destroy</span><span class="non-contributing"> whatever</span><span class="contributing"> the</span><span class="non-contributing"> adventurers</span><span class="non-contributing"> left</span><span class="non-contributing"> behind</span><span class="non-contributing"> them</span><span class="non-contributing">;</span><span class="non-contributing"> that</span><span class="non-contributing"> they</span><span class="non-contributing"> possessed</span><span class="contributing">
+</span><span class="non-contributing">early</span><span class="non-contributing"> the</span><span class="non-contributing"> places</span><span class="non-contributing"> of</span><span class="non-contributing"> greatest</span><span class="non-contributing"> convenience</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="contributing">,</span><span class="non-contributing"> which</span><span class="non-contributing"> was</span><span class="non-contributing"> very</span><span class="non-contributing"> per</span><span class="non-contributing">n</span><span class="non-contributing">icious</span><span class="non-contributing">,
+</span><span class="non-contributing">most</span><span class="non-contributing"> of</span><span class="non-contributing"> them</span><span class="non-contributing"> sold</span><span class="non-contributing"> wine</span><span class="contributing">,</span><span class="contributing"> and</span><span class="non-contributing"> brand</span><span class="non-contributing">y</span><span class="contributing">,</span><span class="non-contributing"> whereby</span><span class="non-contributing"> the</span><span class="non-contributing"> se</span><span class="non-contributing">amen</span><span class="non-contributing"> were</span><span class="non-contributing"> withdrawn</span><span class="contributing">
+</span><span class="non-contributing">from</span><span class="non-contributing"> their</span><span class="non-contributing"> labor</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> many</span><span class="non-contributing"> sed</span><span class="non-contributing">uced</span><span class="non-contributing"> to</span><span class="non-contributing"> stay</span><span class="contributing"> in</span><span class="contributing"> the</span><span class="non-contributing"> place</span><span class="contributing">,</span><span class="non-contributing"> while</span><span class="non-contributing"> their</span><span class="contributing">
+</span><span class="non-contributing">f</span><span class="non-contributing">amilies</span><span class="non-contributing"> thereby</span><span class="non-contributing"> became</span><span class="non-contributing"> bur</span><span class="non-contributing">th</span><span class="non-contributing">ens</span><span class="non-contributing">ome</span><span class="non-contributing"> to</span><span class="non-contributing"> their</span><span class="non-contributing"> respective</span><span class="non-contributing"> par</span><span class="non-contributing">ishes</span><span class="non-contributing"> at</span><span class="non-contributing">
+</span><span class="non-contributing">home</span><span class="non-contributing">.</span><span class="non-contributing"> That</span><span class="contributing"> the</span><span class="non-contributing"> inhabitants</span><span class="non-contributing"> lived</span><span class="non-contributing"> scattered</span><span class="contributing"> in</span><span class="non-contributing"> five</span><span class="non-contributing">-and</span><span class="non-contributing">-tw</span><span class="non-contributing">enty</span><span class="non-contributing"> different</span><span class="contributing">
+</span><span class="non-contributing">har</span><span class="non-contributing">b</span><span class="non-contributing">ors</span><span class="contributing">,</span><span class="non-contributing"> almost</span><span class="non-contributing"> eighty</span><span class="non-contributing"> leagues</span><span class="non-contributing"> as</span><span class="non-contributing">under</span><span class="non-contributing">;</span><span class="non-contributing"> and</span><span class="contributing"> that</span><span class="contributing"> in</span><span class="non-contributing"> all</span><span class="contributing"> the</span><span class="non-contributing"> winter</span><span class="contributing">,</span><span class="non-contributing"> when</span><span class="non-contributing">
+</span><span class="non-contributing">ab</span><span class="non-contributing">uses</span><span class="non-contributing"> were</span><span class="non-contributing"> chiefly</span><span class="non-contributing"> committed</span><span class="non-contributing">,</span><span class="non-contributing"> there</span><span class="contributing"> was</span><span class="non-contributing"> no</span><span class="non-contributing"> passing</span><span class="non-contributing"> from</span><span class="non-contributing"> one</span><span class="non-contributing"> place</span><span class="non-contributing"> to</span><span class="contributing">
+</span><span class="non-contributing">another</span><span class="non-contributing">,</span><span class="non-contributing"> so</span><span class="non-contributing"> that</span><span class="non-contributing"> near</span><span class="non-contributing"> forty</span><span class="non-contributing"> harb</span><span class="non-contributing">ors</span><span class="contributing"> would</span><span class="non-contributing"> have</span><span class="non-contributing"> no</span><span class="non-contributing"> government</span><span class="non-contributing">,</span><span class="non-contributing"> though</span><span class="non-contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">g</span><span class="non-contributing">overn</span><span class="non-contributing">or</span><span class="non-contributing"> were</span><span class="non-contributing"> actually</span><span class="non-contributing"> in</span><span class="non-contributing"> the</span><span class="non-contributing"> country</span><span class="contributing">.
+
+</span><span class="contributing">It</span><span class="contributing"> is</span><span class="non-contributing"> also</span><span class="non-contributing"> stated</span><span class="contributing">,</span><span class="contributing"> that</span><span class="non-contributing"> besides</span><span class="contributing"> the</span><span class="non-contributing"> charge</span><span class="contributing"> of</span><span class="non-contributing"> forts</span><span class="contributing">,</span><span class="contributing"> and</span><span class="non-contributing"> a</span><span class="non-contributing"> governor</span><span class="non-contributing">,
+</span><span class="non-contributing">which</span><span class="contributing"> the</span><span class="non-contributing"> fish</span><span class="non-contributing">-trade</span><span class="non-contributing"> could</span><span class="contributing"> not</span><span class="non-contributing"> support</span><span class="contributing">,</span><span class="contributing"> it</span><span class="contributing"> was</span><span class="non-contributing"> needless</span><span class="non-contributing"> to</span><span class="non-contributing"> have</span><span class="non-contributing"> any</span><span class="non-contributing">
+</span><span class="non-contributing">such</span><span class="non-contributing"> defence</span><span class="non-contributing"> against</span><span class="non-contributing"> foreigners</span><span class="non-contributing">,</span><span class="non-contributing"> the</span><span class="non-contributing"> coast</span><span class="non-contributing"> being</span><span class="non-contributing"> defended</span><span class="non-contributing"> in</span><span class="non-contributing"> winter</span><span class="non-contributing"> by</span><span class="non-contributing">
+</span><span class="non-contributing">the</span><span class="non-contributing"> ice</span><span class="non-contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> in</span><span class="non-contributing"> summer</span><span class="non-contributing"> by</span><span class="non-contributing"> the</span><span class="non-contributing"> resort</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> king</span><span class="non-contributing">’s</span><span class="non-contributing"> subjects</span><span class="non-contributing">;</span><span class="non-contributing"> so</span><span class="contributing"> that</span><span class="non-contributing">
+</span><span class="non-contributing">unless</span><span class="non-contributing"> there</span><span class="contributing"> were</span><span class="non-contributing"> proper</span><span class="non-contributing"> reasons</span><span class="non-contributing"> for</span><span class="non-contributing"> a</span><span class="contributing"> _</span><span class="non-contributing">col</span><span class="non-contributing">ony</span><span class="contributing">_,</span><span class="non-contributing"> there</span><span class="non-contributing"> could</span><span class="non-contributing"> be</span><span class="non-contributing"> none</span><span class="non-contributing"> for</span><span class="contributing">
+</span><span class="non-contributing">_g</span><span class="non-contributing">overn</span><span class="non-contributing">or</span><span class="non-contributing">_.</span><span class="non-contributing"> That</span><span class="non-contributing"> against</span><span class="non-contributing"> a</span><span class="non-contributing"> colony</span><span class="contributing">,</span><span class="non-contributing"> there</span><span class="contributing"> were</span><span class="non-contributing"> not</span><span class="non-contributing"> only</span><span class="contributing"> the</span><span class="non-contributing"> rig</span><span class="non-contributing">ours</span><span class="contributing"> of</span><span class="non-contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">climate</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> infertility</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> land</span><span class="contributing">,</span><span class="non-contributing"> which</span><span class="non-contributing"> obliged</span><span class="non-contributing"> those</span><span class="non-contributing"> who</span><span class="non-contributing"> were</span><span class="non-contributing"> there</span><span class="non-contributing">
+</span><span class="non-contributing">all</span><span class="contributing"> the</span><span class="non-contributing"> winter</span><span class="contributing">,</span><span class="non-contributing"> to</span><span class="non-contributing"> id</span><span class="non-contributing">leness</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> inclined</span><span class="non-contributing"> them</span><span class="contributing"> to</span><span class="non-contributing"> deb</span><span class="non-contributing">a</span><span class="non-contributing">uch</span><span class="non-contributing">ery</span><span class="contributing">,</span><span class="non-contributing"> but</span><span class="non-contributing"> this</span><span class="non-contributing">,
+</span><span class="non-contributing">that</span><span class="non-contributing"> they</span><span class="non-contributing"> chiefly</span><span class="non-contributing"> consumed</span><span class="non-contributing"> the</span><span class="non-contributing"> produce</span><span class="contributing"> of</span><span class="non-contributing"> _</span><span class="non-contributing">New</span><span class="non-contributing"> England</span><span class="non-contributing">_,</span><span class="non-contributing"> by</span><span class="non-contributing"> the</span><span class="non-contributing"> shipping</span><span class="non-contributing">
+</span><span class="non-contributing">of</span><span class="non-contributing"> which</span><span class="non-contributing"> country</span><span class="contributing">,</span><span class="non-contributing"> they</span><span class="non-contributing"> were</span><span class="non-contributing"> furnished</span><span class="non-contributing"> with</span><span class="non-contributing"> French</span><span class="non-contributing"> wine</span><span class="contributing"> and</span><span class="non-contributing"> brand</span><span class="non-contributing">y</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="contributing">
+</span><span class="non-contributing">_M</span><span class="non-contributing">ade</span><span class="non-contributing">ira</span><span class="contributing">_</span><span class="non-contributing"> wines</span><span class="contributing">,</span><span class="contributing"> in</span><span class="non-contributing"> exchange</span><span class="non-contributing"> for</span><span class="non-contributing"> their</span><span class="non-contributing"> fish</span><span class="contributing">,</span><span class="non-contributing"> without</span><span class="non-contributing"> depending</span><span class="contributing">,</span><span class="contributing"> as</span><span class="non-contributing"> they</span><span class="non-contributing">
+</span><span class="non-contributing">should</span><span class="contributing">,</span><span class="non-contributing"> for</span><span class="non-contributing"> supply</span><span class="non-contributing"> from</span><span class="non-contributing"> England</span><span class="non-contributing">;</span><span class="non-contributing"> so</span><span class="non-contributing"> that</span><span class="non-contributing"> if</span><span class="non-contributing"> the</span><span class="non-contributing"> climate</span><span class="contributing"> and</span><span class="non-contributing"> soil</span><span class="non-contributing"> should</span><span class="contributing">
+</span><span class="non-contributing">f</span><span class="non-contributing">avour</span><span class="non-contributing"> a</span><span class="non-contributing"> colony</span><span class="contributing">,</span><span class="non-contributing"> the</span><span class="non-contributing"> plant</span><span class="non-contributing">ers</span><span class="contributing"> would</span><span class="non-contributing"> rather</span><span class="non-contributing"> adhere</span><span class="non-contributing"> to</span><span class="contributing"> _</span><span class="non-contributing">New</span><span class="contributing"> England</span><span class="non-contributing">_,
+</span><span class="non-contributing">and</span><span class="non-contributing"> so</span><span class="non-contributing"> go</span><span class="non-contributing"> on</span><span class="non-contributing"> to</span><span class="non-contributing"> tread</span><span class="contributing"> in</span><span class="non-contributing"> the</span><span class="non-contributing"> same</span><span class="non-contributing"> steps</span><span class="non-contributing"> as</span><span class="non-contributing"> those</span><span class="non-contributing"> colon</span><span class="non-contributing">ists</span><span class="non-contributing"> did</span><span class="contributing">,</span><span class="non-contributing"> to</span><span class="non-contributing"> the</span><span class="non-contributing">
+</span><span class="non-contributing">loss</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> many</span><span class="non-contributing"> advantages</span></div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</div>
+            <div class="content"><span class="contributing">op</span><span class="contributing">inion</span><span class="contributing"> there</span><span class="contributing">on</span><span class="contributing">.
+
+</span><span class="contributing">[S</span><span class="contributing">iden</span><span class="contributing">ote</span><span class="contributing">:</span><span class="contributing"> Report</span><span class="contributing"> against</span><span class="contributing"> a</span><span class="contributing"> Governor</span><span class="contributing"> in</span><span class="contributing"> </span><span class="contributing">167</span><span class="contributing">5</span><span class="contributing">.]
+
+</span><span class="contributing">In</span><span class="contributing"> this</span><span class="contributing"> report</span><span class="contributing"> it</span><span class="contributing"> is</span><span class="contributing"> stated</span><span class="contributing">,</span><span class="contributing"> that</span><span class="contributing"> for</span><span class="contributing"> some</span><span class="contributing"> late</span><span class="contributing"> years</span><span class="contributing">,</span><span class="contributing"> the</span><span class="contributing"> fish</span><span class="contributing"> had</span><span class="contributing">
+</span><span class="contributing">failed</span><span class="contributing"> in</span><span class="contributing"> Newfoundland</span><span class="contributing">;</span><span class="contributing"> that</span><span class="contributing"> the</span><span class="contributing"> adventurers</span><span class="contributing"> had</span><span class="contributing"> lost</span><span class="contributing"> many</span><span class="contributing"> of</span><span class="contributing"> their</span><span class="contributing">
+</span><span class="contributing">ships</span><span class="contributing"> in</span><span class="contributing"> the</span><span class="contributing"> late</span><span class="contributing"> wars</span><span class="contributing">,</span><span class="contributing"> especially</span><span class="contributing"> in</span><span class="contributing"> that</span><span class="contributing"> with</span><span class="contributing"> _</span><span class="contributing">Spain</span><span class="contributing">_;</span><span class="contributing"> and</span><span class="contributing"> that</span><span class="contributing">
+</span><span class="non-contributing">gener</span><span class="non-contributing">osity</span><span class="non-contributing"> and</span><span class="non-contributing"> necessity</span><span class="contributing"> had</span><span class="non-contributing"> together</span><span class="non-contributing"> begun</span><span class="contributing"> to</span><span class="non-contributing"> fail</span><span class="non-contributing"> there</span><span class="non-contributing"> own</span><span class="non-contributing"> adventurers</span><span class="contributing">
+</span><span class="non-contributing">in</span><span class="non-contributing"> Newfoundland</span><span class="non-contributing">;</span><span class="contributing"> and</span><span class="non-contributing"> that</span><span class="non-contributing"> many</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing">&lt;|begin_of_text|&gt;</span><span class="non-contributing">end</span><span class="non-contributing">es</span><span class="non-contributing"> were</span><span class="non-contributing"> gone</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> many</span><span class="non-contributing"> of</span><span class="contributing">
+</span><span class="non-contributing">them</span><span class="non-contributing"> were</span><span class="non-contributing"> in</span><span class="non-contributing"> deep</span><span class="contributing"> sea</span><span class="contributing">,</span><span class="contributing"> and</span><span class="non-contributing"> unable</span><span class="non-contributing"> to</span><span class="non-contributing"> go</span><span class="contributing"> to</span><span class="non-contributing"> _</span><span class="non-contributing">England</span><span class="non-contributing">_.</span><span class="non-contributing"> In</span><span class="non-contributing"> spite</span><span class="non-contributing"> of</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">general</span><span class="non-contributing"> attempt</span><span class="non-contributing"> at</span><span class="non-contributing"> security</span><span class="contributing">,</span><span class="non-contributing"> a</span><span class="non-contributing"> difficulty</span><span class="non-contributing"> here</span><span class="contributing">,</span><span class="non-contributing"> will</span><span class="non-contributing"> remain</span><span class="contributing">,</span><span class="non-contributing"> that</span><span class="non-contributing"> notwithstanding</span><span class="non-contributing">
+</span><span class="non-contributing">these</span><span class="non-contributing"> circumstances</span><span class="contributing"> and</span><span class="non-contributing"> these</span><span class="non-contributing"> circumstances</span><span class="contributing">,</span><span class="non-contributing"> there</span><span class="non-contributing"> still</span><span class="non-contributing"> remained</span><span class="non-contributing"> to</span><span class="non-contributing"> his</span><span class="contributing">
+</span><span class="non-contributing">maj</span><span class="non-contributing">esty</span><span class="contributing">,</span><span class="non-contributing"> a</span><span class="non-contributing"> large</span><span class="non-contributing"> majority</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> people</span><span class="contributing"> in</span><span class="contributing"> the</span><span class="non-contributing"> west</span><span class="non-contributing"> of</span><span class="non-contributing"> England</span><span class="contributing">,</span><span class="non-contributing"> who</span><span class="non-contributing"> were</span><span class="contributing">
+</span><span class="non-contributing">content</span><span class="non-contributing">ed</span><span class="non-contributing"> with</span><span class="non-contributing"> the</span><span class="non-contributing"> administration</span><span class="non-contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> place</span><span class="non-contributing">,</span><span class="non-contributing"> as</span><span class="non-contributing"> witnesses</span><span class="non-contributing"> upon</span><span class="contributing"> in</span><span class="contributing">
+</span><span class="non-contributing">def</span><span class="non-contributing">ence</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> claims</span><span class="non-contributing"> of</span><span class="non-contributing"> some</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing"> more</span><span class="non-contributing"> wealthy</span><span class="non-contributing"> merchants</span><span class="non-contributing">.</span><span class="non-contributing"> Also</span><span class="contributing">,</span><span class="contributing"> that</span><span class="non-contributing"> if</span><span class="non-contributing">
+</span><span class="non-contributing">any</span><span class="non-contributing"> usur</span><span class="non-contributing">per</span><span class="non-contributing"> came</span><span class="non-contributing"> up</span><span class="contributing"> in</span><span class="non-contributing"> _</span><span class="non-contributing">any</span><span class="non-contributing">_</span><span class="non-contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> statutes</span><span class="non-contributing"> as</span><span class="non-contributing"> he</span><span class="non-contributing"> sp</span><span class="non-contributing">ake</span><span class="non-contributing"> of</span><span class="contributing">,</span><span class="non-contributing"> he</span><span class="contributing"> was</span><span class="contributing">
+</span><span class="non-contributing">gu</span><span class="non-contributing">ilty</span><span class="non-contributing"> of</span><span class="non-contributing"> a</span><span class="non-contributing"> false</span><span class="non-contributing"> and</span><span class="non-contributing"> infamous</span><span class="non-contributing"> charge</span><span class="non-contributing"> against</span><span class="non-contributing"> _</span><span class="non-contributing">the</span><span class="non-contributing"> people</span><span class="non-contributing">_,</span><span class="non-contributing"> and</span><span class="contributing"> would</span><span class="contributing">
+</span><span class="non-contributing">be</span><span class="non-contributing"> severely</span><span class="non-contributing"> dealt</span><span class="non-contributing"> with</span><span class="non-contributing"> according</span><span class="non-contributing"> to</span><span class="non-contributing"> law</span><span class="contributing">.
+
+</span><span class="non-contributing">[S</span><span class="non-contributing">iden</span><span class="non-contributing">ote</span><span class="non-contributing">:</span><span class="non-contributing"> Reason</span><span class="non-contributing"> of</span><span class="non-contributing"> this</span><span class="non-contributing"> Government</span><span class="non-contributing">.]
+
+</span><span class="contributing">It</span><span class="contributing"> is</span><span class="non-contributing"> thought</span><span class="non-contributing"> by</span><span class="non-contributing"> some</span><span class="non-contributing"> of</span><span class="non-contributing"> your</span><span class="non-contributing"> lord</span><span class="non-contributing">ships</span><span class="contributing">,</span><span class="contributing"> that</span><span class="non-contributing"> the</span><span class="non-contributing"> colony</span><span class="non-contributing"> should</span><span class="non-contributing"> have</span><span class="non-contributing">
+</span><span class="non-contributing">origin</span><span class="non-contributing">ally</span><span class="non-contributing"> been</span><span class="non-contributing"> founded</span><span class="non-contributing"> in</span><span class="contributing"> the</span><span class="non-contributing"> province</span><span class="contributing"> of</span><span class="non-contributing"> _</span><span class="non-contributing">New</span><span class="non-contributing"> England</span><span class="non-contributing">_.</span><span class="non-contributing"> The</span><span class="non-contributing"> settlement</span><span class="non-contributing">
+</span><span class="non-contributing">of</span><span class="non-contributing"> _</span><span class="non-contributing">England</span><span class="non-contributing">_</span><span class="non-contributing"> would</span><span class="non-contributing"> be</span><span class="non-contributing"> an</span><span class="non-contributing"> innovation</span><span class="contributing">,</span><span class="contributing"> and</span><span class="non-contributing"> would</span><span class="non-contributing"> doubt</span><span class="non-contributing">less</span><span class="non-contributing"> be</span><span class="non-contributing"> disple</span><span class="non-contributing">asing</span><span class="non-contributing">
+</span><span class="non-contributing">to</span><span class="contributing"> the</span><span class="non-contributing"> people</span><span class="non-contributing">;</span><span class="non-contributing"> and</span><span class="non-contributing">,</span><span class="non-contributing"> if</span><span class="contributing"> not</span><span class="contributing">,</span><span class="non-contributing"> there</span><span class="non-contributing"> would</span><span class="non-contributing"> have</span><span class="non-contributing"> been</span><span class="non-contributing"> great</span><span class="non-contributing"> force</span><span class="non-contributing"> to</span><span class="non-contributing"> meet</span><span class="non-contributing">
+</span><span class="non-contributing">and</span><span class="non-contributing"> oppose</span><span class="non-contributing"> it</span><span class="non-contributing">.</span><span class="non-contributing"> There</span><span class="contributing"> it</span><span class="contributing"> was</span><span class="contributing"> that</span><span class="non-contributing"> we</span><span class="contributing"> were</span><span class="non-contributing"> to</span><span class="non-contributing"> go</span><span class="contributing"> _</span><span class="non-contributing">first</span><span class="contributing">_,</span><span class="non-contributing"> and</span><span class="non-contributing"> see</span><span class="non-contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">thing</span><span class="non-contributing">.</span><span class="non-contributing"> Accordingly</span><span class="contributing">,</span><span class="non-contributing"> we</span><span class="contributing"> were</span><span class="non-contributing"> first</span><span class="non-contributing"> made</span><span class="non-contributing"> sure</span><span class="non-contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> advantages</span><span class="contributing"> of</span><span class="non-contributing"> a</span><span class="contributing">
+</span><span class="non-contributing">set</span><span class="non-contributing">tlement</span><span class="non-contributing">,</span><span class="non-contributing"> by</span><span class="non-contributing"> coming</span><span class="non-contributing"> to</span><span class="non-contributing"> England</span><span class="contributing">,</span><span class="non-contributing"> fully</span><span class="non-contributing"> armed</span><span class="contributing">,</span><span class="non-contributing"> on</span><span class="contributing"> the</span><span class="non-contributing"> </span><span class="non-contributing">6</span><span class="non-contributing">th</span><span class="non-contributing"> of</span><span class="non-contributing"> April</span><span class="non-contributing">,
+</span><span class="non-contributing">167</span><span class="non-contributing">5</span><span class="non-contributing">-</span><span class="non-contributing">6</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> with</span><span class="non-contributing"> our</span><span class="non-contributing"> arms</span><span class="non-contributing"> on</span><span class="non-contributing"> our</span><span class="non-contributing"> shoulders</span><span class="contributing">,</span><span class="non-contributing"> went</span><span class="non-contributing"> up</span><span class="contributing"> to</span><span class="non-contributing"> London</span><span class="contributing">,</span><span class="non-contributing"> with</span><span class="non-contributing">
+</span><span class="non-contributing">many</span><span class="contributing"> of</span><span class="non-contributing"> your</span><span class="non-contributing"> lords</span><span class="contributing">,</span><span class="contributing"> and</span><span class="non-contributing"> making</span><span class="non-contributing"> representations</span><span class="non-contributing"> there</span><span class="non-contributing">on</span><span class="non-contributing"> of</span><span class="non-contributing"> us</span><span class="contributing">,</span><span class="non-contributing"> that</span><span class="non-contributing"> we</span><span class="contributing">
+</span><span class="non-contributing">would</span><span class="non-contributing"> be</span><span class="non-contributing"> ready</span><span class="non-contributing"> at</span><span class="non-contributing"> any</span><span class="non-contributing"> time</span><span class="non-contributing"> to</span><span class="non-contributing"> go</span><span class="non-contributing"> to</span><span class="non-contributing"> _</span><span class="non-contributing">England</span><span class="contributing">_</span><span class="non-contributing">--</span><span class="non-contributing">that</span><span class="non-contributing"> our</span><span class="non-contributing"> ministers</span><span class="non-contributing">
+</span><span class="non-contributing">mis</span><span class="non-contributing">under</span><span class="non-contributing">standing</span><span class="contributing">,</span><span class="non-contributing"> they</span><span class="non-contributing"> should</span><span class="non-contributing"> seek</span><span class="non-contributing"> that</span><span class="non-contributing"> good</span><span class="non-contributing"> faith</span><span class="contributing"> in</span><span class="non-contributing"> us</span><span class="contributing">,</span><span class="non-contributing"> which</span><span class="non-contributing"> we</span><span class="non-contributing"> could</span><span class="non-contributing">
+</span><span class="non-contributing">never</span><span class="non-contributing"> have</span><span class="non-contributing"> done</span><span class="contributing">,</span><span class="non-contributing"> as</span><span class="non-contributing"> well</span><span class="contributing"> as</span><span class="non-contributing"> to</span><span class="non-contributing"> have</span><span class="non-contributing"> sent</span><span class="non-contributing"> us</span><span class="non-contributing"> our</span><span class="non-contributing"> reasons</span><span class="non-contributing"> of</span><span class="non-contributing"> purpose</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing">
+</span><span class="non-contributing">any</span><span class="non-contributing"> laws</span><span class="non-contributing"> there</span><span class="non-contributing">for</span><span class="non-contributing">;</span><span class="non-contributing">--</span><span class="non-contributing">and</span><span class="non-contributing"> when</span><span class="non-contributing"> they</span><span class="non-contributing"> had</span><span class="non-contributing"> this</span><span class="contributing">,</span><span class="non-contributing"> they</span><span class="contributing"> would</span><span class="non-contributing"> take</span><span class="non-contributing"> their</span><span class="non-contributing">
+</span><span class="non-contributing">pro</span><span class="non-contributing">tection</span><span class="non-contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> go</span><span class="contributing"> _</span><span class="non-contributing">to</span><span class="contributing"> England</span><span class="non-contributing">_</span><span class="non-contributing">.
+</span><span class="non-contributing">[S</span><span class="non-contributing">iden</span><span class="non-contributing">ote</span><span class="non-contributing">:</span><span class="non-contributing"> Reason</span><span class="non-contributing"> of</span><span class="non-contributing"> this</span><span class="non-contributing"> System</span><span class="non-contributing">.]
+
+</span><span class="non-contributing">Soon</span><span class="non-contributing"> after</span><span class="non-contributing"> our</span><span class="non-contributing"> arrival</span><span class="contributing"> in</span><span class="non-contributing"> England</span><span class="contributing">,</span><span class="non-contributing"> we</span><span class="non-contributing"> were</span><span class="non-contributing"> informed</span><span class="non-contributing"> that</span><span class="non-contributing"> certain</span></div>
+        </div>
+    </div>
+</body>
+</html>

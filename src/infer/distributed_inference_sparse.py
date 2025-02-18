@@ -12,7 +12,6 @@ import json
 import torch.nn.functional as F
 import torch.nn as nn
 import numpy as np
-import random
 
 from distributed_inference import (
     batch_processing_gutenberg,
