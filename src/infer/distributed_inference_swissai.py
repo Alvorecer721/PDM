@@ -10,7 +10,6 @@ from distributed_inference import batch_processing_gutenberg
 from utils import set_seed
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert SwissAI Megatron checkpoint and run inference on Gutenberg dataset')
     parser.add_argument('--experiment-path', type=str, required=True, 
@@ -41,6 +40,11 @@ if __name__ == "__main__":
 
     # Find the iteration directory dynamically
     model_path = Path(args.experiment_path) / "HF"
+
+    model = AutoModelForCausalLM.from_pretrained(
+        model_path,
+        torch_dtype=torch.float16,  # Use float16 for efficiency
+    )
 
     # Create output directory
     output_dir = Path(args.experiment_path) / "inference"
