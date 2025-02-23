@@ -1,9 +1,15 @@
 #!/bin/bash
+if [ "$#" -ne 1 ]; then
+    echo "ERROR: Please provide experiment path"
+    echo "Usage: $0 /path/to/experiment/directory"
+    exit 1
+fi
+
 
 MEGATRON_LM_DIR=/iopsstor/scratch/cscs/$USER/Megatron-LM
 export PYTHONPATH=$MEGATRON_LM_DIR:$PYTHONPATH
 
-EXPR_PATH="/iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/Goldfish/llama3-1b-15n-8192sl-60gbsz-standard-no-bos"
+EXPR_PATH="$1"
 EXPR_NAME=$(basename ${EXPR_PATH})
 RES_PATH="/capstor/users/cscs/xyixuan/PDM/results/lm_eval/${EXPR_NAME}"
 mkdir -p ${RES_PATH}

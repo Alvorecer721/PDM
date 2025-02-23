@@ -9,7 +9,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=12:00:00
-#SBATCH --array=0-9
+#SBATCH --array=0-2
 
 set -e  # Exit immediately if any command fails
 
@@ -35,11 +35,11 @@ export MASTER_ADDR
 # offset=${offsets[$SLURM_ARRAY_TASK_ID]}
 
 # Define suffix length
-# declare -a suffix_lengths=(50 100 250 500 1000 1500 2000 2500)
+# declare -a suffix_lengths=(50 100 250 500 1000 1500 2000 2500 3000)
 # suffix_length=${suffix_lengths[$SLURM_ARRAY_TASK_ID]}
 
 # Define prefix lengths
-declare -a prefix_lengths=(50 100 250 750 1000 1500 2000 3000 4000 5000) 
+declare -a prefix_lengths=(3000 4000 5000) # 50 100 250 750 1000 1500 2000 
 prefix_length=${prefix_lengths[$SLURM_ARRAY_TASK_ID]}
 
 # Function to verify array length
@@ -87,7 +87,7 @@ CMD="srun torchrun \
     --offset 100 \
     --prefix-length $prefix_length \
     --suffix-length 500 \
-    --batch-size 100"
+    --batch-size 50"
 
 # Echo the command to stdout only
 echo "Executing command:" >&1

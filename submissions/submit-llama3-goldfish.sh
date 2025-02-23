@@ -37,7 +37,7 @@ DATASET_CACHE_DIR=/iopsstor/scratch/cscs/$USER/datasets/cache
 
 # Logging directories & artifacts
 PROJECT_NAME=Goldfish
-EXP_NAME=llama3-1b-${SLURM_NNODES}n-${SEQ_LEN}sl-${GBS}gbsz-standard-no-bos
+EXP_NAME=llama3-1b-${SLURM_NNODES}n-${SEQ_LEN}sl-${GBS}gbsz-standard
 PROJECT_DIR=$MEGATRON_LM_DIR/logs/Meg-Runs/$PROJECT_NAME
 
 #########################################
