@@ -231,7 +231,7 @@ if __name__ == "__main__":
     # Check if HF directory already exists and contains model files
     hf_dir = Path(args.experiment_path) / "HF"
 
-    if hf_dir.exists() and (hf_dir / "config.json").exists() and (hf_dir / "model.safetensors").exists():
+    if hf_dir.exists() and (hf_dir / "config.json").exists() and list(hf_dir.glob("*.safetensors")):
         print(f"\nHuggingFace model already exists at: {hf_dir}")
         print("Skipping conversion. Delete the HF directory if you want to reconvert.")
         sys.exit(0)
