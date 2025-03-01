@@ -46,7 +46,8 @@ def load_inference_data(base_dir, step=None, consumed=None, offset=None, len_pre
     dataset = load_dataset(
         'json', 
         data_files=[str(f) for f in rank_files], 
-        split='train'
+        split='train',
+        cache_dir="/iopsstor/scratch/cscs/xyixuan/gutenberg"
     )
     
     total_size = len(dataset)

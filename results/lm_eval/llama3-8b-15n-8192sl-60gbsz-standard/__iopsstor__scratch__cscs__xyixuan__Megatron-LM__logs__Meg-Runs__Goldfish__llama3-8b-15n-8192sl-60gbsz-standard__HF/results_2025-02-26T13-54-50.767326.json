@@ -1,176 +1,195 @@
 {
   "results": {
+    "arc_challenge": {
+      "alias": "arc_challenge",
+      "acc,none": 0.42235494880546076,
+      "acc_stderr,none": 0.014434138713379965,
+      "acc_norm,none": 0.4598976109215017,
+      "acc_norm_stderr,none": 0.01456431885692496
+    },
+    "arc_easy": {
+      "alias": "arc_easy",
+      "acc,none": 0.7596801346801347,
+      "acc_stderr,none": 0.008767553284156834,
+      "acc_norm,none": 0.7218013468013468,
+      "acc_norm_stderr,none": 0.00919505960158374
+    },
+    "commonsense_qa": {
+      "alias": "commonsense_qa",
+      "acc,none": 0.20556920556920558,
+      "acc_stderr,none": 0.011569834551534352
+    },
     "hellaswag": {
       "alias": "hellaswag",
-      "acc,none": 0.4076877116112328,
-      "acc_stderr,none": 0.004904002676184629,
-      "acc_norm,none": 0.5214100776737701,
-      "acc_norm_stderr,none": 0.004985204766555324
+      "acc,none": 0.49741087432782316,
+      "acc_stderr,none": 0.004989714512282005,
+      "acc_norm,none": 0.6574387572196774,
+      "acc_norm_stderr,none": 0.004735962781136343
     },
     "mmlu": {
-      "acc,none": 0.24291411479846176,
-      "acc_stderr,none": 0.003615953880635936,
+      "acc,none": 0.24533542230451502,
+      "acc_stderr,none": 0.003626940326820307,
       "alias": "mmlu"
     },
     "mmlu_humanities": {
-      "acc,none": 0.23995749202975558,
-      "acc_stderr,none": 0.006226634339040469,
+      "acc,none": 0.2365568544102019,
+      "acc_stderr,none": 0.006193794779109006,
       "alias": " - humanities"
     },
     "mmlu_formal_logic": {
       "alias": "  - formal_logic",
-      "acc,none": 0.21428571428571427,
-      "acc_stderr,none": 0.03670066451047179
+      "acc,none": 0.31746031746031744,
+      "acc_stderr,none": 0.04163453031302857
     },
     "mmlu_high_school_european_history": {
       "alias": "  - high_school_european_history",
-      "acc,none": 0.22424242424242424,
-      "acc_stderr,none": 0.03256866661681102
+      "acc,none": 0.2545454545454545,
+      "acc_stderr,none": 0.03401506715249038
     },
     "mmlu_high_school_us_history": {
       "alias": "  - high_school_us_history",
-      "acc,none": 0.22549019607843138,
-      "acc_stderr,none": 0.029331162294251718
+      "acc,none": 0.25,
+      "acc_stderr,none": 0.03039153369274154
     },
     "mmlu_high_school_world_history": {
       "alias": "  - high_school_world_history",
-      "acc,none": 0.2911392405063291,
-      "acc_stderr,none": 0.02957160106575333
+      "acc,none": 0.2320675105485232,
+      "acc_stderr,none": 0.027479744550808465
     },
     "mmlu_international_law": {
       "alias": "  - international_law",
-      "acc,none": 0.21487603305785125,
-      "acc_stderr,none": 0.037494924487096966
+      "acc,none": 0.2396694214876033,
+      "acc_stderr,none": 0.03896878985070412
     },
     "mmlu_jurisprudence": {
       "alias": "  - jurisprudence",
-      "acc,none": 0.24074074074074073,
-      "acc_stderr,none": 0.041331194402438355
+      "acc,none": 0.18518518518518517,
+      "acc_stderr,none": 0.03755265865037181
     },
     "mmlu_logical_fallacies": {
       "alias": "  - logical_fallacies",
-      "acc,none": 0.18404907975460122,
-      "acc_stderr,none": 0.030446777687971775
+      "acc,none": 0.22085889570552147,
+      "acc_stderr,none": 0.032591773927421734
     },
     "mmlu_moral_disputes": {
       "alias": "  - moral_disputes",
-      "acc,none": 0.22832369942196531,
-      "acc_stderr,none": 0.022598703804321586
+      "acc,none": 0.2832369942196532,
+      "acc_stderr,none": 0.024257901705323326
     },
     "mmlu_moral_scenarios": {
       "alias": "  - moral_scenarios",
-      "acc,none": 0.2435754189944134,
-      "acc_stderr,none": 0.014355911964767933
+      "acc,none": 0.2324022346368715,
+      "acc_stderr,none": 0.014125968754673392
     },
     "mmlu_philosophy": {
       "alias": "  - philosophy",
-      "acc,none": 0.21543408360128619,
-      "acc_stderr,none": 0.023350225475471442
+      "acc,none": 0.2540192926045016,
+      "acc_stderr,none": 0.024723861504771655
     },
     "mmlu_prehistory": {
       "alias": "  - prehistory",
-      "acc,none": 0.22530864197530864,
-      "acc_stderr,none": 0.02324620264781973
+      "acc,none": 0.25308641975308643,
+      "acc_stderr,none": 0.02419180860071302
     },
     "mmlu_professional_law": {
       "alias": "  - professional_law",
-      "acc,none": 0.24902216427640156,
-      "acc_stderr,none": 0.011044892264040655
+      "acc,none": 0.22099087353324642,
+      "acc_stderr,none": 0.010597108103720717
     },
     "mmlu_world_religions": {
       "alias": "  - world_religions",
-      "acc,none": 0.28654970760233917,
-      "acc_stderr,none": 0.03467826685703828
+      "acc,none": 0.19883040935672514,
+      "acc_stderr,none": 0.030611116557432514
     },
     "mmlu_other": {
-      "acc,none": 0.2565175410363695,
-      "acc_stderr,none": 0.00782733565193625,
+      "acc,none": 0.2597360798197618,
+      "acc_stderr,none": 0.00786636448734144,
       "alias": " - other"
     },
     "mmlu_business_ethics": {
       "alias": "  - business_ethics",
-      "acc,none": 0.23,
-      "acc_stderr,none": 0.04229525846816507
+      "acc,none": 0.32,
+      "acc_stderr,none": 0.04688261722621507
     },
     "mmlu_clinical_knowledge": {
       "alias": "  - clinical_knowledge",
-      "acc,none": 0.22641509433962265,
-      "acc_stderr,none": 0.025757559893106702
+      "acc,none": 0.29056603773584905,
+      "acc_stderr,none": 0.027943219989337183
     },
     "mmlu_college_medicine": {
       "alias": "  - college_medicine",
-      "acc,none": 0.21965317919075145,
-      "acc_stderr,none": 0.03156809362703173
+      "acc,none": 0.28901734104046245,
+      "acc_stderr,none": 0.03456425745086997
     },
     "mmlu_global_facts": {
       "alias": "  - global_facts",
-      "acc,none": 0.28,
-      "acc_stderr,none": 0.045126085985421296
+      "acc,none": 0.31,
+      "acc_stderr,none": 0.04648231987117317
     },
     "mmlu_human_aging": {
       "alias": "  - human_aging",
-      "acc,none": 0.33183856502242154,
-      "acc_stderr,none": 0.03160295143776678
+      "acc,none": 0.23766816143497757,
+      "acc_stderr,none": 0.02856807946471428
     },
     "mmlu_management": {
       "alias": "  - management",
-      "acc,none": 0.2524271844660194,
-      "acc_stderr,none": 0.04301250399690879
+      "acc,none": 0.20388349514563106,
+      "acc_stderr,none": 0.0398913985953177
     },
     "mmlu_marketing": {
       "alias": "  - marketing",
-      "acc,none": 0.2564102564102564,
-      "acc_stderr,none": 0.02860595370200432
+      "acc,none": 0.23931623931623933,
+      "acc_stderr,none": 0.02795182680892435
     },
     "mmlu_medical_genetics": {
       "alias": "  - medical_genetics",
-      "acc,none": 0.3,
-      "acc_stderr,none": 0.04605661864718382
+      "acc,none": 0.29,
+      "acc_stderr,none": 0.045604802157206865
     },
     "mmlu_miscellaneous": {
       "alias": "  - miscellaneous",
-      "acc,none": 0.2720306513409962,
-      "acc_stderr,none": 0.01591336744750049
+      "acc,none": 0.24648786717752236,
+      "acc_stderr,none": 0.015411308769686863
     },
     "mmlu_nutrition": {
       "alias": "  - nutrition",
-      "acc,none": 0.22549019607843138,
-      "acc_stderr,none": 0.023929155517351218
+      "acc,none": 0.238562091503268,
+      "acc_stderr,none": 0.02440439492808785
     },
     "mmlu_professional_accounting": {
       "alias": "  - professional_accounting",
-      "acc,none": 0.2553191489361702,
-      "acc_stderr,none": 0.026011992930901992
+      "acc,none": 0.23404255319148937,
+      "acc_stderr,none": 0.025257861359432372
     },
     "mmlu_professional_medicine": {
       "alias": "  - professional_medicine",
-      "acc,none": 0.20220588235294118,
-      "acc_stderr,none": 0.024398192986654934
+      "acc,none": 0.2757352941176471,
+      "acc_stderr,none": 0.02714627193662515
     },
     "mmlu_virology": {
       "alias": "  - virology",
-      "acc,none": 0.29518072289156627,
-      "acc_stderr,none": 0.035509201856896336
+      "acc,none": 0.3072289156626506,
+      "acc_stderr,none": 0.03591566797824665
     },
     "mmlu_social_sciences": {
-      "acc,none": 0.23106922326941826,
-      "acc_stderr,none": 0.007599369083343713,
+      "acc,none": 0.24991875203119923,
+      "acc_stderr,none": 0.0077975478147819105,
       "alias": " - social sciences"
     },
     "mmlu_econometrics": {
       "alias": "  - econometrics",
-      "acc,none": 0.2807017543859649,
-      "acc_stderr,none": 0.042270544512322025
+      "acc,none": 0.23684210526315788,
+      "acc_stderr,none": 0.03999423879281335
     },
     "mmlu_high_school_geography": {
       "alias": "  - high_school_geography",
-      "acc,none": 0.20202020202020202,
-      "acc_stderr,none": 0.028606204289229834
+      "acc,none": 0.2676767676767677,
+      "acc_stderr,none": 0.031544498882702825
     },
     "mmlu_high_school_government_and_politics": {
       "alias": "  - high_school_government_and_politics",
-      "acc,none": 0.21761658031088082,
-      "acc_stderr,none": 0.029778663037752975
+      "acc,none": 0.17098445595854922,
+      "acc_stderr,none": 0.02717121368316455
     },
     "mmlu_high_school_macroeconomics": {
       "alias": "  - high_school_macroeconomics",
@@ -179,33 +198,33 @@
     },
     "mmlu_high_school_microeconomics": {
       "alias": "  - high_school_microeconomics",
-      "acc,none": 0.23949579831932774,
-      "acc_stderr,none": 0.02772206549336123
+      "acc,none": 0.2773109243697479,
+      "acc_stderr,none": 0.029079374539480007
     },
     "mmlu_high_school_psychology": {
       "alias": "  - high_school_psychology",
-      "acc,none": 0.22385321100917432,
-      "acc_stderr,none": 0.017871217767790198
+      "acc,none": 0.28807339449541286,
+      "acc_stderr,none": 0.019416445892635966
     },
     "mmlu_human_sexuality": {
       "alias": "  - human_sexuality",
-      "acc,none": 0.2595419847328244,
-      "acc_stderr,none": 0.03844876139785267
+      "acc,none": 0.19083969465648856,
+      "acc_stderr,none": 0.03446513350752599
     },
     "mmlu_professional_psychology": {
       "alias": "  - professional_psychology",
-      "acc,none": 0.23529411764705882,
-      "acc_stderr,none": 0.017160587235046418
+      "acc,none": 0.25326797385620914,
+      "acc_stderr,none": 0.017593486895366887
     },
     "mmlu_public_relations": {
       "alias": "  - public_relations",
-      "acc,none": 0.2818181818181818,
-      "acc_stderr,none": 0.043091187099464606
+      "acc,none": 0.2,
+      "acc_stderr,none": 0.038313051408846055
     },
     "mmlu_security_studies": {
       "alias": "  - security_studies",
-      "acc,none": 0.1673469387755102,
-      "acc_stderr,none": 0.023897144768914517
+      "acc,none": 0.22857142857142856,
+      "acc_stderr,none": 0.026882144922307716
     },
     "mmlu_sociology": {
       "alias": "  - sociology",
@@ -214,23 +233,23 @@
     },
     "mmlu_us_foreign_policy": {
       "alias": "  - us_foreign_policy",
-      "acc,none": 0.23,
-      "acc_stderr,none": 0.04229525846816507
+      "acc,none": 0.3,
+      "acc_stderr,none": 0.04605661864718382
     },
     "mmlu_stem": {
-      "acc,none": 0.24548049476688868,
-      "acc_stderr,none": 0.007649047106163907,
+      "acc,none": 0.23977164605137963,
+      "acc_stderr,none": 0.007582376964367822,
       "alias": " - stem"
     },
     "mmlu_abstract_algebra": {
       "alias": "  - abstract_algebra",
-      "acc,none": 0.28,
-      "acc_stderr,none": 0.045126085985421296
+      "acc,none": 0.25,
+      "acc_stderr,none": 0.04351941398892446
     },
     "mmlu_anatomy": {
       "alias": "  - anatomy",
-      "acc,none": 0.2,
-      "acc_stderr,none": 0.03455473702325441
+      "acc,none": 0.3333333333333333,
+      "acc_stderr,none": 0.04072314811876841
     },
     "mmlu_astronomy": {
       "alias": "  - astronomy",
@@ -239,18 +258,18 @@
     },
     "mmlu_college_biology": {
       "alias": "  - college_biology",
-      "acc,none": 0.1875,
-      "acc_stderr,none": 0.032639560491693344
+      "acc,none": 0.2222222222222222,
+      "acc_stderr,none": 0.03476590104304133
     },
     "mmlu_college_chemistry": {
       "alias": "  - college_chemistry",
-      "acc,none": 0.21,
-      "acc_stderr,none": 0.040936018074033236
+      "acc,none": 0.26,
+      "acc_stderr,none": 0.0440844002276808
     },
     "mmlu_college_computer_science": {
       "alias": "  - college_computer_science",
-      "acc,none": 0.24,
-      "acc_stderr,none": 0.04292346959909278
+      "acc,none": 0.23,
+      "acc_stderr,none": 0.04229525846816507
     },
     "mmlu_college_mathematics": {
       "alias": "  - college_mathematics",
@@ -259,167 +278,320 @@
     },
     "mmlu_college_physics": {
       "alias": "  - college_physics",
-      "acc,none": 0.21568627450980393,
-      "acc_stderr,none": 0.04092563958237658
+      "acc,none": 0.20588235294117646,
+      "acc_stderr,none": 0.040233822736177476
     },
     "mmlu_computer_security": {
       "alias": "  - computer_security",
-      "acc,none": 0.31,
-      "acc_stderr,none": 0.04648231987117317
+      "acc,none": 0.33,
+      "acc_stderr,none": 0.04725815626252609
     },
     "mmlu_conceptual_physics": {
       "alias": "  - conceptual_physics",
-      "acc,none": 0.3148936170212766,
-      "acc_stderr,none": 0.030363582197238136
+      "acc,none": 0.30638297872340425,
+      "acc_stderr,none": 0.03013590647851759
     },
     "mmlu_electrical_engineering": {
       "alias": "  - electrical_engineering",
-      "acc,none": 0.2206896551724138,
-      "acc_stderr,none": 0.03455930201924806
+      "acc,none": 0.22758620689655173,
+      "acc_stderr,none": 0.03493950380131187
     },
     "mmlu_elementary_mathematics": {
       "alias": "  - elementary_mathematics",
-      "acc,none": 0.2777777777777778,
-      "acc_stderr,none": 0.0230681888482611
+      "acc,none": 0.19047619047619047,
+      "acc_stderr,none": 0.020223880317923895
     },
     "mmlu_high_school_biology": {
       "alias": "  - high_school_biology",
-      "acc,none": 0.2161290322580645,
-      "acc_stderr,none": 0.02341529343356858
+      "acc,none": 0.24516129032258063,
+      "acc_stderr,none": 0.024472243840895462
     },
     "mmlu_high_school_chemistry": {
       "alias": "  - high_school_chemistry",
-      "acc,none": 0.2512315270935961,
-      "acc_stderr,none": 0.03051653073269444
+      "acc,none": 0.26108374384236455,
+      "acc_stderr,none": 0.030903796952114482
     },
     "mmlu_high_school_computer_science": {
       "alias": "  - high_school_computer_science",
-      "acc,none": 0.3,
-      "acc_stderr,none": 0.04605661864718382
+      "acc,none": 0.27,
+      "acc_stderr,none": 0.04461960433384737
     },
     "mmlu_high_school_mathematics": {
       "alias": "  - high_school_mathematics",
-      "acc,none": 0.29259259259259257,
-      "acc_stderr,none": 0.027738969632176085
+      "acc,none": 0.22962962962962963,
+      "acc_stderr,none": 0.025644108639267627
     },
     "mmlu_high_school_physics": {
       "alias": "  - high_school_physics",
-      "acc,none": 0.2052980132450331,
-      "acc_stderr,none": 0.032979866484738364
+      "acc,none": 0.1986754966887417,
+      "acc_stderr,none": 0.032578473844367795
     },
     "mmlu_high_school_statistics": {
       "alias": "  - high_school_statistics",
-      "acc,none": 0.1712962962962963,
-      "acc_stderr,none": 0.02569534164382473
+      "acc,none": 0.1574074074074074,
+      "acc_stderr,none": 0.024837173518242432
     },
     "mmlu_machine_learning": {
       "alias": "  - machine_learning",
-      "acc,none": 0.26785714285714285,
-      "acc_stderr,none": 0.04203277291467762
+      "acc,none": 0.30357142857142855,
+      "acc_stderr,none": 0.043642261558410424
+    },
+    "piqa": {
+      "alias": "piqa",
+      "acc,none": 0.7551686615886833,
+      "acc_stderr,none": 0.010032309105568807,
+      "acc_norm,none": 0.7606093579978237,
+      "acc_norm_stderr,none": 0.009955884250291648
+    },
+    "squadv2": {
+      "alias": "squadv2",
+      "exact,none": 4.388107470731913,
+      "exact_stderr,none": "N/A",
+      "f1,none": 11.576125958258935,
+      "f1_stderr,none": "N/A",
+      "HasAns_exact,none": 8.788798920377868,
+      "HasAns_exact_stderr,none": "N/A",
+      "HasAns_f1,none": 23.185449308773336,
+      "HasAns_f1_stderr,none": "N/A",
+      "NoAns_exact,none": 0.0,
+      "NoAns_exact_stderr,none": "N/A",
+      "NoAns_f1,none": 0.0,
+      "NoAns_f1_stderr,none": "N/A",
+      "best_exact,none": 50.07159100480081,
+      "best_exact_stderr,none": "N/A",
+      "best_f1,none": 50.07159100480081,
+      "best_f1_stderr,none": "N/A"
+    },
+    "wikitext": {
+      "alias": "wikitext",
+      "word_perplexity,none": 13.147616606947894,
+      "word_perplexity_stderr,none": "N/A",
+      "byte_perplexity,none": 1.6189371450280237,
+      "byte_perplexity_stderr,none": "N/A",
+      "bits_per_byte,none": 0.6950469743269079,
+      "bits_per_byte_stderr,none": "N/A"
+    },
+    "winogrande": {
+      "alias": "winogrande",
+      "acc,none": 0.6187845303867403,
+      "acc_stderr,none": 0.013650172164160337
     }
   },
   "groups": {
     "mmlu": {
-      "acc,none": 0.24291411479846176,
-      "acc_stderr,none": 0.003615953880635936,
+      "acc,none": 0.24533542230451502,
+      "acc_stderr,none": 0.003626940326820307,
       "alias": "mmlu"
     },
     "mmlu_humanities": {
-      "acc,none": 0.23995749202975558,
-      "acc_stderr,none": 0.006226634339040469,
+      "acc,none": 0.2365568544102019,
+      "acc_stderr,none": 0.006193794779109006,
       "alias": " - humanities"
     },
     "mmlu_other": {
-      "acc,none": 0.2565175410363695,
-      "acc_stderr,none": 0.00782733565193625,
+      "acc,none": 0.2597360798197618,
+      "acc_stderr,none": 0.00786636448734144,
       "alias": " - other"
     },
     "mmlu_social_sciences": {
-      "acc,none": 0.23106922326941826,
-      "acc_stderr,none": 0.007599369083343713,
+      "acc,none": 0.24991875203119923,
+      "acc_stderr,none": 0.0077975478147819105,
       "alias": " - social sciences"
     },
     "mmlu_stem": {
-      "acc,none": 0.24548049476688868,
-      "acc_stderr,none": 0.007649047106163907,
+      "acc,none": 0.23977164605137963,
+      "acc_stderr,none": 0.007582376964367822,
       "alias": " - stem"
     }
   },
   "group_subtasks": {
+    "arc_challenge": [],
+    "arc_easy": [],
+    "commonsense_qa": [],
     "hellaswag": [],
     "mmlu_humanities": [
-      "mmlu_moral_disputes",
-      "mmlu_logical_fallacies",
+      "mmlu_high_school_us_history",
       "mmlu_jurisprudence",
+      "mmlu_professional_law",
+      "mmlu_international_law",
       "mmlu_high_school_world_history",
       "mmlu_philosophy",
-      "mmlu_high_school_us_history",
-      "mmlu_world_religions",
-      "mmlu_professional_law",
-      "mmlu_high_school_european_history",
-      "mmlu_moral_scenarios",
-      "mmlu_international_law",
       "mmlu_formal_logic",
+      "mmlu_moral_scenarios",
+      "mmlu_moral_disputes",
+      "mmlu_world_religions",
+      "mmlu_logical_fallacies",
+      "mmlu_high_school_european_history",
       "mmlu_prehistory"
     ],
     "mmlu_social_sciences": [
-      "mmlu_security_studies",
-      "mmlu_high_school_psychology",
       "mmlu_us_foreign_policy",
-      "mmlu_high_school_geography",
       "mmlu_human_sexuality",
-      "mmlu_professional_psychology",
-      "mmlu_econometrics",
-      "mmlu_public_relations",
-      "mmlu_high_school_microeconomics",
       "mmlu_high_school_macroeconomics",
+      "mmlu_econometrics",
+      "mmlu_sociology",
+      "mmlu_public_relations",
+      "mmlu_high_school_geography",
+      "mmlu_high_school_microeconomics",
+      "mmlu_security_studies",
       "mmlu_high_school_government_and_politics",
-      "mmlu_sociology"
+      "mmlu_professional_psychology",
+      "mmlu_high_school_psychology"
     ],
     "mmlu_other": [
-      "mmlu_clinical_knowledge",
-      "mmlu_miscellaneous",
-      "mmlu_virology",
-      "mmlu_management",
-      "mmlu_global_facts",
-      "mmlu_business_ethics",
-      "mmlu_marketing",
       "mmlu_professional_medicine",
-      "mmlu_nutrition",
-      "mmlu_college_medicine",
+      "mmlu_clinical_knowledge",
+      "mmlu_management",
+      "mmlu_business_ethics",
+      "mmlu_virology",
       "mmlu_medical_genetics",
+      "mmlu_college_medicine",
       "mmlu_human_aging",
-      "mmlu_professional_accounting"
+      "mmlu_nutrition",
+      "mmlu_professional_accounting",
+      "mmlu_miscellaneous",
+      "mmlu_marketing",
+      "mmlu_global_facts"
     ],
     "mmlu_stem": [
-      "mmlu_high_school_physics",
-      "mmlu_college_mathematics",
+      "mmlu_college_computer_science",
+      "mmlu_computer_security",
+      "mmlu_college_chemistry",
+      "mmlu_elementary_mathematics",
       "mmlu_astronomy",
+      "mmlu_college_mathematics",
+      "mmlu_high_school_biology",
+      "mmlu_machine_learning",
+      "mmlu_high_school_chemistry",
+      "mmlu_high_school_physics",
       "mmlu_abstract_algebra",
-      "mmlu_anatomy",
+      "mmlu_high_school_computer_science",
       "mmlu_college_biology",
       "mmlu_conceptual_physics",
-      "mmlu_high_school_biology",
-      "mmlu_college_computer_science",
-      "mmlu_high_school_computer_science",
-      "mmlu_high_school_statistics",
-      "mmlu_high_school_mathematics",
+      "mmlu_anatomy",
       "mmlu_college_physics",
-      "mmlu_high_school_chemistry",
-      "mmlu_elementary_mathematics",
-      "mmlu_machine_learning",
-      "mmlu_computer_security",
+      "mmlu_high_school_statistics",
       "mmlu_electrical_engineering",
-      "mmlu_college_chemistry"
+      "mmlu_high_school_mathematics"
     ],
     "mmlu": [
       "mmlu_stem",
       "mmlu_other",
       "mmlu_social_sciences",
       "mmlu_humanities"
-    ]
+    ],
+    "piqa": [],
+    "squadv2": [],
+    "wikitext": [],
+    "winogrande": []
   },
   "configs": {
+    "arc_challenge": {
+      "task": "arc_challenge",
+      "tag": [
+        "ai2_arc"
+      ],
+      "dataset_path": "allenai/ai2_arc",
+      "dataset_name": "ARC-Challenge",
+      "training_split": "train",
+      "validation_split": "validation",
+      "test_split": "test",
+      "doc_to_text": "Question: {{question}}\nAnswer:",
+      "doc_to_target": "{{choices.label.index(answerKey)}}",
+      "unsafe_code": false,
+      "doc_to_choice": "{{choices.text}}",
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "num_fewshot": 0,
+      "metric_list": [
+        {
+          "metric": "acc",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "acc_norm",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "multiple_choice",
+      "repeats": 1,
+      "should_decontaminate": true,
+      "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+      "metadata": {
+        "version": 1.0
+      }
+    },
+    "arc_easy": {
+      "task": "arc_easy",
+      "tag": [
+        "ai2_arc"
+      ],
+      "dataset_path": "allenai/ai2_arc",
+      "dataset_name": "ARC-Easy",
+      "training_split": "train",
+      "validation_split": "validation",
+      "test_split": "test",
+      "doc_to_text": "Question: {{question}}\nAnswer:",
+      "doc_to_target": "{{choices.label.index(answerKey)}}",
+      "unsafe_code": false,
+      "doc_to_choice": "{{choices.text}}",
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "num_fewshot": 0,
+      "metric_list": [
+        {
+          "metric": "acc",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "acc_norm",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "multiple_choice",
+      "repeats": 1,
+      "should_decontaminate": true,
+      "doc_to_decontamination_query": "Question: {{question}}\nAnswer:",
+      "metadata": {
+        "version": 1.0
+      }
+    },
+    "commonsense_qa": {
+      "task": "commonsense_qa",
+      "dataset_path": "tau/commonsense_qa",
+      "training_split": "train",
+      "validation_split": "validation",
+      "doc_to_text": "Question: {{ question.strip() }}\nA. {{choices['text'][0]}}\nB. {{choices['text'][1]}}\nC. {{choices['text'][2]}}\nD. {{choices['text'][3]}}\nE. {{choices['text'][4]}}\nAnswer:",
+      "doc_to_target": "answerKey",
+      "unsafe_code": false,
+      "doc_to_choice": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "num_fewshot": 0,
+      "metric_list": [
+        {
+          "metric": "acc",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "multiple_choice",
+      "repeats": 1,
+      "should_decontaminate": false
+    },
     "hellaswag": {
       "task": "hellaswag",
       "tag": [
@@ -2795,9 +2967,137 @@
       "metadata": {
         "version": 1.0
       }
+    },
+    "piqa": {
+      "task": "piqa",
+      "dataset_path": "piqa",
+      "dataset_kwargs": {
+        "trust_remote_code": true
+      },
+      "training_split": "train",
+      "validation_split": "validation",
+      "doc_to_text": "Question: {{goal}}\nAnswer:",
+      "doc_to_target": "label",
+      "unsafe_code": false,
+      "doc_to_choice": "{{[sol1, sol2]}}",
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "num_fewshot": 0,
+      "metric_list": [
+        {
+          "metric": "acc",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "acc_norm",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "multiple_choice",
+      "repeats": 1,
+      "should_decontaminate": true,
+      "doc_to_decontamination_query": "goal",
+      "metadata": {
+        "version": 1.0
+      }
+    },
+    "squadv2": {
+      "task": "squadv2",
+      "unsafe_code": false,
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "num_fewshot": 0,
+      "output_type": "generate_until",
+      "generation_kwargs": {
+        "until": [
+          "\n\n"
+        ],
+        "do_sample": false
+      },
+      "repeats": 1,
+      "should_decontaminate": false,
+      "metadata": {
+        "version": 3
+      }
+    },
+    "wikitext": {
+      "task": "wikitext",
+      "dataset_path": "EleutherAI/wikitext_document_level",
+      "dataset_name": "wikitext-2-raw-v1",
+      "dataset_kwargs": {
+        "trust_remote_code": true
+      },
+      "training_split": "train",
+      "validation_split": "validation",
+      "test_split": "test",
+      "doc_to_text": "",
+      "doc_to_target": "def wikitext_detokenizer(doc):\n    string = doc[\"page\"]\n    # contractions\n    string = string.replace(\"s '\", \"s'\")\n    string = re.sub(r\"/' [0-9]/\", r\"/'[0-9]/\", string)\n    # number separators\n    string = string.replace(\" @-@ \", \"-\")\n    string = string.replace(\" @,@ \", \",\")\n    string = string.replace(\" @.@ \", \".\")\n    # punctuation\n    string = string.replace(\" : \", \": \")\n    string = string.replace(\" ; \", \"; \")\n    string = string.replace(\" . \", \". \")\n    string = string.replace(\" ! \", \"! \")\n    string = string.replace(\" ? \", \"? \")\n    string = string.replace(\" , \", \", \")\n    # double brackets\n    string = re.sub(r\"\\(\\s*([^\\)]*?)\\s*\\)\", r\"(\\1)\", string)\n    string = re.sub(r\"\\[\\s*([^\\]]*?)\\s*\\]\", r\"[\\1]\", string)\n    string = re.sub(r\"{\\s*([^}]*?)\\s*}\", r\"{\\1}\", string)\n    string = re.sub(r\"\\\"\\s*([^\\\"]*?)\\s*\\\"\", r'\"\\1\"', string)\n    string = re.sub(r\"'\\s*([^']*?)\\s*'\", r\"'\\1'\", string)\n    # miscellaneous\n    string = string.replace(\"= = = =\", \"====\")\n    string = string.replace(\"= = =\", \"===\")\n    string = string.replace(\"= =\", \"==\")\n    string = string.replace(\" \" + chr(176) + \" \", chr(176))\n    string = string.replace(\" \\n\", \"\\n\")\n    string = string.replace(\"\\n \", \"\\n\")\n    string = string.replace(\" N \", \" 1 \")\n    string = string.replace(\" 's\", \"'s\")\n\n    return string\n",
+      "unsafe_code": false,
+      "process_results": "def process_results(doc, results):\n    (loglikelihood,) = results\n    # IMPORTANT: wikitext counts number of words in *original doc before detokenization*\n    _words = len(re.split(r\"\\s+\", doc[\"page\"]))\n    _bytes = len(doc[\"page\"].encode(\"utf-8\"))\n    return {\n        \"word_perplexity\": (loglikelihood, _words),\n        \"byte_perplexity\": (loglikelihood, _bytes),\n        \"bits_per_byte\": (loglikelihood, _bytes),\n    }\n",
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "num_fewshot": 0,
+      "metric_list": [
+        {
+          "metric": "word_perplexity"
+        },
+        {
+          "metric": "byte_perplexity"
+        },
+        {
+          "metric": "bits_per_byte"
+        }
+      ],
+      "output_type": "loglikelihood_rolling",
+      "repeats": 1,
+      "should_decontaminate": true,
+      "doc_to_decontamination_query": "{{page}}",
+      "metadata": {
+        "version": 2.0
+      }
+    },
+    "winogrande": {
+      "task": "winogrande",
+      "dataset_path": "winogrande",
+      "dataset_name": "winogrande_xl",
+      "dataset_kwargs": {
+        "trust_remote_code": true
+      },
+      "training_split": "train",
+      "validation_split": "validation",
+      "doc_to_text": "def doc_to_text(doc):\n    answer_to_num = {\"1\": 0, \"2\": 1}\n    return answer_to_num[doc[\"answer\"]]\n",
+      "doc_to_target": "def doc_to_target(doc):\n    idx = doc[\"sentence\"].index(\"_\") + 1\n    return doc[\"sentence\"][idx:].strip()\n",
+      "unsafe_code": false,
+      "doc_to_choice": "def doc_to_choice(doc):\n    idx = doc[\"sentence\"].index(\"_\")\n    options = [doc[\"option1\"], doc[\"option2\"]]\n    return [doc[\"sentence\"][:idx] + opt for opt in options]\n",
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "num_fewshot": 0,
+      "metric_list": [
+        {
+          "metric": "acc",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "multiple_choice",
+      "repeats": 1,
+      "should_decontaminate": true,
+      "doc_to_decontamination_query": "sentence",
+      "metadata": {
+        "version": 1.0
+      }
     }
   },
   "versions": {
+    "arc_challenge": 1.0,
+    "arc_easy": 1.0,
+    "commonsense_qa": "Yaml",
     "hellaswag": 1.0,
     "mmlu": 2,
     "mmlu_abstract_algebra": 1.0,
@@ -2860,9 +3160,16 @@
     "mmlu_stem": 2,
     "mmlu_us_foreign_policy": 1.0,
     "mmlu_virology": 1.0,
-    "mmlu_world_religions": 1.0
+    "mmlu_world_religions": 1.0,
+    "piqa": 1.0,
+    "squadv2": 3,
+    "wikitext": 2.0,
+    "winogrande": 1.0
   },
   "n-shot": {
+    "arc_challenge": 0,
+    "arc_easy": 0,
+    "commonsense_qa": 0,
     "hellaswag": 0,
     "mmlu_abstract_algebra": 0,
     "mmlu_anatomy": 0,
@@ -2920,9 +3227,24 @@
     "mmlu_sociology": 0,
     "mmlu_us_foreign_policy": 0,
     "mmlu_virology": 0,
-    "mmlu_world_religions": 0
+    "mmlu_world_religions": 0,
+    "piqa": 0,
+    "squadv2": 0,
+    "wikitext": 0,
+    "winogrande": 0
   },
   "higher_is_better": {
+    "arc_challenge": {
+      "acc": true,
+      "acc_norm": true
+    },
+    "arc_easy": {
+      "acc": true,
+      "acc_norm": true
+    },
+    "commonsense_qa": {
+      "acc": true
+    },
     "hellaswag": {
       "acc": true,
       "acc_norm": true
@@ -3112,28 +3434,94 @@
     },
     "mmlu_world_religions": {
       "acc": true
+    },
+    "piqa": {
+      "acc": true,
+      "acc_norm": true
+    },
+    "squadv2": {
+      "exact": true,
+      "f1": true,
+      "HasAns_exact": true,
+      "HasAns_f1": true,
+      "NoAns_exact": true,
+      "NoAns_f1": true,
+      "best_exact": true,
+      "best_f1": true
+    },
+    "wikitext": {
+      "word_perplexity": false,
+      "byte_perplexity": false,
+      "bits_per_byte": false
+    },
+    "winogrande": {
+      "acc": true
     }
   },
   "n-samples": {
-    "mmlu_high_school_physics": {
-      "original": 151,
-      "effective": 151
+    "winogrande": {
+      "original": 1267,
+      "effective": 1267
     },
-    "mmlu_college_mathematics": {
+    "wikitext": {
+      "original": 62,
+      "effective": 62
+    },
+    "squadv2": {
+      "original": 11873,
+      "effective": 11873
+    },
+    "piqa": {
+      "original": 1838,
+      "effective": 1838
+    },
+    "mmlu_college_computer_science": {
       "original": 100,
       "effective": 100
+    },
+    "mmlu_computer_security": {
+      "original": 100,
+      "effective": 100
+    },
+    "mmlu_college_chemistry": {
+      "original": 100,
+      "effective": 100
+    },
+    "mmlu_elementary_mathematics": {
+      "original": 378,
+      "effective": 378
     },
     "mmlu_astronomy": {
       "original": 152,
       "effective": 152
     },
+    "mmlu_college_mathematics": {
+      "original": 100,
+      "effective": 100
+    },
+    "mmlu_high_school_biology": {
+      "original": 310,
+      "effective": 310
+    },
+    "mmlu_machine_learning": {
+      "original": 112,
+      "effective": 112
+    },
+    "mmlu_high_school_chemistry": {
+      "original": 203,
+      "effective": 203
+    },
+    "mmlu_high_school_physics": {
+      "original": 151,
+      "effective": 151
+    },
     "mmlu_abstract_algebra": {
       "original": 100,
       "effective": 100
     },
-    "mmlu_anatomy": {
-      "original": 135,
-      "effective": 135
+    "mmlu_high_school_computer_science": {
+      "original": 100,
+      "effective": 100
     },
     "mmlu_college_biology": {
       "original": 144,
@@ -3143,165 +3531,141 @@
       "original": 235,
       "effective": 235
     },
-    "mmlu_high_school_biology": {
-      "original": 310,
-      "effective": 310
-    },
-    "mmlu_college_computer_science": {
-      "original": 100,
-      "effective": 100
-    },
-    "mmlu_high_school_computer_science": {
-      "original": 100,
-      "effective": 100
-    },
-    "mmlu_high_school_statistics": {
-      "original": 216,
-      "effective": 216
-    },
-    "mmlu_high_school_mathematics": {
-      "original": 270,
-      "effective": 270
+    "mmlu_anatomy": {
+      "original": 135,
+      "effective": 135
     },
     "mmlu_college_physics": {
       "original": 102,
       "effective": 102
     },
-    "mmlu_high_school_chemistry": {
-      "original": 203,
-      "effective": 203
-    },
-    "mmlu_elementary_mathematics": {
-      "original": 378,
-      "effective": 378
-    },
-    "mmlu_machine_learning": {
-      "original": 112,
-      "effective": 112
-    },
-    "mmlu_computer_security": {
-      "original": 100,
-      "effective": 100
+    "mmlu_high_school_statistics": {
+      "original": 216,
+      "effective": 216
     },
     "mmlu_electrical_engineering": {
       "original": 145,
       "effective": 145
     },
-    "mmlu_college_chemistry": {
-      "original": 100,
-      "effective": 100
-    },
-    "mmlu_clinical_knowledge": {
-      "original": 265,
-      "effective": 265
-    },
-    "mmlu_miscellaneous": {
-      "original": 783,
-      "effective": 783
-    },
-    "mmlu_virology": {
-      "original": 166,
-      "effective": 166
-    },
-    "mmlu_management": {
-      "original": 103,
-      "effective": 103
-    },
-    "mmlu_global_facts": {
-      "original": 100,
-      "effective": 100
-    },
-    "mmlu_business_ethics": {
-      "original": 100,
-      "effective": 100
-    },
-    "mmlu_marketing": {
-      "original": 234,
-      "effective": 234
+    "mmlu_high_school_mathematics": {
+      "original": 270,
+      "effective": 270
     },
     "mmlu_professional_medicine": {
       "original": 272,
       "effective": 272
     },
-    "mmlu_nutrition": {
-      "original": 306,
-      "effective": 306
+    "mmlu_clinical_knowledge": {
+      "original": 265,
+      "effective": 265
     },
-    "mmlu_college_medicine": {
-      "original": 173,
-      "effective": 173
+    "mmlu_management": {
+      "original": 103,
+      "effective": 103
+    },
+    "mmlu_business_ethics": {
+      "original": 100,
+      "effective": 100
+    },
+    "mmlu_virology": {
+      "original": 166,
+      "effective": 166
     },
     "mmlu_medical_genetics": {
       "original": 100,
       "effective": 100
     },
+    "mmlu_college_medicine": {
+      "original": 173,
+      "effective": 173
+    },
     "mmlu_human_aging": {
       "original": 223,
       "effective": 223
+    },
+    "mmlu_nutrition": {
+      "original": 306,
+      "effective": 306
     },
     "mmlu_professional_accounting": {
       "original": 282,
       "effective": 282
     },
-    "mmlu_security_studies": {
-      "original": 245,
-      "effective": 245
+    "mmlu_miscellaneous": {
+      "original": 783,
+      "effective": 783
     },
-    "mmlu_high_school_psychology": {
-      "original": 545,
-      "effective": 545
+    "mmlu_marketing": {
+      "original": 234,
+      "effective": 234
+    },
+    "mmlu_global_facts": {
+      "original": 100,
+      "effective": 100
     },
     "mmlu_us_foreign_policy": {
       "original": 100,
       "effective": 100
     },
-    "mmlu_high_school_geography": {
-      "original": 198,
-      "effective": 198
-    },
     "mmlu_human_sexuality": {
       "original": 131,
       "effective": 131
-    },
-    "mmlu_professional_psychology": {
-      "original": 612,
-      "effective": 612
-    },
-    "mmlu_econometrics": {
-      "original": 114,
-      "effective": 114
-    },
-    "mmlu_public_relations": {
-      "original": 110,
-      "effective": 110
-    },
-    "mmlu_high_school_microeconomics": {
-      "original": 238,
-      "effective": 238
     },
     "mmlu_high_school_macroeconomics": {
       "original": 390,
       "effective": 390
     },
-    "mmlu_high_school_government_and_politics": {
-      "original": 193,
-      "effective": 193
+    "mmlu_econometrics": {
+      "original": 114,
+      "effective": 114
     },
     "mmlu_sociology": {
       "original": 201,
       "effective": 201
     },
-    "mmlu_moral_disputes": {
-      "original": 346,
-      "effective": 346
+    "mmlu_public_relations": {
+      "original": 110,
+      "effective": 110
     },
-    "mmlu_logical_fallacies": {
-      "original": 163,
-      "effective": 163
+    "mmlu_high_school_geography": {
+      "original": 198,
+      "effective": 198
+    },
+    "mmlu_high_school_microeconomics": {
+      "original": 238,
+      "effective": 238
+    },
+    "mmlu_security_studies": {
+      "original": 245,
+      "effective": 245
+    },
+    "mmlu_high_school_government_and_politics": {
+      "original": 193,
+      "effective": 193
+    },
+    "mmlu_professional_psychology": {
+      "original": 612,
+      "effective": 612
+    },
+    "mmlu_high_school_psychology": {
+      "original": 545,
+      "effective": 545
+    },
+    "mmlu_high_school_us_history": {
+      "original": 204,
+      "effective": 204
     },
     "mmlu_jurisprudence": {
       "original": 108,
       "effective": 108
+    },
+    "mmlu_professional_law": {
+      "original": 1534,
+      "effective": 1534
+    },
+    "mmlu_international_law": {
+      "original": 121,
+      "effective": 121
     },
     "mmlu_high_school_world_history": {
       "original": 237,
@@ -3311,33 +3675,29 @@
       "original": 311,
       "effective": 311
     },
-    "mmlu_high_school_us_history": {
-      "original": 204,
-      "effective": 204
-    },
-    "mmlu_world_religions": {
-      "original": 171,
-      "effective": 171
-    },
-    "mmlu_professional_law": {
-      "original": 1534,
-      "effective": 1534
-    },
-    "mmlu_high_school_european_history": {
-      "original": 165,
-      "effective": 165
+    "mmlu_formal_logic": {
+      "original": 126,
+      "effective": 126
     },
     "mmlu_moral_scenarios": {
       "original": 895,
       "effective": 895
     },
-    "mmlu_international_law": {
-      "original": 121,
-      "effective": 121
+    "mmlu_moral_disputes": {
+      "original": 346,
+      "effective": 346
     },
-    "mmlu_formal_logic": {
-      "original": 126,
-      "effective": 126
+    "mmlu_world_religions": {
+      "original": 171,
+      "effective": 171
+    },
+    "mmlu_logical_fallacies": {
+      "original": 163,
+      "effective": 163
+    },
+    "mmlu_high_school_european_history": {
+      "original": 165,
+      "effective": 165
     },
     "mmlu_prehistory": {
       "original": 324,
@@ -3346,16 +3706,28 @@
     "hellaswag": {
       "original": 10042,
       "effective": 10042
+    },
+    "commonsense_qa": {
+      "original": 1221,
+      "effective": 1221
+    },
+    "arc_easy": {
+      "original": 2376,
+      "effective": 2376
+    },
+    "arc_challenge": {
+      "original": 1172,
+      "effective": 1172
     }
   },
   "config": {
     "model": "hf",
-    "model_args": "pretrained=/iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/Goldfish/llama3-1b-15n-8192sl-60gbsz-standard-no-bos/HF,tokenizer=meta-llama/Llama-3.1-8B-Instruct",
-    "model_num_parameters": 1235814400,
+    "model_args": "pretrained=/iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/Goldfish/llama3-8b-15n-8192sl-60gbsz-standard/HF,tokenizer=meta-llama/Llama-3.1-8B-Instruct",
+    "model_num_parameters": 8030261248,
     "model_dtype": "torch.bfloat16",
     "model_revision": "main",
     "model_sha": "",
-    "batch_size": "1",
+    "batch_size": "4",
     "batch_sizes": [],
     "device": null,
     "use_cache": null,
@@ -3367,11 +3739,11 @@
     "torch_seed": 1234,
     "fewshot_seed": 1234
   },
-  "git_hash": "7bcddef",
-  "date": 1740046908.4920523,
-  "pretty_env_info": "PyTorch version: 2.6.0a0+ecf3bae40a.nv25.01\nIs debug build: False\nCUDA used to build PyTorch: 12.8\nROCM used to build PyTorch: N/A\n\nOS: Ubuntu 24.04.1 LTS (aarch64)\nGCC version: (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0\nClang version: Could not collect\nCMake version: version 3.31.4\nLibc version: glibc-2.39\n\nPython version: 3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0] (64-bit runtime)\nPython platform: Linux-5.14.21-150500.55.65_13.0.74-cray_shasta_c_64k-aarch64-with-glibc2.39\nIs CUDA available: True\nCUDA runtime version: 12.8.61\nCUDA_MODULE_LOADING set to: LAZY\nGPU models and configuration: \nGPU 0: NVIDIA GH200 120GB\nGPU 1: NVIDIA GH200 120GB\nGPU 2: NVIDIA GH200 120GB\nGPU 3: NVIDIA GH200 120GB\n\nNvidia driver version: 550.54.15\ncuDNN version: Probably one of the following:\n/usr/lib/aarch64-linux-gnu/libcudnn.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_adv.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_cnn.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_engines_precompiled.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_engines_runtime_compiled.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_graph.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_heuristic.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_ops.so.9.7.0\nHIP runtime version: N/A\nMIOpen runtime version: N/A\nIs XNNPACK available: True\n\nCPU:\nArchitecture:                         aarch64\nCPU op-mode(s):                       64-bit\nByte Order:                           Little Endian\nCPU(s):                               288\nOn-line CPU(s) list:                  0-287\nVendor ID:                            ARM\nModel name:                           Neoverse-V2\nModel:                                0\nThread(s) per core:                   1\nCore(s) per socket:                   72\nSocket(s):                            4\nStepping:                             r0p0\nFrequency boost:                      disabled\nCPU(s) scaling MHz:                   97%\nCPU max MHz:                          3447.0000\nCPU min MHz:                          81.0000\nBogoMIPS:                             2000.00\nFlags:                                fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm ssbs sb paca pacg dcpodp sve2 sveaes svepmull svebitperm svesha3 svesm4 flagm2 frint svei8mm svebf16 i8mm bf16 dgh bti\nL1d cache:                            18 MiB (288 instances)\nL1i cache:                            18 MiB (288 instances)\nL2 cache:                             288 MiB (288 instances)\nL3 cache:                             456 MiB (4 instances)\nNUMA node(s):                         36\nNUMA node0 CPU(s):                    0-71\nNUMA node1 CPU(s):                    72-143\nNUMA node2 CPU(s):                    144-215\nNUMA node3 CPU(s):                    216-287\nNUMA node4 CPU(s):                    \nNUMA node5 CPU(s):                    \nNUMA node6 CPU(s):                    \nNUMA node7 CPU(s):                    \nNUMA node8 CPU(s):                    \nNUMA node9 CPU(s):                    \nNUMA node10 CPU(s):                   \nNUMA node11 CPU(s):                   \nNUMA node12 CPU(s):                   \nNUMA node13 CPU(s):                   \nNUMA node14 CPU(s):                   \nNUMA node15 CPU(s):                   \nNUMA node16 CPU(s):                   \nNUMA node17 CPU(s):                   \nNUMA node18 CPU(s):                   \nNUMA node19 CPU(s):                   \nNUMA node20 CPU(s):                   \nNUMA node21 CPU(s):                   \nNUMA node22 CPU(s):                   \nNUMA node23 CPU(s):                   \nNUMA node24 CPU(s):                   \nNUMA node25 CPU(s):                   \nNUMA node26 CPU(s):                   \nNUMA node27 CPU(s):                   \nNUMA node28 CPU(s):                   \nNUMA node29 CPU(s):                   \nNUMA node30 CPU(s):                   \nNUMA node31 CPU(s):                   \nNUMA node32 CPU(s):                   \nNUMA node33 CPU(s):                   \nNUMA node34 CPU(s):                   \nNUMA node35 CPU(s):                   \nVulnerability Gather data sampling:   Not affected\nVulnerability Itlb multihit:          Not affected\nVulnerability L1tf:                   Not affected\nVulnerability Mds:                    Not affected\nVulnerability Meltdown:               Not affected\nVulnerability Mmio stale data:        Not affected\nVulnerability Reg file data sampling: Not affected\nVulnerability Retbleed:               Not affected\nVulnerability Spec rstack overflow:   Not affected\nVulnerability Spec store bypass:      Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:             Mitigation; __user pointer sanitization\nVulnerability Spectre v2:             Not affected\nVulnerability Srbds:                  Not affected\nVulnerability Tsx async abort:        Not affected\n\nVersions of relevant libraries:\n[pip3] mypy-extensions==1.0.0\n[pip3] numpy==1.26.4\n[pip3] nvidia-cudnn-frontend==1.9.0\n[pip3] nvtx==0.2.5\n[pip3] onnx==1.17.0\n[pip3] optree==0.14.0\n[pip3] pynvjitlink==0.3.0\n[pip3] pytorch-triton==3.1.0+cf34004b8.internal\n[pip3] torch==2.6.0a0+ecf3bae40a.nv25.1\n[pip3] torch_tensorrt==2.6.0a0\n[pip3] torchprofile==0.0.4\n[pip3] torchvision==0.20.0a0\n[conda] numpy                     2.1.0                    pypi_0    pypi\n[conda] pytorch-ignite            0.5.1                    pypi_0    pypi\n[conda] torch                     2.6.0                    pypi_0    pypi\n[conda] torchaudio                2.6.0                    pypi_0    pypi\n[conda] torchvision               0.21.0                   pypi_0    pypi",
+  "git_hash": "af2d2f3e",
+  "date": 1740568755.260796,
+  "pretty_env_info": "PyTorch version: 2.6.0a0+ecf3bae40a.nv25.01\nIs debug build: False\nCUDA used to build PyTorch: 12.8\nROCM used to build PyTorch: N/A\n\nOS: Ubuntu 24.04.1 LTS (aarch64)\nGCC version: (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0\nClang version: Could not collect\nCMake version: version 3.31.4\nLibc version: glibc-2.39\n\nPython version: 3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0] (64-bit runtime)\nPython platform: Linux-5.14.21-150500.55.65_13.0.74-cray_shasta_c_64k-aarch64-with-glibc2.39\nIs CUDA available: True\nCUDA runtime version: 12.8.61\nCUDA_MODULE_LOADING set to: LAZY\nGPU models and configuration: \nGPU 0: NVIDIA GH200 120GB\nGPU 1: NVIDIA GH200 120GB\nGPU 2: NVIDIA GH200 120GB\nGPU 3: NVIDIA GH200 120GB\n\nNvidia driver version: 550.54.15\ncuDNN version: Probably one of the following:\n/usr/lib/aarch64-linux-gnu/libcudnn.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_adv.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_cnn.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_engines_precompiled.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_engines_runtime_compiled.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_graph.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_heuristic.so.9.7.0\n/usr/lib/aarch64-linux-gnu/libcudnn_ops.so.9.7.0\nHIP runtime version: N/A\nMIOpen runtime version: N/A\nIs XNNPACK available: True\n\nCPU:\nArchitecture:                         aarch64\nCPU op-mode(s):                       64-bit\nByte Order:                           Little Endian\nCPU(s):                               288\nOn-line CPU(s) list:                  0-287\nVendor ID:                            ARM\nModel name:                           Neoverse-V2\nModel:                                0\nThread(s) per core:                   1\nCore(s) per socket:                   72\nSocket(s):                            4\nStepping:                             r0p0\nFrequency boost:                      disabled\nCPU(s) scaling MHz:                   99%\nCPU max MHz:                          3402.0000\nCPU min MHz:                          81.0000\nBogoMIPS:                             2000.00\nFlags:                                fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm ssbs sb paca pacg dcpodp sve2 sveaes svepmull svebitperm svesha3 svesm4 flagm2 frint svei8mm svebf16 i8mm bf16 dgh bti\nL1d cache:                            18 MiB (288 instances)\nL1i cache:                            18 MiB (288 instances)\nL2 cache:                             288 MiB (288 instances)\nL3 cache:                             456 MiB (4 instances)\nNUMA node(s):                         36\nNUMA node0 CPU(s):                    0-71\nNUMA node1 CPU(s):                    72-143\nNUMA node2 CPU(s):                    144-215\nNUMA node3 CPU(s):                    216-287\nNUMA node4 CPU(s):                    \nNUMA node5 CPU(s):                    \nNUMA node6 CPU(s):                    \nNUMA node7 CPU(s):                    \nNUMA node8 CPU(s):                    \nNUMA node9 CPU(s):                    \nNUMA node10 CPU(s):                   \nNUMA node11 CPU(s):                   \nNUMA node12 CPU(s):                   \nNUMA node13 CPU(s):                   \nNUMA node14 CPU(s):                   \nNUMA node15 CPU(s):                   \nNUMA node16 CPU(s):                   \nNUMA node17 CPU(s):                   \nNUMA node18 CPU(s):                   \nNUMA node19 CPU(s):                   \nNUMA node20 CPU(s):                   \nNUMA node21 CPU(s):                   \nNUMA node22 CPU(s):                   \nNUMA node23 CPU(s):                   \nNUMA node24 CPU(s):                   \nNUMA node25 CPU(s):                   \nNUMA node26 CPU(s):                   \nNUMA node27 CPU(s):                   \nNUMA node28 CPU(s):                   \nNUMA node29 CPU(s):                   \nNUMA node30 CPU(s):                   \nNUMA node31 CPU(s):                   \nNUMA node32 CPU(s):                   \nNUMA node33 CPU(s):                   \nNUMA node34 CPU(s):                   \nNUMA node35 CPU(s):                   \nVulnerability Gather data sampling:   Not affected\nVulnerability Itlb multihit:          Not affected\nVulnerability L1tf:                   Not affected\nVulnerability Mds:                    Not affected\nVulnerability Meltdown:               Not affected\nVulnerability Mmio stale data:        Not affected\nVulnerability Reg file data sampling: Not affected\nVulnerability Retbleed:               Not affected\nVulnerability Spec rstack overflow:   Not affected\nVulnerability Spec store bypass:      Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:             Mitigation; __user pointer sanitization\nVulnerability Spectre v2:             Not affected\nVulnerability Srbds:                  Not affected\nVulnerability Tsx async abort:        Not affected\n\nVersions of relevant libraries:\n[pip3] mypy-extensions==1.0.0\n[pip3] numpy==1.26.4\n[pip3] nvidia-cudnn-frontend==1.9.0\n[pip3] nvtx==0.2.5\n[pip3] onnx==1.17.0\n[pip3] optree==0.14.0\n[pip3] pynvjitlink==0.3.0\n[pip3] pytorch-triton==3.1.0+cf34004b8.internal\n[pip3] torch==2.6.0a0+ecf3bae40a.nv25.1\n[pip3] torch_tensorrt==2.6.0a0\n[pip3] torchprofile==0.0.4\n[pip3] torchvision==0.20.0a0\n[conda] numpy                     2.1.0                    pypi_0    pypi\n[conda] pytorch-ignite            0.5.1                    pypi_0    pypi\n[conda] torch                     2.6.0                    pypi_0    pypi\n[conda] torchaudio                2.6.0                    pypi_0    pypi\n[conda] torchvision               0.21.0                   pypi_0    pypi",
   "transformers_version": "4.48.2",
-  "upper_git_hash": "7bcddef5fb39eff3c2c6a17437bbe8b73e782691",
+  "upper_git_hash": null,
   "tokenizer_pad_token": [
     "<|eot_id|>",
     "128009"
@@ -3388,14 +3760,14 @@
   "max_length": 131072,
   "task_hashes": {},
   "model_source": "hf",
-  "model_name": "/iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/Goldfish/llama3-1b-15n-8192sl-60gbsz-standard-no-bos/HF",
-  "model_name_sanitized": "__iopsstor__scratch__cscs__xyixuan__Megatron-LM__logs__Meg-Runs__Goldfish__llama3-1b-15n-8192sl-60gbsz-standard-no-bos__HF",
+  "model_name": "/iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/Goldfish/llama3-8b-15n-8192sl-60gbsz-standard/HF",
+  "model_name_sanitized": "__iopsstor__scratch__cscs__xyixuan__Megatron-LM__logs__Meg-Runs__Goldfish__llama3-8b-15n-8192sl-60gbsz-standard__HF",
   "system_instruction": null,
   "system_instruction_sha": null,
   "fewshot_as_multiturn": false,
   "chat_template": null,
   "chat_template_sha": null,
-  "start_time": 3980208.892487721,
-  "end_time": 3980524.713779405,
-  "total_evaluation_time_seconds": "315.82129168417305"
+  "start_time": 1039944.150884609,
+  "end_time": 1045690.797400213,
+  "total_evaluation_time_seconds": "5746.646515603992"
 }
