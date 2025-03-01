@@ -1,4 +1,14 @@
-from utils import is_rank_0
+"""
+MEGATRON_LM_DIR=/iopsstor/scratch/cscs/$USER/Megatron-LM
+export PYTHONPATH=$MEGATRON_LM_DIR:$PYTHONPATH
+python /capstor/users/cscs/xyixuan/PDM/src/convert/convert_megatron_to_hf.py --experiment-path 
+"""
+from utils import (
+    is_rank_0,
+    is_model_converted,
+    clear_and_create_directory,
+    extract_iteration_number,
+)
 from typing import Dict, Any, Tuple
 from transformers import AutoModelForCausalLM, AutoConfig
 import torch
@@ -209,15 +219,69 @@ def convert_megatron_checkpoint_to_hf(checkpoint_path: str,
     return model, config
 
 
+def convert_and_save_checkpoint(checkpoint_path, output_dir):
+    """Convert a checkpoint and save it to the specified output directory."""
+    print(f"\nConverting checkpoint from: {checkpoint_path}")
+    model, config = convert_megatron_checkpoint_to_hf(str(checkpoint_path))
+    
+    # Save model and config
+    model.save_pretrained(output_dir)
+    config.save_pretrained(output_dir)
+    
+    print(f"Conversion complete!")
+    print(f"Model saved to: {output_dir}")
+
+    
+def handle_single_checkpoint(checkpoint_path, experiment_path):
+    """Process a single checkpoint with the original behavior."""
+    hf_dir = Path(experiment_path) / "HF"
+    
+    if is_model_converted(hf_dir):
+        print(f"\nHuggingFace model already exists at: {hf_dir}")
+        print("Skipping conversion. Delete the HF directory if you want to reconvert.")
+        return
+    
+    clear_and_create_directory(hf_dir)
+    convert_and_save_checkpoint(checkpoint_path, hf_dir)
+
+
+def handle_multiple_checkpoints(checkpoint_paths, experiment_path):
+    """Process multiple checkpoints, saving each to its own iteration directory."""
+    print(f"\nFound {len(checkpoint_paths)} checkpoints. Converting each to its own directory...")
+    
+    # Create base HF directory if it doesn't exist
+    base_hf_dir = Path(experiment_path) / "HF"
+    if not base_hf_dir.exists():
+        os.makedirs(base_hf_dir)
+    
+    # Process each checkpoint
+    for checkpoint_path in sorted(checkpoint_paths):
+        iter_num = extract_iteration_number(checkpoint_path)
+        if not iter_num:
+            print(f"Warning: Could not extract iteration number from {checkpoint_path}, skipping")
+            continue
+            
+        iter_dir = base_hf_dir / f"iter_{iter_num}"
+        
+        # Check if this iteration has already been converted
+        if is_model_converted(iter_dir):
+            print(f"\nHuggingFace model for iteration {iter_num} already exists at: {iter_dir}")
+            print("Skipping conversion. Delete the directory if you want to reconvert.")
+            continue
+        
+        clear_and_create_directory(iter_dir)
+        convert_and_save_checkpoint(checkpoint_path, iter_dir)
+    
+    print("\nAll checkpoint conversions completed!")
+
+
 if __name__ == "__main__":
     import argparse
     import sys
     from pathlib import Path
     import os
-    import shutil
 
-
-    parser = argparse.ArgumentParser(description='Convert SwissAI Megatron checkpoint to HUggingFace')
+    parser = argparse.ArgumentParser(description='Convert SwissAI Megatron checkpoint to HuggingFace')
     parser.add_argument('--experiment-path', type=str, required=True, 
                       help='Path to experiment directory')
     
@@ -228,39 +292,15 @@ if __name__ == "__main__":
         print(f"Error: Experiment path not found: {args.experiment_path}", file=sys.stderr)
         sys.exit(1)
 
-    # Check if HF directory already exists and contains model files
-    hf_dir = Path(args.experiment_path) / "HF"
-
-    if hf_dir.exists() and (hf_dir / "config.json").exists() and list(hf_dir.glob("*.safetensors")):
-        print(f"\nHuggingFace model already exists at: {hf_dir}")
-        print("Skipping conversion. Delete the HF directory if you want to reconvert.")
-        sys.exit(0)
-    else:
-        # If directory exists, remove it and its contents
-        if hf_dir.exists():
-            print(f"\nClearing existing HF directory at: {hf_dir}")
-            shutil.rmtree(hf_dir)
-        
-        # Create fresh directory
-        print("Creating new HF directory")
-        os.makedirs(hf_dir)
-
-    # Find the iteration directory dynamically and check if checkpoint exists
-    checkpoint_path = Path(args.experiment_path).glob('torch/iter_*/mp_rank_00/model_optim_rng.pt')
-    try:
-        checkpoint_path = next(checkpoint_path)
-    except StopIteration:
-        print(f"Error: No checkpoint found in {args.experiment_path}/torch/iter_*/mp_rank_00/", file=sys.stderr)
-        sys.exit(1)
-
-
-    # Convert checkpoint to HuggingFace format
-    print(f"\nConverting checkpoint from: {checkpoint_path}")
-    model, config = convert_megatron_checkpoint_to_hf(str(checkpoint_path))
-
-    # Save model and config
-    model.save_pretrained(hf_dir)
-    config.save_pretrained(hf_dir)
+    # Find all checkpoint paths
+    checkpoint_paths = list(Path(args.experiment_path).glob('torch/iter_*/mp_rank_00/model_optim_rng.pt'))
     
-    print("\nConversion complete!")
-    print(f"Model saved to: {hf_dir}")
+    if not checkpoint_paths:
+        print(f"Error: No checkpoints found in {args.experiment_path}/torch/iter_*/mp_rank_00/", file=sys.stderr)
+        sys.exit(1)
+    
+    # Branch based on number of checkpoints
+    if len(checkpoint_paths) == 1:
+        handle_single_checkpoint(checkpoint_paths[0], args.experiment_path)
+    else:
+        handle_multiple_checkpoints(checkpoint_paths, args.experiment_path)

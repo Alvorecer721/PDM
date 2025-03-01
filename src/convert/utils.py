@@ -2,6 +2,10 @@ import os
 import shutil
 import tempfile
 import torch.distributed as dist
+from pathlib import Path
+import os
+import shutil
+import re
 
   
 class TempFolder(object):
@@ -27,3 +31,25 @@ def is_rank_0():
         return dist.get_rank() == 0
     # If not distributed, we're on rank 0
     return True
+
+def is_model_converted(dir_path):
+        """Check if a directory already contains a converted model."""
+        path = Path(dir_path)
+        return path.exists() and (path / "config.json").exists() and list(path.glob("*.safetensors"))
+
+def clear_and_create_directory(dir_path):
+    """Clear an existing directory and create a fresh one."""
+    path = Path(dir_path)
+    if path.exists():
+        print(f"\nClearing existing directory at: {path}")
+        shutil.rmtree(path)
+    
+    print(f"Creating new directory at: {path}")
+    os.makedirs(path)
+
+def extract_iteration_number(checkpoint_path):
+    """Extract iteration number from checkpoint path."""
+    match = re.search(r'iter_(\d+)', str(checkpoint_path))
+    if not match:
+        return None
+    return match.group(1)

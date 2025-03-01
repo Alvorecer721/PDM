@@ -4,46 +4,49 @@ import argparse
 from pathlib import Path
 from typing import Dict, Any, Tuple
 from datasets import load_dataset
-
-from distributed_inference_sparse import run
-from distributed_inference import batch_processing_gutenberg
-from utils import set_seed
+from commons import set_seed, run, batch_processing_gutenberg
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert SwissAI Megatron checkpoint and run inference on Gutenberg dataset')
     parser.add_argument('--experiment-path', type=str, required=True, 
-                      help='Path to experiment directory')
+                        help='Path to experiment directory')
     parser.add_argument('--data-folder', type=str,
-                      default='/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg',
-                      help='Path to Gutenberg dataset folder')
+                        default='/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg',
+                        help='Path to Gutenberg dataset folder')
     parser.add_argument('--repetitions', type=str, required=True,
-                      help='Repetition choices, e.g. 128,256,512')
+                        help='Repetition choices, e.g. 128,256,512')
     
     parser.add_argument('--offset', type=int, default=0,
-                      help='Offset for text processing, should always be larger then goldfish H')
+                        help='Offset for text processing')
     parser.add_argument('--prefix-length', type=int, default=500,
-                      help='Length of prefix sequence')
+                        help='Length of prefix sequence')
     parser.add_argument('--suffix-length', type=int, default=500,
-                      help='Length of suffix sequence')
+                        help='Length of suffix sequence')
     parser.add_argument('--batch-size', type=int, default=1,
-                      help='Batch size for inference')
+                        help='Batch size for inference')
     parser.add_argument('--num-proc', type=int, default=20,
-                      help='Number of processes for dataset mapping')
+                        help='Number of processes for dataset mapping')
     parser.add_argument('--gen-policy', type=str, default='greedy',
-                      help='Generation policy for inference, options: greedy, nucleus')
+                        help='Generation policy for inference, options: greedy, nucleus')
+    parser.add_argument('--seed', type=int, default=42,
+                        help='Global random seed for all ranks')
     
     args = parser.parse_args()
 
     # Set global seed for reproducibility
-    set_seed(42)
+    set_seed(args.seed)
 
     # Find the iteration directory dynamically
     model_path = Path(args.experiment_path) / "HF"
 
+    # Check if the directory exists
+    if not model_path.exists():
+        raise ValueError(f"Model checkpoint not found at {model_path}")
+
     model = AutoModelForCausalLM.from_pretrained(
         model_path,
-        torch_dtype=torch.float16,  # Use float16 for efficiency
+        torch_dtype=torch.bfloat16,
     )
 
     # Create output directory
@@ -104,7 +107,8 @@ if __name__ == "__main__":
             suffix_length=args.suffix_length,
             batch_size=args.batch_size,
             inference_dir=inference_dir,
-            policy=args.gen_policy
+            policy=args.gen_policy,
+            seed=args.seed,
         )
         
         print(f"Completed processing repetition {rep}")

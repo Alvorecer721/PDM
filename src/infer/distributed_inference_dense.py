@@ -1,0 +1,101 @@
+import os
+import torch
+import argparse
+from pathlib import Path
+import logging
+
+from transformers import AutoModelForCausalLM
+from datasets import load_dataset
+
+from distributed_inference import batch_processing_gutenberg
+from commons import set_seed, run
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Run inference with specified parameters')
+    parser.add_argument('--experiment-path', type=str, required=True, 
+                      help='Path to experiment directory')
+    parser.add_argument('--data-path', type=str, 
+                        default='/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_en_8k/token.jsonl',
+                        help='Path to the tokenised jsonl file')
+    parser.add_argument('--num-epoch', type=int, required=True,
+                        help='Training epochs')
+    parser.add_argument('--iterations-per-epoch', type=int, default=125,
+                        help='Number of iterations per training epoch')
+    
+    
+    parser.add_argument('--offset', type=int, default=0,
+                        help='Offset for text processing')
+    parser.add_argument('--prefix-length', type=int, default=500,
+                        help='Length of prefix sequence')
+    parser.add_argument('--suffix-length', type=int, default=500,
+                        help='Length of suffix sequence')
+    parser.add_argument('--batch-size', type=int, default=1,
+                        help='Batch size for inference')
+    parser.add_argument('--num-proc', type=int, default=20,
+                        help='Number of processes for dataset mapping')
+    parser.add_argument('--gen-policy', type=str, default='greedy',
+                        help='Generation policy for inference, options: greedy, nucleus')
+    parser.add_argument('--seed', type=int, default=42,
+                        help='Global random seed for all ranks')
+    
+    args = parser.parse_args()
+
+    # Set global seed for reproducibility
+    set_seed(args.seed)
+
+    # Find the iteration directory dynamically
+    model_path = Path(args.experiment_path) / "HF" / f"iter_{args.num_epoch*args.iterations_per_epoch:07d}"
+
+    # Check if the directory exists
+    if not model_path.exists():
+        raise ValueError(f"Model checkpoint not found at {model_path}")
+
+    model = AutoModelForCausalLM.from_pretrained(
+        model_path,
+        torch_dtype=torch.bfloat16,  
+    )
+
+    # Create output directory
+    output_dir = Path(args.experiment_path) / "inference"
+    output_path = output_dir / f"offset_{args.offset}_prefix_{args.prefix_length}_suffix_{args.suffix_length}"
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    inference_dir = output_path / f"rep_{args.num_epoch}_{args.gen_policy}"
+    
+    # Load and process data
+    gutenberg = load_dataset("json", data_files=args.data_path, split='train')
+    dataset = gutenberg.map(
+        batch_processing_gutenberg,
+        batched=True,
+        desc="Generating prefix and suffix pairs",
+        num_proc=args.num_proc,
+        fn_kwargs={
+            '_prefix_len': args.prefix_length,
+            '_suffix_len': args.suffix_length,
+            '_offset': args.offset
+        }
+    )['prefix_suffix']
+    
+    run(
+        model=model,
+        dataset=dataset,
+        prefix_length=args.prefix_length,
+        suffix_length=args.suffix_length,
+        batch_size=args.batch_size,
+        inference_dir=inference_dir,
+        policy=args.gen_policy,
+        seed=args.seed,
+    )
+        
+    print(f"Completed inference")
+    
+    # Clear any cached tensors
+    torch.cuda.empty_cache()

@@ -28,13 +28,9 @@ CUDA_DEVICE_MAX_CONNECTIONS=1 torchrun src/convert/convert_torch_dist_to_torch.p
     --rope-scaling-factor 32 \
     --normalization RMSNorm \
     --seq-length 8192 \
-    --load /iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/DenseGutenberg/llama3-1b-standard-80gbsz \
+    --load /iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/DenseGutenberg/llama3-1b-standard-80gbsz/checkpoints \
     --ckpt-convert-save /iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/DenseGutenberg/llama3-1b-standard-80gbsz
-
 """
-import sys
-import argparse
-from utils import is_rank_0
 from megatron.core.enums import ModelType
 from megatron.training.training import setup_model_and_optimizer
 from megatron.training.initialize import initialize_megatron
