@@ -1,35 +1,24 @@
-import os
-import torch
 import argparse
 from pathlib import Path
 import logging
+import torch
 
-from transformers import AutoModelForCausalLM
-from datasets import load_dataset
-
-from distributed_inference import batch_processing_gutenberg
-from commons import set_seed, run
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler()
-    ]
+from commons import (
+    set_seed, run, batch_processing_gutenberg, process_dataset,
+    setup_output_directories, get_inference_dir, load_model
 )
 
+logger = logging.getLogger(__name__)
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Run inference with specified parameters')
+    parser = argparse.ArgumentParser(description='Run inference on multiple repetitions')
     parser.add_argument('--experiment-path', type=str, required=True, 
                       help='Path to experiment directory')
-    parser.add_argument('--data-path', type=str, 
-                        default='/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_en_8k/token.jsonl',
-                        help='Path to the tokenised jsonl file')
-    parser.add_argument('--num-epoch', type=int, required=True,
-                        help='Training epochs')
-    parser.add_argument('--iterations-per-epoch', type=int, default=125,
-                        help='Number of iterations per training epoch')
-    
+    parser.add_argument('--data-folder', type=str,
+                      default='/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg',
+                      help='Path to Gutenberg dataset folder')
+    parser.add_argument('--repetitions', type=str, required=True,
+                      help='Repetition choices, e.g. 128,256,512')
     
     parser.add_argument('--offset', type=int, default=0,
                         help='Offset for text processing')
@@ -52,38 +41,34 @@ if __name__ == "__main__":
     set_seed(args.seed)
 
     # Find the iteration directory dynamically
-    model_path = Path(args.experiment_path) / "HF" / f"iter_{args.num_epoch*args.iterations_per_epoch:07d}"
+    experiment_path = Path(args.experiment_path)
+    model_path = experiment_path / "HF" / f"iter_{args.num_epoch*args.iterations_per_epoch:07d}"
 
-    # Check if the directory exists
-    if not model_path.exists():
-        raise ValueError(f"Model checkpoint not found at {model_path}")
-
-    model = AutoModelForCausalLM.from_pretrained(
-        model_path,
-        torch_dtype=torch.bfloat16,  
+    # Load model
+    model = load_model(model_path)
+    
+    # Set up output directories
+    output_path = setup_output_directories(
+        experiment_path,
+        args.offset,
+        args.prefix_length,
+        args.suffix_length
     )
 
-    # Create output directory
-    output_dir = Path(args.experiment_path) / "inference"
-    output_path = output_dir / f"offset_{args.offset}_prefix_{args.prefix_length}_suffix_{args.suffix_length}"
-    output_path.mkdir(parents=True, exist_ok=True)
-
-    inference_dir = output_path / f"rep_{args.num_epoch}_{args.gen_policy}"
+    inference_dir = get_inference_dir(output_path, args.num_epoch, args.gen_policy)
     
-    # Load and process data
-    gutenberg = load_dataset("json", data_files=args.data_path, split='train')
-    dataset = gutenberg.map(
+    # Process dataset
+    dataset = process_dataset(
+        args.data_path,
         batch_processing_gutenberg,
-        batched=True,
-        desc="Generating prefix and suffix pairs",
-        num_proc=args.num_proc,
-        fn_kwargs={
-            '_prefix_len': args.prefix_length,
-            '_suffix_len': args.suffix_length,
-            '_offset': args.offset
-        }
-    )['prefix_suffix']
+        args.prefix_length,
+        args.suffix_length,
+        args.offset,
+        args.num_proc
+    )
     
+    # Run inference
+    logger.info("Starting inference")
     run(
         model=model,
         dataset=dataset,

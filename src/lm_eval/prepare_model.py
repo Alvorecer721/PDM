@@ -1,4 +1,4 @@
-from src.infer.distributed_inference import load_model
+from src.infer.nemo.distributed_inference import load_model
 from transformers import AutoConfig
 import shutil
 import os

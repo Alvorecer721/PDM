@@ -11,37 +11,7 @@ from pathlib import Path
 
 from transformers import AutoModelForCausalLM, AutoConfig
 from datasets import load_dataset
-
-
-def batch_processing_gutenberg(batch, _prefix_len, _offset, _suffix_len=None):
-    """
-    Tokenize sequences from a batch of articles between specified character positions.
-    
-    Args:
-        batch (dict): Batch of data containing the 'text' field.
-        _tokenizer (AutoTokenizer): The tokenizer used for tokenization.
-        _prefix_len (int): Length of the prefix to extract.
-        _suffix_len (int, optional): Length of the suffix to extract. If None, defaults to prefix length.
-        _offset (int, optional): Starting position for token slicing. Default is 0.
-    
-    Returns:
-        dict: Dictionary containing 'prefix_list' and 'suffix_list'.
-    """
-    if _suffix_len is None:
-        _suffix_len = _prefix_len
-        
-    prefix_suffix_list = []
-
-    for sequence in batch['input_ids']:
-        # No need to tokenize again if sequences are already tokenized (input_ids)
-        # Adjust slicing based on offset, prefix, and suffix lengths
-        prefix_suffix = sequence[_offset:_offset + _prefix_len + _suffix_len]
-        prefix_suffix_list.append(prefix_suffix)
-
-    return {
-        'prefix_suffix': prefix_suffix_list,
-    }
-
+from src.infer.commons import batch_processing_gutenberg
 
 def load_model(config, model_path):
     """

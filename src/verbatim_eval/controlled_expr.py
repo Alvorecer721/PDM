@@ -99,8 +99,8 @@ class Results:
             'metrics': self.metrics
         }
     
-    def save(self):
-        base_path='/capstor/users/cscs/xyixuan/PDM/results/sparse'
+    def save(self, mode='sparse'):
+        base_path=f'/capstor/users/cscs/xyixuan/PDM/results/{mode}'
 
         offsets_str = '_'.join(map(str, self.offsets))
         prefixes_str = '_'.join(map(str, self.prefixes))
