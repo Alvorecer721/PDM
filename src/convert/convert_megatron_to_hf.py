@@ -1,6 +1,4 @@
 """
-MEGATRON_LM_DIR=/iopsstor/scratch/cscs/$USER/Megatron-LM
-export PYTHONPATH=$MEGATRON_LM_DIR:$PYTHONPATH
 python /capstor/users/cscs/xyixuan/PDM/src/convert/convert_megatron_to_hf.py --experiment-path 
 """
 from utils import (

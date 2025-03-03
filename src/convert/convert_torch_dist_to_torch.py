@@ -1,4 +1,7 @@
 """
+MEGATRON_LM_DIR=/iopsstor/scratch/cscs/$USER/Megatron-LM
+export PYTHONPATH=$MEGATRON_LM_DIR:$PYTHONPATH
+
 CUDA_DEVICE_MAX_CONNECTIONS=1 torchrun src/convert/convert_torch_dist_to_torch.py \
     --bf16 \
     --use-precision-aware-optimizer \
@@ -30,6 +33,12 @@ CUDA_DEVICE_MAX_CONNECTIONS=1 torchrun src/convert/convert_torch_dist_to_torch.p
     --seq-length 8192 \
     --load /iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/DenseGutenberg/llama3-1b-standard-80gbsz/checkpoints \
     --ckpt-convert-save /iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/DenseGutenberg/llama3-1b-standard-80gbsz
+
+CUDA_DEVICE_MAX_CONNECTIONS=1 torchrun src/convert/convert_torch_dist_to_torch.py \
+    --bf16 \
+    --load /iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/DenseGutenberg/llama3-1b-standard-80gbsz \
+    --ckpt-convert-save /iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/DenseGutenberg/llama3-1b-standard-80gbsz
+    
 """
 from megatron.core.enums import ModelType
 from megatron.training.training import setup_model_and_optimizer
@@ -49,6 +58,7 @@ def main():
         "no_load_rng": True,
         "no_load_optim": True,
         "no_save_optim": True,
+        "--untie-embeddings-and-output-weights": True,
         
         # Fake args for initialization
         "micro_batch_size": 1,
