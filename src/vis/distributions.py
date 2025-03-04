@@ -2,6 +2,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import re
 
 sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})
 
@@ -169,3 +170,4 @@ def plot_batch_distribution(dataset_index_path, show_n_batches, batch_size, log_
 
     plt.tight_layout()
     plt.show()
+

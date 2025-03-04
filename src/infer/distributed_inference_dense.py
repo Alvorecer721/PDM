@@ -14,11 +14,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run inference on multiple repetitions')
     parser.add_argument('--experiment-path', type=str, required=True, 
                       help='Path to experiment directory')
-    parser.add_argument('--data-folder', type=str,
-                      default='/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg',
-                      help='Path to Gutenberg dataset folder')
-    parser.add_argument('--repetitions', type=str, required=True,
-                      help='Repetition choices, e.g. 128,256,512')
+    parser.add_argument('--data-path', type=str, 
+                        default='/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_en_8k/token.jsonl',
+                        help='Path to the tokenised jsonl file')
+    parser.add_argument('--num-epoch', type=int, required=True,
+                        help='Training epochs')
+    parser.add_argument('--iterations-per-epoch', type=int, default=125,
+                        help='Number of iterations per training epoch')
     
     parser.add_argument('--offset', type=int, default=0,
                         help='Offset for text processing')

@@ -2,14 +2,14 @@
 #SBATCH --account=a-a06
 #SBATCH --cpus-per-task=72
 #SBATCH --environment=nemo
-#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/infer/sparse_%A_%a.err
-#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/infer/sparse_%A_%a.out
+#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/infer/sparse/sparse_%A_%a.err
+#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/infer/sparse/sparse_%A_%a.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=gfl-infer
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=24:00:00
-#SBATCH --array=0-9
+#SBATCH --array=0-8
 
 set -e  # Exit immediately if any command fails
 
@@ -31,16 +31,16 @@ export MASTER_PORT
 export MASTER_ADDR
 
 # Define offsets
-# declare -a offsets=(0 50 100)
-# offset=${offsets[$SLURM_ARRAY_TASK_ID]}
+declare -a offsets=(1 2 4 8 16 32 64 128 256)
+offset=${offsets[$SLURM_ARRAY_TASK_ID]}
 
 # Define suffix length
 # declare -a suffix_lengths=(50 100 250 500 1000 1500 2000 2500 3000)
 # suffix_length=${suffix_lengths[$SLURM_ARRAY_TASK_ID]}
 
 # Define prefix lengths
-declare -a prefix_lengths=(50 100 250 750 1000 1500 2000 3000 4000 5000)
-prefix_length=${prefix_lengths[$SLURM_ARRAY_TASK_ID]}
+# declare -a prefix_lengths=(50 100 250 750 1000 1500 2000 3000 4000 5000)
+# prefix_length=${prefix_lengths[$SLURM_ARRAY_TASK_ID]}
 
 # Function to verify array length
 verify_array_length() {
@@ -80,12 +80,12 @@ set -e
 # Create the command string
 CMD="srun torchrun \
     --nproc_per_node=4 \
-    /capstor/users/cscs/xyixuan/PDM/src/infer/distributed_inference_swissai.py \
+    /capstor/users/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py \
     --experiment-path \"$EXPR_PATH\" \
-    --repetitions 1,2,4,8,16,24,32,48,64,96,128 \
+    --repetitions 1,2,4,8,16,32,64,128 \
     --gen-policy greedy \
-    --offset 100 \
-    --prefix-length $prefix_length \
+    --offset $offset \
+    --prefix-length 500 \
     --suffix-length 500 \
     --batch-size 20"
 

@@ -2,19 +2,20 @@
 #SBATCH --account=a-a06
 #SBATCH --cpus-per-task=72
 #SBATCH --environment=nemo
-#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/infer/dense_%A_%a.err
-#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/infer/dense_%A_%a.out
+#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/infer/dense/dense_%A_%a.err
+#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/infer/dense/dense_%A_%a.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=gfl-infer
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=24:00:00
-#SBATCH --array=0-7
+#SBATCH --array=0-71
 
 set -e  # Exit immediately if any command fails
 
 # Setup
 EXPR_PATH="$1"
+PILOT_MODE="$2"  # Add a pilot mode flag argument
 
 # Ensure EXPR_PATH is provided
 if [ -z "$EXPR_PATH" ]; then
@@ -30,36 +31,39 @@ echo "MASTER_ADDR:MASTER_PORT=${MASTER_ADDR}:${MASTER_PORT}"
 export MASTER_PORT
 export MASTER_ADDR
 
-# Define number of epoch
-declare -a epochs=(1 2 4 8 16 32 64 80)
-epoch=${epochs[$SLURM_ARRAY_TASK_ID]}
+# Define arrays for epochs and offsets
+# declare -a epochs=(1 2 4 8 16 32 64 80)
+# declare -a offsets=(0 1 2 4 8 16 32 64 128 256)
+declare -a epochs=(100)
+declare -a offsets=(0 1 2 4 8 16 32 64 128 256)
 
+# Check if pilot mode is enabled
+if [ "$PILOT_MODE" = "pilot" ]; then
+    echo "Running in PILOT MODE - using only first epoch and offset"
+    # Use only the first elements, regardless of array task ID
+    epoch=${epochs[0]}
+    offset=${offsets[0]}
+    echo "Fixed pilot values: epoch=$epoch, offset=$offset"
+else
+    # Calculate total combinations
+    TOTAL_COMBINATIONS=$((${#epochs[@]} * ${#offsets[@]}))
 
-# Function to verify array length
-verify_array_length() {
-    local array_name=$1
-    local array_size=$2
-    
-    if [ "$array_size" -ne "$SLURM_ARRAY_TASK_COUNT" ]; then
-        echo "Error: Array size mismatch for $array_name!"
-        echo "$array_name array has $array_size elements"
-        echo "SLURM array size is $SLURM_ARRAY_TASK_COUNT (e.g. --array=0-7 means 8 tasks)"
-        exit 1
+    # Check if SLURM array size matches total combinations
+    if [ "$SLURM_ARRAY_TASK_COUNT" -ne "$TOTAL_COMBINATIONS" ]; then
+        echo "Warning: SLURM array size (${SLURM_ARRAY_TASK_COUNT}) does not match total combinations (${TOTAL_COMBINATIONS})"
+        echo "Please adjust your --array parameter to --array=0-$((TOTAL_COMBINATIONS-1))"
     fi
-}
 
-# Check if arrays are defined using set -u to avoid undefined variable errors
-set +u
+    # Calculate which epoch and offset to use for this task
+    EPOCH_INDEX=$((SLURM_ARRAY_TASK_ID / ${#offsets[@]}))
+    OFFSET_INDEX=$((SLURM_ARRAY_TASK_ID % ${#offsets[@]}))
 
-# Verify arrays if they are uncommented
-if [ -n "${offsets+x}" ]; then
-    verify_array_length "offsets" "${#offsets[@]}"
-    offset=${offsets[$SLURM_ARRAY_TASK_ID]}
+    # Get the actual epoch and offset values
+    epoch=${epochs[$EPOCH_INDEX]}
+    offset=${offsets[$OFFSET_INDEX]}
+    
+    echo "Running with epoch=$epoch, offset=$offset (Task ID: $SLURM_ARRAY_TASK_ID)"
 fi
-
-
-# Reset to original state
-set -e
 
 # Create the command string
 CMD="srun torchrun \
@@ -68,13 +72,13 @@ CMD="srun torchrun \
     --experiment-path \"$EXPR_PATH\" \
     --gen-policy greedy \
     --num-epoch $epoch \
-    --offset 50 \
+    --offset $offset \
     --prefix-length 500 \
     --suffix-length 500 \
     --batch-size 20 \
     --num-proc 100"
 
-# Echo the command to stdout only
+# Echo the command to stdout
 echo "Executing command:" >&1
 echo "$CMD" >&1
 
@@ -82,7 +86,8 @@ echo "$CMD" >&1
 eval "$CMD"
 
 # Usage:
-# sbatch dense-gutenberg-inference.slurm /iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/DenseGutenberg/llama3-1b-standard-80gbsz
-
-# 64,128,256,512,1024,2048
-# 1,2,3,4,8,16,24,32,48,64,96,128
+# Regular run:
+# sbatch --array=0-71 dense-gutenberg-inference.slurm /iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/DenseGutenberg/llama3-1b-standard-80gbsz
+#
+# Pilot run (only run epoch=1, offset=1):
+# sbatch --array=0 dense-gutenberg-inference.slurm /iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/DenseGutenberg/llama3-1b-standard-80gbsz pilot

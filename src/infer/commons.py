@@ -11,6 +11,11 @@ import torch.nn as nn
 from transformers import AutoModelForCausalLM
 from datasets import load_dataset
 
+import sys
+# Add the src directory to the path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from verbatim_eval.LCS import find_longest_common_substrings
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -324,17 +329,23 @@ def run(
                 sequences[:, prefix_length + len(prepend_tokens) :].cpu().tolist()
             )  # Skip prepend BOS token
 
+            lcs_result = find_longest_common_substrings(true_suffixes, generated_suffixes)
+            lcs = lcs_result['max_length'].to_numpy()
+            lcs = lcs / suffix_length
+            lcs_mean = lcs.mean()
+
             nlls = seq_nlls.cpu().tolist()
             nll_means = seq_nlls_mean.cpu().tolist()
             nll_stds = seq_nlls_std.cpu().tolist()
+            lcs = lcs.tolist()
 
             # Clear GPU tensors immediately after use
             del batch_tensor, sequences, outputs, input_with_bos
             del seq_nlls, seq_nlls_mean, seq_nlls_std
 
             # Write results directly without storing in memory
-            for p, t, g, nll, nll_m, nll_s in zip(
-                prefixes, true_suffixes, generated_suffixes, nlls, nll_means, nll_stds
+            for p, t, g, nll, nll_m, nll_s, lcs_norm in zip(
+                prefixes, true_suffixes, generated_suffixes, nlls, nll_means, nll_stds, lcs
             ):
                 json.dump(
                     {
@@ -344,6 +355,8 @@ def run(
                         "nll": nll,
                         "nll_mean": nll_m,
                         "nll_std": nll_s,
+                        "lcs_norm": lcs_norm,
+                        "lcs_mean": lcs_mean,
                     },
                     jsonl_file,
                 )

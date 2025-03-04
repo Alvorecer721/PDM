@@ -78,6 +78,35 @@ class Results:
     def load(cls, path: str):
         with open(path, 'rb') as f:
             return cls(cls._convert_to_metric_data(pickle.load(f)))
+        
+    @staticmethod
+    def merge_results_as_dict(paths):
+        """
+        Merge multiple Results files into a dictionary of Results objects.
+        
+        Parameters
+        ----------
+        paths : list
+            List of file paths to Results pickle files
+            
+        Returns
+        -------
+        dict
+            Dictionary with structure { expr_name: Results_object }
+        """
+        merged_dict = {}
+        
+        for i, path in enumerate(paths):
+            # Load the Results object from the path
+            result_obj = Results.load(path)
+            
+            # Get the experiment name from the Results object
+            expr_name = result_obj.expr[0]
+            
+            # Store it in the merged dictionary with the model name as key
+            merged_dict[expr_name] = result_obj
+        
+        return merged_dict
        
     @classmethod
     def from_raw_dict(cls, results: Dict):
@@ -99,8 +128,8 @@ class Results:
             'metrics': self.metrics
         }
     
-    def save(self, mode='sparse'):
-        base_path=f'/capstor/users/cscs/xyixuan/PDM/results/{mode}'
+    def save(self, folder='sparse'):
+        base_path=f'/capstor/users/cscs/xyixuan/PDM/results/{folder}'
 
         offsets_str = '_'.join(map(str, self.offsets))
         prefixes_str = '_'.join(map(str, self.prefixes))
@@ -211,7 +240,12 @@ def calculate_metrics(config, rep, offset, prefix_length, suffix_length) -> Dict
             'scores': data['nll_mean'],
             'mean': np.mean(data['nll_mean']),
             'std': np.std(data['nll_mean'])
-        }
+        },
+        # 'LCS': {
+        #     'scores': data['nll_mean'],
+        #     'mean': np.mean(data['nll_mean']),
+        #     'std': np.std(data['nll_mean'])
+        # }
     }
 
     for metric in eval_results.column_names:
@@ -223,6 +257,15 @@ def calculate_metrics(config, rep, offset, prefix_length, suffix_length) -> Dict
         }
 
     return metrics
+
+
+def get_repetitions(inference_path):
+    """Get repetition values from inference directories."""
+    return sorted(
+        int(path.name.split('_')[1]) 
+        for path in inference_path.glob("rep_*_greedy")
+        if path.name.split('_')[1].isdigit()
+    )
 
 
 def get_repetition_mean_df(

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+.container {
+    display: grid;
+    grid-template-columns: 50px 1fr 50px 1fr;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+.header {
+    padding: 8px;
+    background: #4a4a4a;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+.line-numbers {
+    padding: 0 8px;
+    text-align: right;
+    background: #e0e0e0;
+    color: #666;
+    white-space: pre;
+    align-self: stretch;
+}
+.content {
+    padding: 0 8px;
+    white-space: pre;
+    overflow-x: auto;
+    background: white;
+    align-self: stretch;
+}
+.equal { color: #333; }
+.delete { background: #ffeef0; }
+.insert { background: #e6ffed; }
+.contributing { background: #fff3cd; }
+.non-contributing { color: #999; }
+.tabs {
+    display: flex;
+    margin-bottom: 1rem;
+}
+.tab {
+    padding: 8px 16px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #f8f9fa;
+    margin-right: 4px;
+}
+.tab.active {
+    background: #fff;
+    border-bottom: none;
+}
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
+.score {
+    font-size: 16px;
+    margin: 1rem 0;
+    padding: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+</style>
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+    </script>
+</head>
+<body>
+    <h2>Generation Log - llama_1.5B_Sparse_Gutenberg_Standard_GBS_60_SEQ_10200350</h2>
+    <h3>Repetition 96, Sequence 240, Offset 0</h3>
+    <div class="tabs">
+        <button class="tab active" id="diff-tab" onclick="switchTab('diff')">Diff View</button>
+        <button class="tab" id="rouge-tab" onclick="switchTab('rouge')">Rouge-L View</button>
+    </div>
+    <div id="diff" class="tab-content active">
+        <div class="container">
+            <div class="header">Line</div>
+            <div class="header">True Sequence</div>
+            <div class="header">Line</div>
+            <div class="header">Model Generation</div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55</div>
+            <div class="content"><span class="equal"> Latour!" and one man,
+towering above the rest, sprang at the count with uplifted axe.
+
+It was the burly ruffian who had walked with us a short time in the
+morning, and at sight of me his face grew black as a thunder-cloud.
+
+"Traitor!" he shouted, and, swinging round, aimed his axe full at my
+head.
+
+There was little time for action, much less for thought; but, having my
+pistol free, I levelled it swiftly, and shot the truculent bully dead.
+
+The count threw me a glance of gratitude mingled with pity; and in truth
+it appeared as if I needed the latter.
+
+The insurgents rushed at us, bore us back, flung themselves into our
+midst, and, acting like wedges, split us into small groups.
+
+I found myself in front of Latour, where</span><span class="delete"> the fighting was fiercest, and
+emptied my pistol recklessly into the crowd.
+
+The bullets cleared a space, but it was soon reoccupied. Most of the
+loyalists were overpowered and disarmed, and now their opponents came to
+help seize Latour.
+
+Planting my feet firmly on the ground, I stood by the side of the
+veteran, and did my best to save him.
+
+The attempt failed; it was hopeless from the start, and the end came
+very suddenly.
+
+There were scarcely half a dozen of us all told, standing shoulder to
+shoulder, to stay the rush, and we toppled over like so many wooden
+pegs.
+
+I lay on the floor half stunned, with the body of a man right across my
+chest.  He was badly hurt, and kept moaning feebly.
+
+For several minutes I was unable to rise, or even to move, and during
+that time the noise of the fighting grew less and less distinct, finally
+dying away altogether.
+
+The shouts of the populace, however, continued to ascend from the
+courtyard, and could be plainly heard through the open windows.
+
+As soon as I had recovered a little strength, I shifted the wounded man
+gently, and stood up.
+
+The rioters had left the apartment; only the dead and those seriously
+injured remained, and amongst these I looked in vain for Latour.
+
+Had they spared his life?  The idea seemed too good for truth, but it
+was just possible.
+
+Picking</span></div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55</div>
+            <div class="content"><span class="equal"> Latour!" and one man,
+towering above the rest, sprang at the count with uplifted axe.
+
+It was the burly ruffian who had walked with us a short time in the
+morning, and at sight of me his face grew black as a thunder-cloud.
+
+"Traitor!" he shouted, and, swinging round, aimed his axe full at my
+head.
+
+There was little time for action, much less for thought; but, having my
+pistol free, I levelled it swiftly, and shot the truculent bully dead.
+
+The count threw me a glance of gratitude mingled with pity; and in truth
+it appeared as if I needed the latter.
+
+The insurgents rushed at us, bore us back, flung themselves into our
+midst, and, acting like wedges, split us into small groups.
+
+I found myself in front of Latour, where</span><span class="insert">, in a narrow space of ground,
+fifteen minutes had elapsed since we first attacked the palace of the
+council.
+
+"Wound" was the word I heard most.  There was a wound, a breach, a
+perpetration.  We were obliged to penetrate the hole.
+
+"Oh, here's the end.  Let them get at it!  Here's the place for them.
+Let them enter as they run; and if they are successful I'll be a
+hunted dog alive."
+
+Alas! the dear, good creature, the king of beasts! what miraculous
+intelligence he gave me, and what a dread duty to keep the mouth of
+every person who suspects work.
+
+For myself I did not show the slightest emotion; but, obeying the orders
+of others, I watched the works of the insurgents as they work'd on the
+building of the palace.  They are doing it so well that I am unable to
+worry me out of my own room amid the memories they create.
+
+
+
+
+CHAPTER II
+
+The Palace of the Cæsars
+
+
+While I was sleeping, early in the morning, my neighbours and I took
+a stroll through the city.  I overtook them in a small street with a
+large assemblage of soldiers.  The Italian village on the opposite side
+of the river runs almost down the side of the city.  It is full of
+shops. I liked these first ones at first; but they were not easy to
+get.  Most of them were sold by the</span></div>
+        </div>
+    </div>
+    <div id="rouge" class="tab-content">
+        <div class="score">Rouge-L Score: 0.4800</div>
+        <div class="container">
+            <div class="header">Line</div>
+            <div class="header">True Sequence</div>
+            <div class="header">Line</div>
+            <div class="header">Model Generation</div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55</div>
+            <div class="content"><span class="contributing"> Lat</span><span class="contributing">our</span><span class="contributing">!"</span><span class="contributing"> and</span><span class="contributing"> one</span><span class="contributing"> man</span><span class="contributing">,
+</span><span class="contributing">tower</span><span class="contributing">ing</span><span class="contributing"> above</span><span class="contributing"> the</span><span class="contributing"> rest</span><span class="contributing">,</span><span class="contributing"> spr</span><span class="contributing">ang</span><span class="contributing"> at</span><span class="contributing"> the</span><span class="contributing"> count</span><span class="contributing"> with</span><span class="contributing"> uplift</span><span class="contributing">ed</span><span class="contributing"> axe</span><span class="contributing">.
+
+</span><span class="contributing">It</span><span class="contributing"> was</span><span class="contributing"> the</span><span class="contributing"> bur</span><span class="contributing">ly</span><span class="contributing"> r</span><span class="contributing">uff</span><span class="contributing">ian</span><span class="contributing"> who</span><span class="contributing"> had</span><span class="contributing"> walked</span><span class="contributing"> with</span><span class="contributing"> us</span><span class="contributing"> a</span><span class="contributing"> short</span><span class="contributing"> time</span><span class="contributing"> in</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="contributing">mor</span><span class="contributing">ning</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing"> at</span><span class="contributing"> sight</span><span class="contributing"> of</span><span class="contributing"> me</span><span class="contributing"> his</span><span class="contributing"> face</span><span class="contributing"> grew</span><span class="contributing"> black</span><span class="contributing"> as</span><span class="contributing"> a</span><span class="contributing"> thunder</span><span class="contributing">-cloud</span><span class="contributing">.
+
+</span><span class="contributing">"</span><span class="contributing">Tra</span><span class="contributing">itor</span><span class="contributing">!"</span><span class="contributing"> he</span><span class="contributing"> shouted</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing">,</span><span class="contributing"> swinging</span><span class="contributing"> round</span><span class="contributing">,</span><span class="contributing"> aimed</span><span class="contributing"> his</span><span class="contributing"> axe</span><span class="contributing"> full</span><span class="contributing"> at</span><span class="contributing"> my</span><span class="contributing">
+</span><span class="contributing">head</span><span class="contributing">.
+
+</span><span class="contributing">There</span><span class="contributing"> was</span><span class="contributing"> little</span><span class="contributing"> time</span><span class="contributing"> for</span><span class="contributing"> action</span><span class="contributing">,</span><span class="contributing"> much</span><span class="contributing"> less</span><span class="contributing"> for</span><span class="contributing"> thought</span><span class="contributing">;</span><span class="contributing"> but</span><span class="contributing">,</span><span class="contributing"> having</span><span class="contributing"> my</span><span class="contributing">
+</span><span class="contributing">p</span><span class="contributing">istol</span><span class="contributing"> free</span><span class="contributing">,</span><span class="contributing"> I</span><span class="contributing"> level</span><span class="contributing">led</span><span class="contributing"> it</span><span class="contributing"> swiftly</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing"> shot</span><span class="contributing"> the</span><span class="contributing"> tr</span><span class="contributing">uc</span><span class="contributing">ulent</span><span class="contributing"> bully</span><span class="contributing"> dead</span><span class="contributing">.
+
+</span><span class="contributing">The</span><span class="contributing"> count</span><span class="contributing"> threw</span><span class="contributing"> me</span><span class="contributing"> a</span><span class="contributing"> glance</span><span class="contributing"> of</span><span class="contributing"> gratitude</span><span class="contributing"> ming</span><span class="contributing">led</span><span class="contributing"> with</span><span class="contributing"> pity</span><span class="contributing">;</span><span class="contributing"> and</span><span class="contributing"> in</span><span class="contributing"> truth</span><span class="contributing">
+</span><span class="contributing">it</span><span class="contributing"> appeared</span><span class="contributing"> as</span><span class="contributing"> if</span><span class="contributing"> I</span><span class="contributing"> needed</span><span class="contributing"> the</span><span class="contributing"> latter</span><span class="contributing">.
+
+</span><span class="contributing">The</span><span class="contributing"> insurgents</span><span class="contributing"> rushed</span><span class="contributing"> at</span><span class="contributing"> us</span><span class="contributing">,</span><span class="contributing"> bore</span><span class="contributing"> us</span><span class="contributing"> back</span><span class="contributing">,</span><span class="contributing"> fl</span><span class="contributing">ung</span><span class="contributing"> themselves</span><span class="contributing"> into</span><span class="contributing"> our</span><span class="contributing">
+</span><span class="contributing">mid</span><span class="contributing">st</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing">,</span><span class="contributing"> acting</span><span class="contributing"> like</span><span class="contributing"> wed</span><span class="contributing">ges</span><span class="contributing">,</span><span class="contributing"> split</span><span class="contributing"> us</span><span class="contributing"> into</span><span class="contributing"> small</span><span class="contributing"> groups</span><span class="contributing">.
+
+</span><span class="contributing">I</span><span class="contributing"> found</span><span class="contributing"> myself</span><span class="contributing"> in</span><span class="contributing"> front</span><span class="contributing"> of</span><span class="contributing"> Lat</span><span class="contributing">our</span><span class="contributing">,</span><span class="contributing"> where</span><span class="contributing"> the</span><span class="non-contributing"> fighting</span><span class="contributing"> was</span><span class="non-contributing"> fier</span><span class="non-contributing">cest</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="contributing">
+</span><span class="non-contributing">empt</span><span class="non-contributing">ied</span><span class="non-contributing"> my</span><span class="non-contributing"> pistol</span><span class="non-contributing"> reck</span><span class="non-contributing">lessly</span><span class="non-contributing"> into</span><span class="contributing"> the</span><span class="non-contributing"> crowd</span><span class="contributing">.
+
+</span><span class="non-contributing">The</span><span class="non-contributing"> bullets</span><span class="non-contributing"> cleared</span><span class="non-contributing"> a</span><span class="non-contributing"> space</span><span class="contributing">,</span><span class="non-contributing"> but</span><span class="contributing"> it</span><span class="non-contributing"> was</span><span class="non-contributing"> soon</span><span class="non-contributing"> re</span><span class="non-contributing">occupied</span><span class="non-contributing">.</span><span class="non-contributing"> Most</span><span class="non-contributing"> of</span><span class="contributing"> the</span><span class="non-contributing">
+</span><span class="non-contributing">loy</span><span class="non-contributing">al</span><span class="non-contributing">ists</span><span class="non-contributing"> were</span><span class="non-contributing"> over</span><span class="non-contributing">powered</span><span class="contributing"> and</span><span class="non-contributing"> dis</span><span class="non-contributing">armed</span><span class="non-contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> now</span><span class="non-contributing"> their</span><span class="non-contributing"> opponents</span><span class="non-contributing"> came</span><span class="non-contributing"> to</span><span class="contributing">
+</span><span class="non-contributing">help</span><span class="non-contributing"> seize</span><span class="non-contributing"> Lat</span><span class="non-contributing">our</span><span class="non-contributing">.
+
+</span><span class="non-contributing">Plant</span><span class="non-contributing">ing</span><span class="non-contributing"> my</span><span class="non-contributing"> feet</span><span class="non-contributing"> firmly</span><span class="non-contributing"> on</span><span class="contributing"> the</span><span class="non-contributing"> ground</span><span class="contributing">,</span><span class="non-contributing"> I</span><span class="non-contributing"> stood</span><span class="non-contributing"> by</span><span class="contributing"> the</span><span class="non-contributing"> side</span><span class="contributing"> of</span><span class="non-contributing"> the</span><span class="contributing">
+</span><span class="non-contributing">v</span><span class="non-contributing">eter</span><span class="non-contributing">an</span><span class="contributing">,</span><span class="contributing"> and</span><span class="non-contributing"> did</span><span class="non-contributing"> my</span><span class="non-contributing"> best</span><span class="contributing"> to</span><span class="non-contributing"> save</span><span class="non-contributing"> him</span><span class="contributing">.
+
+</span><span class="non-contributing">The</span><span class="non-contributing"> attempt</span><span class="non-contributing"> failed</span><span class="contributing">;</span><span class="non-contributing"> it</span><span class="non-contributing"> was</span><span class="non-contributing"> hopeless</span><span class="non-contributing"> from</span><span class="contributing"> the</span><span class="non-contributing"> start</span><span class="contributing">,</span><span class="non-contributing"> and</span><span class="contributing"> the</span><span class="non-contributing"> end</span><span class="non-contributing"> came</span><span class="non-contributing">
+</span><span class="non-contributing">very</span><span class="non-contributing"> suddenly</span><span class="non-contributing">.
+
+</span><span class="non-contributing">There</span><span class="non-contributing"> were</span><span class="non-contributing"> scarcely</span><span class="non-contributing"> half</span><span class="non-contributing"> a</span><span class="non-contributing"> dozen</span><span class="contributing"> of</span><span class="non-contributing"> us</span><span class="non-contributing"> all</span><span class="non-contributing"> told</span><span class="non-contributing">,</span><span class="non-contributing"> standing</span><span class="non-contributing"> shoulder</span><span class="non-contributing"> to</span><span class="non-contributing">
+</span><span class="non-contributing">should</span><span class="non-contributing">er</span><span class="non-contributing">,</span><span class="non-contributing"> to</span><span class="non-contributing"> stay</span><span class="contributing"> the</span><span class="non-contributing"> rush</span><span class="non-contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> we</span><span class="non-contributing"> topp</span><span class="non-contributing">led</span><span class="non-contributing"> over</span><span class="non-contributing"> like</span><span class="non-contributing"> so</span><span class="non-contributing"> many</span><span class="non-contributing"> wooden</span><span class="non-contributing">
+</span><span class="non-contributing">pe</span><span class="non-contributing">gs</span><span class="non-contributing">.
+
+</span><span class="non-contributing">I</span><span class="non-contributing"> lay</span><span class="contributing"> on</span><span class="contributing"> the</span><span class="non-contributing"> floor</span><span class="non-contributing"> half</span><span class="non-contributing"> stunned</span><span class="non-contributing">,</span><span class="non-contributing"> with</span><span class="contributing"> the</span><span class="non-contributing"> body</span><span class="non-contributing"> of</span><span class="non-contributing"> a</span><span class="non-contributing"> man</span><span class="non-contributing"> right</span><span class="non-contributing"> across</span><span class="non-contributing"> my</span><span class="non-contributing">
+</span><span class="non-contributing">chest</span><span class="contributing">.</span><span class="contributing"> </span><span class="non-contributing"> He</span><span class="non-contributing"> was</span><span class="non-contributing"> badly</span><span class="non-contributing"> hurt</span><span class="non-contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> kept</span><span class="non-contributing"> mo</span><span class="non-contributing">aning</span><span class="non-contributing"> fe</span><span class="non-contributing">eb</span><span class="non-contributing">ly</span><span class="non-contributing">.
+
+</span><span class="non-contributing">For</span><span class="non-contributing"> several</span><span class="non-contributing"> minutes</span><span class="contributing"> I</span><span class="non-contributing"> was</span><span class="contributing"> unable</span><span class="non-contributing"> to</span><span class="non-contributing"> rise</span><span class="non-contributing">,</span><span class="non-contributing"> or</span><span class="non-contributing"> even</span><span class="contributing"> to</span><span class="non-contributing"> move</span><span class="non-contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> during</span><span class="contributing">
+</span><span class="non-contributing">that</span><span class="non-contributing"> time</span><span class="non-contributing"> the</span><span class="non-contributing"> noise</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> fighting</span><span class="non-contributing"> grew</span><span class="non-contributing"> less</span><span class="non-contributing"> and</span><span class="non-contributing"> less</span><span class="non-contributing"> distinct</span><span class="non-contributing">,</span><span class="non-contributing"> finally</span><span class="non-contributing">
+</span><span class="non-contributing">d</span><span class="non-contributing">ying</span><span class="non-contributing"> away</span><span class="non-contributing"> altogether</span><span class="non-contributing">.
+
+</span><span class="contributing">The</span><span class="non-contributing"> shouts</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> populace</span><span class="contributing">,</span><span class="non-contributing"> however</span><span class="non-contributing">,</span><span class="non-contributing"> continued</span><span class="non-contributing"> to</span><span class="non-contributing"> ascend</span><span class="non-contributing"> from</span><span class="contributing"> the</span><span class="non-contributing">
+</span><span class="non-contributing">cour</span><span class="non-contributing">tyard</span><span class="contributing">,</span><span class="contributing"> and</span><span class="non-contributing"> could</span><span class="non-contributing"> be</span><span class="non-contributing"> plainly</span><span class="non-contributing"> heard</span><span class="contributing"> through</span><span class="contributing"> the</span><span class="non-contributing"> open</span><span class="non-contributing"> windows</span><span class="non-contributing">.
+
+</span><span class="non-contributing">As</span><span class="non-contributing"> soon</span><span class="non-contributing"> as</span><span class="contributing"> I</span><span class="non-contributing"> had</span><span class="non-contributing"> recovered</span><span class="contributing"> a</span><span class="non-contributing"> little</span><span class="non-contributing"> strength</span><span class="non-contributing">,</span><span class="non-contributing"> I</span><span class="non-contributing"> shifted</span><span class="contributing"> the</span><span class="non-contributing"> wounded</span><span class="non-contributing"> man</span><span class="contributing">
+</span><span class="non-contributing">g</span><span class="non-contributing">ently</span><span class="non-contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> stood</span><span class="non-contributing"> up</span><span class="non-contributing">.
+
+</span><span class="non-contributing">The</span><span class="non-contributing"> riot</span><span class="non-contributing">ers</span><span class="non-contributing"> had</span><span class="non-contributing"> left</span><span class="contributing"> the</span><span class="non-contributing"> apartment</span><span class="non-contributing">;</span><span class="non-contributing"> only</span><span class="contributing"> the</span><span class="non-contributing"> dead</span><span class="non-contributing"> and</span><span class="non-contributing"> those</span><span class="non-contributing"> seriously</span><span class="contributing">
+</span><span class="non-contributing">in</span><span class="non-contributing">jured</span><span class="non-contributing"> remained</span><span class="non-contributing">,</span><span class="non-contributing"> and</span><span class="non-contributing"> amongst</span><span class="contributing"> these</span><span class="non-contributing"> I</span><span class="non-contributing"> looked</span><span class="non-contributing"> in</span><span class="non-contributing"> vain</span><span class="non-contributing"> for</span><span class="non-contributing"> Lat</span><span class="non-contributing">our</span><span class="non-contributing">.
+
+</span><span class="non-contributing">Had</span><span class="contributing"> they</span><span class="non-contributing"> spared</span><span class="non-contributing"> his</span><span class="non-contributing"> life</span><span class="non-contributing">?</span><span class="contributing"> </span><span class="non-contributing"> The</span><span class="non-contributing"> idea</span><span class="non-contributing"> seemed</span><span class="non-contributing"> too</span><span class="non-contributing"> good</span><span class="non-contributing"> for</span><span class="non-contributing"> truth</span><span class="non-contributing">,</span><span class="non-contributing"> but</span><span class="non-contributing"> it</span><span class="non-contributing">
+</span><span class="non-contributing">was</span><span class="non-contributing"> just</span><span class="non-contributing"> possible</span><span class="non-contributing">.
+
+</span><span class="non-contributing">P</span><span class="non-contributing">icking</span></div>
+            <div class="line-numbers">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55</div>
+            <div class="content"><span class="contributing"> Lat</span><span class="contributing">our</span><span class="contributing">!"</span><span class="contributing"> and</span><span class="contributing"> one</span><span class="contributing"> man</span><span class="contributing">,
+</span><span class="contributing">tower</span><span class="contributing">ing</span><span class="contributing"> above</span><span class="contributing"> the</span><span class="contributing"> rest</span><span class="contributing">,</span><span class="contributing"> spr</span><span class="contributing">ang</span><span class="contributing"> at</span><span class="contributing"> the</span><span class="contributing"> count</span><span class="contributing"> with</span><span class="contributing"> uplift</span><span class="contributing">ed</span><span class="contributing"> axe</span><span class="contributing">.
+
+</span><span class="contributing">It</span><span class="contributing"> was</span><span class="contributing"> the</span><span class="contributing"> bur</span><span class="contributing">ly</span><span class="contributing"> r</span><span class="contributing">uff</span><span class="contributing">ian</span><span class="contributing"> who</span><span class="contributing"> had</span><span class="contributing"> walked</span><span class="contributing"> with</span><span class="contributing"> us</span><span class="contributing"> a</span><span class="contributing"> short</span><span class="contributing"> time</span><span class="contributing"> in</span><span class="contributing"> the</span><span class="contributing">
+</span><span class="contributing">mor</span><span class="contributing">ning</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing"> at</span><span class="contributing"> sight</span><span class="contributing"> of</span><span class="contributing"> me</span><span class="contributing"> his</span><span class="contributing"> face</span><span class="contributing"> grew</span><span class="contributing"> black</span><span class="contributing"> as</span><span class="contributing"> a</span><span class="contributing"> thunder</span><span class="contributing">-cloud</span><span class="contributing">.
+
+</span><span class="contributing">"</span><span class="contributing">Tra</span><span class="contributing">itor</span><span class="contributing">!"</span><span class="contributing"> he</span><span class="contributing"> shouted</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing">,</span><span class="contributing"> swinging</span><span class="contributing"> round</span><span class="contributing">,</span><span class="contributing"> aimed</span><span class="contributing"> his</span><span class="contributing"> axe</span><span class="contributing"> full</span><span class="contributing"> at</span><span class="contributing"> my</span><span class="contributing">
+</span><span class="contributing">head</span><span class="contributing">.
+
+</span><span class="contributing">There</span><span class="contributing"> was</span><span class="contributing"> little</span><span class="contributing"> time</span><span class="contributing"> for</span><span class="contributing"> action</span><span class="contributing">,</span><span class="contributing"> much</span><span class="contributing"> less</span><span class="contributing"> for</span><span class="contributing"> thought</span><span class="contributing">;</span><span class="contributing"> but</span><span class="contributing">,</span><span class="contributing"> having</span><span class="contributing"> my</span><span class="contributing">
+</span><span class="contributing">p</span><span class="contributing">istol</span><span class="contributing"> free</span><span class="contributing">,</span><span class="contributing"> I</span><span class="contributing"> level</span><span class="contributing">led</span><span class="contributing"> it</span><span class="contributing"> swiftly</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing"> shot</span><span class="contributing"> the</span><span class="contributing"> tr</span><span class="contributing">uc</span><span class="contributing">ulent</span><span class="contributing"> bully</span><span class="contributing"> dead</span><span class="contributing">.
+
+</span><span class="contributing">The</span><span class="contributing"> count</span><span class="contributing"> threw</span><span class="contributing"> me</span><span class="contributing"> a</span><span class="contributing"> glance</span><span class="contributing"> of</span><span class="contributing"> gratitude</span><span class="contributing"> ming</span><span class="contributing">led</span><span class="contributing"> with</span><span class="contributing"> pity</span><span class="contributing">;</span><span class="contributing"> and</span><span class="contributing"> in</span><span class="contributing"> truth</span><span class="contributing">
+</span><span class="contributing">it</span><span class="contributing"> appeared</span><span class="contributing"> as</span><span class="contributing"> if</span><span class="contributing"> I</span><span class="contributing"> needed</span><span class="contributing"> the</span><span class="contributing"> latter</span><span class="contributing">.
+
+</span><span class="contributing">The</span><span class="contributing"> insurgents</span><span class="contributing"> rushed</span><span class="contributing"> at</span><span class="contributing"> us</span><span class="contributing">,</span><span class="contributing"> bore</span><span class="contributing"> us</span><span class="contributing"> back</span><span class="contributing">,</span><span class="contributing"> fl</span><span class="contributing">ung</span><span class="contributing"> themselves</span><span class="contributing"> into</span><span class="contributing"> our</span><span class="contributing">
+</span><span class="contributing">mid</span><span class="contributing">st</span><span class="contributing">,</span><span class="contributing"> and</span><span class="contributing">,</span><span class="contributing"> acting</span><span class="contributing"> like</span><span class="contributing"> wed</span><span class="contributing">ges</span><span class="contributing">,</span><span class="contributing"> split</span><span class="contributing"> us</span><span class="contributing"> into</span><span class="contributing"> small</span><span class="contributing"> groups</span><span class="contributing">.
+
+</span><span class="contributing">I</span><span class="contributing"> found</span><span class="contributing"> myself</span><span class="contributing"> in</span><span class="contributing"> front</span><span class="contributing"> of</span><span class="contributing"> Lat</span><span class="contributing">our</span><span class="contributing">,</span><span class="contributing"> where</span><span class="non-contributing">,</span><span class="non-contributing"> in</span><span class="non-contributing"> a</span><span class="non-contributing"> narrow</span><span class="non-contributing"> space</span><span class="non-contributing"> of</span><span class="non-contributing"> ground</span><span class="non-contributing">,
+</span><span class="non-contributing">f</span><span class="non-contributing">if</span><span class="non-contributing">teen</span><span class="non-contributing"> minutes</span><span class="non-contributing"> had</span><span class="non-contributing"> elapsed</span><span class="non-contributing"> since</span><span class="non-contributing"> we</span><span class="non-contributing"> first</span><span class="non-contributing"> attacked</span><span class="non-contributing"> the</span><span class="non-contributing"> palace</span><span class="non-contributing"> of</span><span class="non-contributing"> the</span><span class="non-contributing">
+</span><span class="non-contributing">c</span><span class="non-contributing">ouncil</span><span class="non-contributing">.
+
+</span><span class="non-contributing">"W</span><span class="non-contributing">ound</span><span class="non-contributing">"</span><span class="non-contributing"> was</span><span class="contributing"> the</span><span class="non-contributing"> word</span><span class="non-contributing"> I</span><span class="non-contributing"> heard</span><span class="non-contributing"> most</span><span class="non-contributing">.</span><span class="non-contributing"> </span><span class="non-contributing"> There</span><span class="contributing"> was</span><span class="non-contributing"> a</span><span class="non-contributing"> wound</span><span class="non-contributing">,</span><span class="non-contributing"> a</span><span class="non-contributing"> breach</span><span class="contributing">,</span><span class="non-contributing"> a</span><span class="contributing">
+</span><span class="non-contributing">per</span><span class="non-contributing">pet</span><span class="non-contributing">ration</span><span class="non-contributing">.</span><span class="non-contributing"> </span><span class="non-contributing"> We</span><span class="non-contributing"> were</span><span class="non-contributing"> obliged</span><span class="non-contributing"> to</span><span class="non-contributing"> penetrate</span><span class="contributing"> the</span><span class="non-contributing"> hole</span><span class="contributing">.
+
+</span><span class="non-contributing">"Oh</span><span class="contributing">,</span><span class="non-contributing"> here</span><span class="non-contributing">'s</span><span class="non-contributing"> the</span><span class="non-contributing"> end</span><span class="non-contributing">.</span><span class="non-contributing"> </span><span class="non-contributing"> Let</span><span class="non-contributing"> them</span><span class="non-contributing"> get</span><span class="non-contributing"> at</span><span class="contributing"> it</span><span class="non-contributing">!</span><span class="non-contributing"> </span><span class="non-contributing"> Here</span><span class="non-contributing">'s</span><span class="contributing"> the</span><span class="non-contributing"> place</span><span class="non-contributing"> for</span><span class="non-contributing"> them</span><span class="non-contributing">.
+</span><span class="non-contributing">Let</span><span class="non-contributing"> them</span><span class="non-contributing"> enter</span><span class="non-contributing"> as</span><span class="non-contributing"> they</span><span class="non-contributing"> run</span><span class="non-contributing">;</span><span class="contributing"> and</span><span class="non-contributing"> if</span><span class="non-contributing"> they</span><span class="non-contributing"> are</span><span class="non-contributing"> successful</span><span class="non-contributing"> I</span><span class="non-contributing">'ll</span><span class="non-contributing"> be</span><span class="non-contributing"> a</span><span class="contributing">
+</span><span class="non-contributing">h</span><span class="non-contributing">unted</span><span class="non-contributing"> dog</span><span class="non-contributing"> alive</span><span class="non-contributing">."
+
+</span><span class="non-contributing">Al</span><span class="non-contributing">as</span><span class="non-contributing">!</span><span class="contributing"> the</span><span class="non-contributing"> dear</span><span class="non-contributing">,</span><span class="non-contributing"> good</span><span class="non-contributing"> creature</span><span class="contributing">,</span><span class="contributing"> the</span><span class="non-contributing"> king</span><span class="contributing"> of</span><span class="non-contributing"> beasts</span><span class="non-contributing">!</span><span class="non-contributing"> what</span><span class="non-contributing"> miraculous</span><span class="contributing">
+</span><span class="non-contributing">intelligence</span><span class="non-contributing"> he</span><span class="non-contributing"> gave</span><span class="non-contributing"> me</span><span class="contributing">,</span><span class="contributing"> and</span><span class="non-contributing"> what</span><span class="non-contributing"> a</span><span class="non-contributing"> dread</span><span class="non-contributing"> duty</span><span class="contributing"> to</span><span class="non-contributing"> keep</span><span class="non-contributing"> the</span><span class="non-contributing"> mouth</span><span class="non-contributing"> of</span><span class="non-contributing">
+</span><span class="non-contributing">every</span><span class="non-contributing"> person</span><span class="non-contributing"> who</span><span class="non-contributing"> suspects</span><span class="non-contributing"> work</span><span class="contributing">.
+
+</span><span class="non-contributing">For</span><span class="non-contributing"> myself</span><span class="non-contributing"> I</span><span class="non-contributing"> did</span><span class="non-contributing"> not</span><span class="non-contributing"> show</span><span class="non-contributing"> the</span><span class="non-contributing"> slightest</span><span class="non-contributing"> emotion</span><span class="contributing">;</span><span class="non-contributing"> but</span><span class="non-contributing">,</span><span class="non-contributing"> obey</span><span class="non-contributing">ing</span><span class="contributing"> the</span><span class="non-contributing"> orders</span><span class="non-contributing">
+</span><span class="non-contributing">of</span><span class="non-contributing"> others</span><span class="contributing">,</span><span class="non-contributing"> I</span><span class="non-contributing"> watched</span><span class="contributing"> the</span><span class="non-contributing"> works</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> insurgents</span><span class="non-contributing"> as</span><span class="non-contributing"> they</span><span class="non-contributing"> work</span><span class="non-contributing">'d</span><span class="contributing"> on</span><span class="contributing"> the</span><span class="non-contributing">
+</span><span class="non-contributing">building</span><span class="non-contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> palace</span><span class="contributing">.</span><span class="contributing"> </span><span class="non-contributing"> They</span><span class="non-contributing"> are</span><span class="non-contributing"> doing</span><span class="non-contributing"> it</span><span class="non-contributing"> so</span><span class="non-contributing"> well</span><span class="non-contributing"> that</span><span class="contributing"> I</span><span class="non-contributing"> am</span><span class="contributing"> unable</span><span class="contributing"> to</span><span class="contributing">
+</span><span class="non-contributing">w</span><span class="non-contributing">orry</span><span class="non-contributing"> me</span><span class="non-contributing"> out</span><span class="contributing"> of</span><span class="non-contributing"> my</span><span class="non-contributing"> own</span><span class="non-contributing"> room</span><span class="non-contributing"> amid</span><span class="contributing"> the</span><span class="non-contributing"> memories</span><span class="non-contributing"> they</span><span class="non-contributing"> create</span><span class="non-contributing">.
+
+
+
+
+</span><span class="non-contributing">CHAPTER</span><span class="non-contributing"> II</span><span class="non-contributing">
+
+</span><span class="contributing">The</span><span class="non-contributing"> Palace</span><span class="contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> C</span><span class="non-contributing">æ</span><span class="non-contributing">s</span><span class="non-contributing">ars</span><span class="non-contributing">
+
+
+</span><span class="non-contributing">While</span><span class="non-contributing"> I</span><span class="non-contributing"> was</span><span class="non-contributing"> sleeping</span><span class="contributing">,</span><span class="non-contributing"> early</span><span class="non-contributing"> in</span><span class="contributing"> the</span><span class="non-contributing"> morning</span><span class="contributing">,</span><span class="non-contributing"> my</span><span class="non-contributing"> neighbours</span><span class="contributing"> and</span><span class="non-contributing"> I</span><span class="non-contributing"> took</span><span class="non-contributing">
+</span><span class="non-contributing">a</span><span class="non-contributing"> stroll</span><span class="contributing"> through</span><span class="contributing"> the</span><span class="non-contributing"> city</span><span class="non-contributing">.</span><span class="non-contributing"> </span><span class="contributing"> I</span><span class="non-contributing"> over</span><span class="non-contributing">took</span><span class="non-contributing"> them</span><span class="non-contributing"> in</span><span class="non-contributing"> a</span><span class="non-contributing"> small</span><span class="non-contributing"> street</span><span class="non-contributing"> with</span><span class="contributing"> a</span><span class="non-contributing">
+</span><span class="non-contributing">large</span><span class="non-contributing"> as</span><span class="non-contributing">sembl</span><span class="non-contributing">age</span><span class="non-contributing"> of</span><span class="non-contributing"> soldiers</span><span class="non-contributing">.</span><span class="non-contributing"> </span><span class="non-contributing"> The</span><span class="non-contributing"> Italian</span><span class="non-contributing"> village</span><span class="non-contributing"> on</span><span class="contributing"> the</span><span class="non-contributing"> opposite</span><span class="non-contributing"> side</span><span class="contributing">
+</span><span class="non-contributing">of</span><span class="non-contributing"> the</span><span class="non-contributing"> river</span><span class="non-contributing"> runs</span><span class="non-contributing"> almost</span><span class="non-contributing"> down</span><span class="contributing"> the</span><span class="non-contributing"> side</span><span class="non-contributing"> of</span><span class="contributing"> the</span><span class="non-contributing"> city</span><span class="non-contributing">.</span><span class="non-contributing"> </span><span class="non-contributing"> It</span><span class="non-contributing"> is</span><span class="non-contributing"> full</span><span class="non-contributing"> of</span><span class="contributing">
+</span><span class="non-contributing">shops</span><span class="non-contributing">.</span><span class="non-contributing"> I</span><span class="non-contributing"> liked</span><span class="contributing"> these</span><span class="non-contributing"> first</span><span class="non-contributing"> ones</span><span class="non-contributing"> at</span><span class="non-contributing"> first</span><span class="non-contributing">;</span><span class="non-contributing"> but</span><span class="contributing"> they</span><span class="non-contributing"> were</span><span class="non-contributing"> not</span><span class="non-contributing"> easy</span><span class="non-contributing"> to</span><span class="non-contributing">
+</span><span class="non-contributing">get</span><span class="non-contributing">.</span><span class="contributing"> </span><span class="non-contributing"> Most</span><span class="non-contributing"> of</span><span class="non-contributing"> them</span><span class="non-contributing"> were</span><span class="non-contributing"> sold</span><span class="non-contributing"> by</span><span class="non-contributing"> the</span></div>
+        </div>
+    </div>
+</body>
+</html>
