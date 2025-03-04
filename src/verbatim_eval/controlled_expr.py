@@ -222,18 +222,29 @@ def calculate_metrics(config, rep, offset, prefix_length, suffix_length) -> Dict
         len_suffix=suffix_length
     )
 
-    eval_results = data.map(
-        batch_rouge_ttr_calc,
-        batched=True,
-        batch_size=5,
-        num_proc=100,
-        remove_columns=data.column_names,
-        fn_kwargs={
-            "true_key": "true_suffix", 
-            "gen_key": "generated_suffix", 
-            "len_suffix": suffix_length
-        }
-    )
+     # First check if we already have the metrics computed during inference
+    has_precomputed_metrics = all(metric in data.column_names 
+                              for metric in ['TTR_ref', 'TTR_gen', 'Rouge-L'])
+
+    # Only run the batch_rouge_ttr_calc if metrics were not precomputed
+    if not has_precomputed_metrics:
+        eval_results = data.map(
+            batch_rouge_ttr_calc,
+            batched=True,
+            batch_size=5,
+            num_proc=100,
+            remove_columns=data.column_names,
+            fn_kwargs={
+                "true_key": "true_suffix", 
+                "gen_key": "generated_suffix", 
+                "len_suffix": suffix_length
+            }
+        )
+    else:
+        # Only keep the specific metrics we need
+        needed_columns = ['lcs_norm', 'TTR_ref', 'TTR_gen', 'Rouge-L']
+        available_columns = [col for col in needed_columns if col in data.column_names]
+        eval_results = data.select_columns(available_columns)
 
     metrics = {
         'NLL': {
@@ -241,20 +252,68 @@ def calculate_metrics(config, rep, offset, prefix_length, suffix_length) -> Dict
             'mean': np.mean(data['nll_mean']),
             'std': np.std(data['nll_mean'])
         },
-        # 'LCS': {
-        #     'scores': data['nll_mean'],
-        #     'mean': np.mean(data['nll_mean']),
-        #     'std': np.std(data['nll_mean'])
-        # }
+        'PPL': {
+            'scores': data['perplexity'],
+            'mean': np.mean(data['perplexity']),
+            'std': np.std(data['perplexity'])
+        },
+        'Rouge-L': {
+            'scores': data['Rouge-L'],
+            'mean': np.mean(data['Rouge-L']),
+            'std': np.std(data['Rouge-L'])
+        },
+        'LCS': {
+            'scores': data['lcs_norm'],
+            'mean': np.mean(data['lcs_norm']),
+            'std': np.std(data['lcs_norm'])
+        },
+        'TTR_ref': {
+            'scores': data['TTR_ref'],
+            'mean': np.mean(data['TTR_ref']),
+            'std': np.std(data['TTR_ref'])
+        },
+        'TTR_gen': {
+            'scores': data['TTR_gen'],
+            'mean': np.mean(data['TTR_gen']),
+            'std': np.std(data['TTR_gen'])
+        }
     }
 
-    for metric in eval_results.column_names:
-        scores = np.array(eval_results[metric])
-        metrics[metric] = {
-            'scores': scores,
-            'mean': np.mean(scores),
-            'std': np.std(scores)
-        }
+    # Calculate exact match statistics
+    lcs_norm_values = np.array(data['lcs_norm'])
+    exact_match = sum(lcs_norm_values == 1.0)
+    match_75 = sum(lcs_norm_values >= 0.75)
+    match_50 = sum(lcs_norm_values >= 0.50)
+    match_25 = sum(lcs_norm_values >= 0.25)
+    
+    # Calculate percentages
+    total_samples = len(lcs_norm_values)
+    exact_match_pct = (exact_match / total_samples) * 100 if total_samples > 0 else 0
+    match_75_pct = (match_75 / total_samples) * 100 if total_samples > 0 else 0
+    match_50_pct = (match_50 / total_samples) * 100 if total_samples > 0 else 0
+    match_25_pct = (match_25 / total_samples) * 100 if total_samples > 0 else 0
+    
+    # Add to metrics dictionary
+    metrics['exact_match'] = {
+        'scores': exact_match,
+        'mean': exact_match_pct,
+        'std': 0
+    }
+    metrics['match_75'] = {
+        'scores': match_75,
+        'mean': match_75_pct, 
+        'std': 0
+    }
+    metrics['match_50'] = {
+        'scores': match_50,
+        'mean': match_50_pct,
+        'std': 0
+    }
+    metrics['match_25'] = {
+        'scores': match_25,
+        'mean': match_25_pct,
+        'std': 0
+    }
 
     return metrics
 

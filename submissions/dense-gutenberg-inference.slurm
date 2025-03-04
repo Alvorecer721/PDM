@@ -8,7 +8,7 @@
 #SBATCH --job-name=gfl-infer
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=24:00:00
+#SBATCH --time=02:00:00
 #SBATCH --array=0-71
 
 set -e  # Exit immediately if any command fails
@@ -23,6 +23,7 @@ if [ -z "$EXPR_PATH" ]; then
     exit 1
 fi
 
+
 # Get the master node hostname
 MASTER_PORT=$((10000 + ${SLURM_JOBID: -4}))
 MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
@@ -31,11 +32,30 @@ echo "MASTER_ADDR:MASTER_PORT=${MASTER_ADDR}:${MASTER_PORT}"
 export MASTER_PORT
 export MASTER_ADDR
 
+# Find the last epoch by getting the highest iteration and dividing by 125
+if [ -d "${EXPR_PATH}/HF" ]; then
+    # Find the highest iteration number from the directory names
+    HIGHEST_ITER=$(ls -d "${EXPR_PATH}/HF/iter_"* 2>/dev/null | sed 's/.*iter_//' | sort -n | tail -1)
+    
+    if [ -n "$HIGHEST_ITER" ]; then
+        # Remove leading zeros and calculate last epoch by dividing by 125
+        HIGHEST_ITER_CLEAN=$(echo "$HIGHEST_ITER" | sed 's/^0*//')
+        LAST_EPOCH=$((HIGHEST_ITER_CLEAN / 125))
+        echo "Found highest iteration: $HIGHEST_ITER ($HIGHEST_ITER_CLEAN without leading zeros), last epoch: $LAST_EPOCH"
+    else
+        echo "Warning: No iteration directories found at ${EXPR_PATH}/HF/"
+        exit 1  
+    fi
+else
+    echo "Warning: HF directory not found at ${EXPR_PATH}/HF, using default last epoch"
+    exit 1 
+fi
+
 # Define arrays for epochs and offsets
-# declare -a epochs=(1 2 4 8 16 32 64 80)
+# declare -a epochs=(1 2 4 8 16 32 64 82)
 # declare -a offsets=(0 1 2 4 8 16 32 64 128 256)
-declare -a epochs=(100)
-declare -a offsets=(0 1 2 4 8 16 32 64 128 256)
+declare -a epochs=($LAST_EPOCH)
+declare -a offsets=(0)
 
 # Check if pilot mode is enabled
 if [ "$PILOT_MODE" = "pilot" ]; then

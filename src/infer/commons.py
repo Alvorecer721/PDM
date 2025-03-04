@@ -11,10 +11,12 @@ import torch.nn as nn
 from transformers import AutoModelForCausalLM
 from datasets import load_dataset
 
+
 import sys
 # Add the src directory to the path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from verbatim_eval.LCS import find_longest_common_substrings
+from verbatim_eval.my_rouge import compute_rouge_l_2d, _compute_dp_matrix_2d
 
 # Configure logging
 logging.basicConfig(
@@ -41,6 +43,35 @@ def is_rank_0():
         return dist.get_rank() == 0
     # If not distributed, we're on rank 0
     return True
+
+
+
+def setup_distributed(seed):
+    """
+    Set up distributed training environment.
+    
+    Args:
+        seed (int): Random seed
+        
+    Returns:
+        tuple: (local_rank, rank, world_size)
+    """
+    # Set random seed
+    set_seed(seed)
+    
+    # Get distributed environment variables
+    local_rank = int(os.environ["LOCAL_RANK"])
+    rank = int(os.environ["RANK"])  # Global rank across all nodes
+    world_size = int(os.environ["WORLD_SIZE"])  # Total number of processes
+
+    # Initialize process group if not already done
+    if not dist.is_initialized():
+        dist.init_process_group(backend="nccl")
+    
+    # Set CUDA device
+    torch.cuda.set_device(local_rank)
+    
+    return local_rank, rank, world_size
 
 
 ########################################################################################################################
@@ -173,7 +204,7 @@ def get_inference_dir(output_path, rep, gen_policy):
 
 
 ########################################################################################################################
-############################################### NEGATIVE LOG LIKELIHOOD ################################################
+#################################################### TEXT METRICS ######################################################
 ########################################################################################################################
 
 
@@ -207,8 +238,41 @@ def calc_generation_nll(generated_sequences, scores):
 
     token_nlls = torch.stack(token_nlls, dim=-1)  # shape: [batch_size, seq_length]
     assert token_nlls.min() >= 0, f"Negative NLL found: {token_nlls.min()}"
-    return token_nlls, token_nlls.mean(dim=-1), token_nlls.std(dim=-1)
 
+    seq_nlls_mean = token_nlls.mean(dim=-1)  # Average NLL per sequence
+    seq_nlls_std = token_nlls.std(dim=-1)    # Std of NLL per sequence
+    
+    # Calculate perplexity per sequence: exp(average NLL)
+    perplexity = torch.exp(seq_nlls_mean)
+    
+    return token_nlls, seq_nlls_mean, seq_nlls_std, perplexity
+
+
+def calculate_text_metrics(true_seq, gen_seq):
+    """
+    Calculate various text similarity metrics for a pair of sequences.
+
+    Args:
+        true_seq (list): True suffix sequence (token IDs)
+        gen_seq (list): Generated suffix sequence (token IDs)
+
+    Returns:
+        dict: Dictionary with metrics (TTR_ref, TTR_gen, Rouge-L)
+    """
+    # Type-Token-Ratio
+    ttr_ref = len(set(true_seq)) / len(true_seq) if true_seq else 0
+    ttr_gen = len(set(gen_seq)) / len(gen_seq) if gen_seq else 0
+
+    # Rouge-L
+    dp_matrix = _compute_dp_matrix_2d(true_seq, gen_seq)
+    rouge_l = compute_rouge_l_2d(dp_matrix)
+    del dp_matrix  # Free memory
+
+    return {
+        "TTR_ref": ttr_ref,
+        "TTR_gen": ttr_gen,
+        "Rouge-L": rouge_l
+    }
 
 ########################################################################################################################
 ################################################## INFERENCE ###########################################################
@@ -242,14 +306,10 @@ def run(
     local_rank = int(os.environ["LOCAL_RANK"])
     rank = int(os.environ["RANK"])  # Global rank across all nodes
     world_size = int(os.environ["WORLD_SIZE"])  # Total number of processes
+    model.to(local_rank)
 
     # Set same seed for all ranks
-    set_seed(seed)
-
-    if not dist.is_initialized():
-        dist.init_process_group(backend="nccl")
-    torch.cuda.set_device(local_rank)
-    model = model.to(local_rank)
+    setup_distributed(seed)
 
     # Setup distributed sampling
     sampler = DistributedSampler(
@@ -267,6 +327,7 @@ def run(
         "greedy": {"num_beams": 1, "do_sample": False},
         "nucleus": {"num_beams": 1, "do_sample": True, "temperature": 1, "top_p": 0.3},
     }
+
 
     # Process batches
     with open(output_file, "w") as jsonl_file:
@@ -312,7 +373,7 @@ def run(
                 )
 
             sequences = outputs.sequences
-            seq_nlls, seq_nlls_mean, seq_nlls_std = calc_generation_nll(
+            seq_nlls, seq_nlls_mean, seq_nlls_std, perplexity = calc_generation_nll(
                 sequences, outputs.scores
             )
 
@@ -331,22 +392,24 @@ def run(
 
             lcs_result = find_longest_common_substrings(true_suffixes, generated_suffixes)
             lcs = lcs_result['max_length'].to_numpy()
-            lcs = lcs / suffix_length
-            lcs_mean = lcs.mean()
+            lcs_norm = lcs / suffix_length
 
+            lcs = lcs.tolist()
             nlls = seq_nlls.cpu().tolist()
             nll_means = seq_nlls_mean.cpu().tolist()
             nll_stds = seq_nlls_std.cpu().tolist()
-            lcs = lcs.tolist()
+            perplexities = perplexity.cpu().tolist()
 
             # Clear GPU tensors immediately after use
             del batch_tensor, sequences, outputs, input_with_bos
-            del seq_nlls, seq_nlls_mean, seq_nlls_std
+            del seq_nlls, seq_nlls_mean, seq_nlls_std, perplexity
 
             # Write results directly without storing in memory
-            for p, t, g, nll, nll_m, nll_s, lcs_norm in zip(
-                prefixes, true_suffixes, generated_suffixes, nlls, nll_means, nll_stds, lcs
+            for p, t, g, nll, nll_m, nll_s, lcs_n, ppl in zip(
+                prefixes, true_suffixes, generated_suffixes, nlls, nll_means, nll_stds, lcs_norm, perplexities
             ):
+                metrics = calculate_text_metrics(t,g)
+
                 json.dump(
                     {
                         "prefix": p,
@@ -355,8 +418,9 @@ def run(
                         "nll": nll,
                         "nll_mean": nll_m,
                         "nll_std": nll_s,
-                        "lcs_norm": lcs_norm,
-                        "lcs_mean": lcs_mean,
+                        "perplexity": ppl,
+                        "lcs_norm": lcs_n,
+                        **metrics
                     },
                     jsonl_file,
                 )
@@ -364,7 +428,9 @@ def run(
                 jsonl_file.flush()
 
             # Clear CPU lists after writing
-            del prefixes, true_suffixes, generated_suffixes, nlls, nll_means, nll_stds
+            del prefixes, true_suffixes, generated_suffixes
+            del nlls, nll_means, nll_stds, perplexities
+            del lcs, lcs_norm, lcs_result
             torch.cuda.empty_cache()
 
     # Synchronize all processes
