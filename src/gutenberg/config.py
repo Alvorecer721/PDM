@@ -14,7 +14,7 @@ COLUMN_NAMES = {
 
 FILE_NAMES = {"TOKEN": "token.jsonl", "TEXT": "text.jsonl"}
 
-REPETITIONS = np.array([1, 2, 3, 4, 8, 16, 24, 32, 48, 64, 96, 128])
+REPETITIONS = np.array([1, 2, 3, 4, 8, 16, 24, 32, 48, 64, 96, 128, 256])
 # REPETITIONS = np.array([2 ** i for i in range(7,12)])
 # REPETITIONS = np.array([2 ** i for i in range(12,17)])
 

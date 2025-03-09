@@ -1,7 +1,6 @@
-from ignite.metrics import RougeL
 from typing import List
 import numpy as np
-from .utils import load_inference_data
+from utils import load_inference_data
 from tqdm.auto import tqdm
 
 
@@ -17,7 +16,7 @@ def batch_rouge_ttr_calc(batch, true_key, gen_key, len_suffix):
     Returns:
         dict: Dictionary containing arrays of ROUGE-L scores and summary statistics.
     """
-
+    from ignite.metrics import RougeL
 
     rouge_scores = []
     ttr_ref_scores = []

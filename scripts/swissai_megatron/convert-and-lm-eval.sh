@@ -50,7 +50,7 @@ pip install -e .
 # Then run your evaluation command
 accelerate launch -m lm_eval --model hf \
    --model_args pretrained=${EXPR_PATH}/HF,tokenizer=meta-llama/Llama-3.1-8B-Instruct \
-   --tasks hellaswag,mmlu,winogrande,wikitext,squadv2,arc_easy,arc_challenge,piqa,commonsense_qa \
+   --tasks hellaswag,mmlu,winogrande,wikitext,arc_easy,arc_challenge,piqa,commonsense_qa \
    --batch_size 4 \
    --output_path ${RES_PATH}
 

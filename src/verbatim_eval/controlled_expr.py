@@ -7,8 +7,8 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 
-from .rouge_ttr import batch_rouge_ttr_calc
-from .utils import load_inference_data
+from rouge_ttr import batch_rouge_ttr_calc
+from utils import load_inference_data
 
 @dataclass
 class MetricData:
@@ -137,10 +137,20 @@ class Results:
         name = f"offset_{offsets_str}_prefix_{prefixes_str}_suffix_{suffixes_str}.pkl"
 
         path = f"{base_path}/{self.expr[0]}/{name}"
+        
+        # Create directory if it doesn't exist
         os.makedirs(os.path.dirname(path), exist_ok=True)
+        
+        # Check if file exists and delete it
+        if os.path.exists(path):
+            os.remove(path)
+            print(f"Deleted existing file: {path}")
+        
+        # Save the new file
         with open(path, 'wb') as f:
             pickle.dump(self.data, f)
-
+        
+        print(f"Saved data to: {path}")
 
 @dataclass
 class EvalConfig:
@@ -276,7 +286,17 @@ def calculate_metrics(config, rep, offset, prefix_length, suffix_length) -> Dict
             'scores': data['TTR_gen'],
             'mean': np.mean(data['TTR_gen']),
             'std': np.std(data['TTR_gen'])
-        }
+        },
+        # 'Distinct-n_ref': {
+        #     'scores': data['Distinct-n_ref'],
+        #     'mean': np.mean(data['Distinct-n_ref']),
+        #     'std': np.std(data['Distinct-n_ref'])
+        # },
+        # 'Distinct-n_gen': {
+        #     'scores': data['Distinct-n_gen'],
+        #     'mean': np.mean(data['Distinct-n_gen']),
+        #     'std': np.std(data['Distinct-n_gen'])
+        # }
     }
 
     # Calculate exact match statistics

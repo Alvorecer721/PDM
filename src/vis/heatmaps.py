@@ -2,8 +2,10 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 
-def create_heatmaps_subplots(data_dict, figsize=(30, 12)):
+
+def create_heatmaps_subplots(data_dict, output_file, figsize=(40, 10)):
     """
     Create heatmaps from a dictionary of pandas dataframes with fixed colorbar scale 0-1
     
@@ -33,8 +35,6 @@ def create_heatmaps_subplots(data_dict, figsize=(30, 12)):
     xlabel = first_df.columns.name
     ylabel = first_df.index.name
     
-    fig.suptitle(f'Rouge-L Scores by offset, {xlabel} Length, and Repetition', fontsize=16, y=1.02)
-    
     # Set fixed color scale from 0 to 1
     vmin, vmax = 0, 1
     
@@ -57,8 +57,10 @@ def create_heatmaps_subplots(data_dict, figsize=(30, 12)):
     # Hide empty subplots
     for idx in range(len(items), n_rows * n_cols):
         axes.flat[idx].set_visible(False)
+
+    plt.savefig(f"/capstor/users/cscs/xyixuan/PDM/results/plots/{output_file}.pdf", bbox_inches='tight', pad_inches=0.1)
     
-    plt.tight_layout()
+    # plt.tight_layout()
 
 
 def create_heatmaps_difference_subplots(data_dict1, data_dict2, figsize=(30, 12)):

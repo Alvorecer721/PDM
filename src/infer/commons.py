@@ -101,6 +101,11 @@ def batch_processing_gutenberg(batch, _prefix_len, _offset, _suffix_len=None):
     for sequence in batch["input_ids"]:
         # No need to tokenize again if sequences are already tokenized (input_ids)
         # Adjust slicing based on offset, prefix, and suffix lengths
+        assert _offset + _prefix_len + _suffix_len <= len(sequence), (
+            f"Requested offset ({_offset}), prefix length ({_prefix_len}), "
+            f"and suffix length ({_suffix_len}) exceed sequence length ({len(sequence)})."
+        )
+
         prefix_suffix = sequence[_offset : _offset + _prefix_len + _suffix_len]
         prefix_suffix_list.append(prefix_suffix)
 
@@ -248,6 +253,27 @@ def calc_generation_nll(generated_sequences, scores):
     return token_nlls, seq_nlls_mean, seq_nlls_std, perplexity
 
 
+def distinct_n(tokens, n):
+    """
+    Memory-optimized version for very large token sequences.
+    Uses a generator to avoid creating intermediate lists.
+    
+    Args:
+        tokens (list): List of tokens
+        n (int): Size of n-grams
+        
+    Returns:
+        float: Distinct-n metric
+    """
+    total_ngrams = len(tokens) - n + 1
+    
+    # Use generator expression to minimize memory usage
+    ngrams_generator = (tuple(tokens[i:i+n]) for i in range(total_ngrams))
+    unique_ngrams = set(ngrams_generator)
+    
+    return len(unique_ngrams) / total_ngrams
+
+
 def calculate_text_metrics(true_seq, gen_seq):
     """
     Calculate various text similarity metrics for a pair of sequences.
@@ -268,11 +294,19 @@ def calculate_text_metrics(true_seq, gen_seq):
     rouge_l = compute_rouge_l_2d(dp_matrix)
     del dp_matrix  # Free memory
 
+    # Distinct-n metrics for reference sequence (optional)
+    distinct_3_gen =  distinct_n(gen_seq, 3)
+    distinct_3_ref = distinct_n(true_seq, 3)
+
     return {
         "TTR_ref": ttr_ref,
         "TTR_gen": ttr_gen,
+        "Distinct-n_ref": distinct_3_ref,
+        "Distinct-n_gen": distinct_3_gen,
         "Rouge-L": rouge_l
     }
+
+
 
 ########################################################################################################################
 ################################################## INFERENCE ###########################################################
