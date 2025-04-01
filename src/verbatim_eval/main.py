@@ -8,6 +8,7 @@ python /capstor/users/cscs/xyixuan/PDM/src/verbatim_eval/main.py \
 
 import argparse
 from pathlib import Path
+from typing import Optional
 from controlled_expr import (
     EvalConfig, 
     eval_expr, 
@@ -32,6 +33,8 @@ def main():
     parser.add_argument("--suffix-lengths", type=int, nargs="+", 
                         default=[500],
                         help="List of suffix lengths")
+    parser.add_argument("--repetitions", type=int, nargs="+", default=None,
+                        help="List of repetition frequencies; if omitted, will use all available repetitions.")
     
     args = parser.parse_args()
     
@@ -51,7 +54,9 @@ def main():
             continue
             
         # Get repetitions
-        repetitions = get_repetitions(infer_path)
+        repetitions: Optional[list[int]] = args.repetitions
+        if repetitions is None:
+            repetitions = get_repetitions(infer_path)
         print(f"Found repetitions for {expr}: {repetitions}")
         
         # Create evaluation config

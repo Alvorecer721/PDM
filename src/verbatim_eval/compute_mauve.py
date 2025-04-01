@@ -109,7 +109,8 @@ if __name__ == "__main__":
                         default=[0, 1, 2, 4, 8, 16, 32, 64, 128],
                         help="List of repetition numbers")
     parser.add_argument("--policy", type=str, default="greedy", help="Generation policy")
-    parser.add_argument("--sample-size", type=int, default=1, help="Sample size for MAUVE computation")
+    parser.add_argument("--mode", type=str, default="SparseGutenberg", choices=["SparseGutenberg", "DenseGutenberg", "Goldfish-H-Ablation"])
+    parser.add_argument("--sample-size", type=int, default=None, help="Sample size for MAUVE computation")
     
     args = parser.parse_args()
     
@@ -120,7 +121,7 @@ if __name__ == "__main__":
     
     # Get full experiment path using pathlib
     base_path = Path(args.base_path)
-    expr_path = Path("SparseGutenberg") / args.expr
+    expr_path = Path(args.mode) / args.expr
     inference_dir = base_path / expr_path / "inference"
     
     # Loop through all parameter combinations

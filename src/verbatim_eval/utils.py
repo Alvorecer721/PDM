@@ -43,12 +43,16 @@ def load_inference_data(base_dir, step=None, consumed=None, offset=None, len_pre
     world_size = len(rank_files)
 
     # Load data from all ranks
-    dataset = load_dataset(
-        'json', 
-        data_files=[str(f) for f in rank_files], 
-        split='train',
-        cache_dir="/iopsstor/scratch/cscs/xyixuan/gutenberg"
-    )
+    try:
+        dataset = load_dataset(
+            'json', 
+            data_files=[str(f) for f in rank_files], 
+            split='train',
+            cache_dir="/iopsstor/scratch/cscs/xyixuan/gutenberg"
+        )
+    except ValueError as e:
+        print(f"Failed to load dataset from path: {file_path}")
+        raise e
     
     total_size = len(dataset)
     items_per_rank = total_size // world_size

@@ -1,4 +1,8 @@
+import os
+import json
 import matplotlib.pyplot as plt
+import numpy as np
+import re
 
 def plot_metric_comparison(
     results_dict,
@@ -7,6 +11,7 @@ def plot_metric_comparison(
     log_y=False,
     log_x=False,
     metric="Rouge-L",
+    y_lim=None,  # New parameter for y-axis limits
 ):
     # Disable TeX interpretation to allow % characters
     plt.rcParams["text.usetex"] = False
@@ -27,6 +32,8 @@ def plot_metric_comparison(
         Whether to use log scale for x-axis
     metric : str, optional
         Metric to plot (e.g., "Rouge-L", "TTR-gen"). Default is "Rouge-L"
+    y_lim : tuple, optional
+        Tuple of (ymin, ymax) to set y-axis limits. If None, uses matplotlib defaults.
     """
     plt.figure(figsize=(12, 6))
 
@@ -147,6 +154,10 @@ def plot_metric_comparison(
     if log_x:
         plt.xscale("log", base=2)  # Use base 2 for power of 2 scale
 
+    # Set y-axis limits if provided
+    if y_lim is not None:
+        plt.ylim(y_lim)
+
     # Improve legend appearance with light background
     plt.legend(
         bbox_to_anchor=(1.05, 1), loc="upper left", facecolor="white", edgecolor="black"
@@ -155,3 +166,31 @@ def plot_metric_comparison(
     plt.tight_layout()
 
     plt.show()
+
+
+def load_mauve_scores(dir_path):
+    """
+    Load MAUVE scores from JSON files in the specified directory, sorted by repetition number.
+    
+    Parameters:
+        dir_path (str): Path to the directory containing rep_*.json files
+    
+    Returns:
+        dict: Dictionary with repetition number as key and mauve_score as value, sorted in ascending order
+    """
+    mauve_scores = {}
+    
+    # Iterate over all JSON files in directory
+    for filename in os.listdir(dir_path):
+        if filename.startswith("rep_") and filename.endswith(".json"):
+            rep_num = int(filename.replace('rep_', '').replace('.json', ''))
+
+            with open(os.path.join(dir_path, filename), 'r') as f:
+                data = json.load(f)
+
+            if 'mauve_score' in data:
+                mauve_scores[rep_num] = data['mauve_score']
+
+    # Return dictionary sorted by repetition number
+    return dict(sorted(mauve_scores.items()))
+

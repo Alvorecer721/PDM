@@ -62,8 +62,7 @@ def create_heatmaps_subplots(data_dict, output_file, figsize=(40, 10)):
     
     # plt.tight_layout()
 
-
-def create_heatmaps_difference_subplots(data_dict1, data_dict2, figsize=(30, 12)):
+def create_heatmaps_difference_subplots(data_dict1, data_dict2, output_file, figsize=(30, 12), vmin=None, vmax=None):
     """
     Create heatmaps showing the difference between two dictionaries of pandas dataframes
     
@@ -71,6 +70,8 @@ def create_heatmaps_difference_subplots(data_dict1, data_dict2, figsize=(30, 12)
         data_dict1: First dictionary with keys as titles and values as pandas dataframes
         data_dict2: Second dictionary with keys as titles and values as pandas dataframes
         figsize: Tuple for figure size (width, height)
+        vmin: Minimum value for the colorbar (optional)
+        vmax: Maximum value for the colorbar (optional)
     """
     # Verify matching keys
     if set(data_dict1.keys()) != set(data_dict2.keys()):
@@ -108,12 +109,12 @@ def create_heatmaps_difference_subplots(data_dict1, data_dict2, figsize=(30, 12)
     xlabel = first_df.columns.name
     ylabel = first_df.index.name
     
-    fig.suptitle('Difference in Rouge-L Scores', fontsize=16, y=1.02)
-    
-    # Find global min and max for symmetric color scale
-    all_values = np.concatenate([df.values.flatten() for df in diff_dict.values()])
-    abs_max = max(abs(np.min(all_values)), abs(np.max(all_values)))
-    vmin, vmax = -abs_max, abs_max
+    # If vmin and vmax are not provided, calculate them from the data
+    if vmin is None or vmax is None:
+        all_values = np.concatenate([df.values.flatten() for df in diff_dict.values()])
+        abs_max = max(abs(np.min(all_values)), abs(np.max(all_values)))
+        vmin = -abs_max if vmin is None else vmin
+        vmax = abs_max if vmax is None else vmax
     
     # Create heatmap for each difference dataframe
     items = list(diff_dict.items())
@@ -121,7 +122,7 @@ def create_heatmaps_difference_subplots(data_dict1, data_dict2, figsize=(30, 12)
         # Convert to numpy array and ensure float type
         data = df.astype(float).to_numpy()
         
-        # Plot heatmap with symmetric scale and diverging colormap
+        # Plot heatmap with specified scale and diverging colormap
         sns.heatmap(data, annot=True, fmt='.4f', cmap='RdBu_r', ax=ax,
                     xticklabels=df.columns, yticklabels=df.index,
                     annot_kws={'size': 8},
@@ -136,4 +137,5 @@ def create_heatmaps_difference_subplots(data_dict1, data_dict2, figsize=(30, 12)
     for idx in range(len(items), n_rows * n_cols):
         axes.flat[idx].set_visible(False)
     
+    plt.savefig(f"/capstor/users/cscs/xyixuan/PDM/results/plots/{output_file}.pdf", bbox_inches='tight', pad_inches=0.1)
     plt.tight_layout()
