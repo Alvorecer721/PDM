@@ -62,8 +62,9 @@ if __name__ == "__main__":
     # Find all relevant data files matching requested repetitions
     data_folder = Path(args.data_folder)
     paths = sorted(
-        (path for path in data_folder.glob("rep_*_token.jsonl")
-        if int(path.stem.split('_')[1]) in repetitions),
+        (path for path in data_folder.glob("rep_[0-9]*_token.jsonl") 
+        if int(path.stem.split('_')[1]) in repetitions 
+        and "_swaps_" not in path.name),
         key=lambda path: int(path.stem.split('_')[1])
     )
 

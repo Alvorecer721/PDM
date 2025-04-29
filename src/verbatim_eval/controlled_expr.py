@@ -287,16 +287,6 @@ def calculate_metrics(config, rep, offset, prefix_length, suffix_length) -> Dict
             'mean': np.mean(data['TTR_gen']),
             'std': np.std(data['TTR_gen'])
         },
-        # 'Distinct-n_ref': {
-        #     'scores': data['Distinct-n_ref'],
-        #     'mean': np.mean(data['Distinct-n_ref']),
-        #     'std': np.std(data['Distinct-n_ref'])
-        # },
-        # 'Distinct-n_gen': {
-        #     'scores': data['Distinct-n_gen'],
-        #     'mean': np.mean(data['Distinct-n_gen']),
-        #     'std': np.std(data['Distinct-n_gen'])
-        # }
     }
 
     # Calculate exact match statistics

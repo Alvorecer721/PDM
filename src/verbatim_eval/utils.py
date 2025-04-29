@@ -2,6 +2,9 @@ from pathlib import Path
 from datasets import load_dataset
 import numpy as np
 import pandas as pd
+import os
+import json
+from typing import Union, List, Dict, Optional
 
 def load_inference_data(base_dir, step=None, consumed=None, offset=None, len_prefix=None, len_suffix=None, rep=None, policy=None):
     """
@@ -61,6 +64,154 @@ def load_inference_data(base_dir, step=None, consumed=None, offset=None, len_pre
     orig_indices = np.arange(total_size).reshape(world_size, items_per_rank).T.flatten()
     
     return dataset.select(orig_indices)
+
+def load_mauve_scores(parent_dir: str, 
+                      reps: Optional[List[int]] = None, 
+                      prefixes: Optional[List[int]] = None, 
+                      suffixes: Optional[List[int]] = None, 
+                      offsets: Optional[List[int]] = None,
+                      as_series: bool = True) -> Union[Dict, pd.DataFrame, pd.Series]:
+    """
+    Load MAUVE scores and return them in the specified format.
+    
+    Parameters:
+        parent_dir (str): Path to the parent directory containing subdirectories
+        reps (list): List of repetition numbers to retrieve (e.g., [32, 64, 128])
+        prefixes (list): List of prefix values to match (e.g., [50, 100, 250])
+        suffixes (list): List of suffix values to match (e.g., [500])
+        offsets (list): List of offset values to match (e.g., [0, 1, 2])
+        as_series (bool): If True, returns a pandas Series when there's a single offset/prefix/suffix
+                         If False, always returns the nested dictionary
+    
+    Returns:
+        Union[dict, pd.DataFrame, pd.Series]: 
+            - pd.Series with rep as index when as_series=True and single offset/prefix/suffix
+            - pd.DataFrame when as_series=True but multiple offset/prefix/suffix combinations
+            - Nested dictionary with structure {offset: {prefix: {suffix: {rep: mauve_score}}}}
+              when as_series=False
+    """
+    # Default to all if not specified
+    reps = reps or []
+    prefixes = prefixes or []
+    suffixes = suffixes or []
+    offsets = offsets or []
+    
+    results = {}
+    
+    # Iterate over all subdirectories in the parent directory
+    for offset_dir in os.listdir(parent_dir):
+        offset_dir_path = os.path.join(parent_dir, offset_dir)
+        
+        # Check if it's a directory and matches our pattern for offsets
+        if os.path.isdir(offset_dir_path) and offset_dir.startswith("offset_"):
+            try:
+                # Extract offset value
+                offset_val = int(offset_dir.replace('offset_', ''))
+                
+                # Skip if not in our target offsets (when specified)
+                if offsets and offset_val not in offsets:
+                    continue
+                
+                # Initialize offset in results
+                if offset_val not in results:
+                    results[offset_val] = {}
+                
+                # Process prefix_suffix directories
+                for prefix_suffix_dir in os.listdir(offset_dir_path):
+                    prefix_suffix_path = os.path.join(offset_dir_path, prefix_suffix_dir)
+                    
+                    if os.path.isdir(prefix_suffix_path) and prefix_suffix_dir.startswith("prefix_"):
+                        # Extract prefix and suffix from directory name
+                        parts = prefix_suffix_dir.split('_')
+                        if len(parts) >= 4:  # Ensure we have enough parts
+                            try:
+                                prefix_val = int(parts[1])
+                                suffix_val = int(parts[3])
+                                
+                                # Skip if not in our target lists (when specified)
+                                if prefixes and prefix_val not in prefixes:
+                                    continue
+                                if suffixes and suffix_val not in suffixes:
+                                    continue
+                                
+                                # Initialize nested dictionaries
+                                if prefix_val not in results[offset_val]:
+                                    results[offset_val][prefix_val] = {}
+                                if suffix_val not in results[offset_val][prefix_val]:
+                                    results[offset_val][prefix_val][suffix_val] = {}
+                                
+                                # Process rep files
+                                for filename in os.listdir(prefix_suffix_path):
+                                    if filename.startswith("rep_") and filename.endswith(".json"):
+                                        try:
+                                            rep_num = int(filename.replace('rep_', '').replace('.json', ''))
+                                            
+                                            # Skip if not in our target reps (when specified)
+                                            if reps and rep_num not in reps:
+                                                continue
+                                            
+                                            # Load the json file
+                                            file_path = os.path.join(prefix_suffix_path, filename)
+                                            with open(file_path, 'r') as f:
+                                                data = json.load(f)
+                                            
+                                            if 'mauve_score' in data:
+                                                results[offset_val][prefix_val][suffix_val][rep_num] = data['mauve_score']
+                                        except (ValueError, json.JSONDecodeError):
+                                            # Skip files with invalid rep format or JSON issues
+                                            continue
+                            
+                            except (ValueError, IndexError):
+                                # Skip directories with invalid format
+                                continue
+            
+            except ValueError:
+                # Skip directories with invalid offset format
+                continue
+    
+    # Sort the dictionaries by keys for consistent output
+    sorted_results = {}
+    for offset in sorted(results.keys()):
+        sorted_results[offset] = {}
+        for prefix in sorted(results[offset].keys()):
+            sorted_results[offset][prefix] = {}
+            for suffix in sorted(results[offset][prefix].keys()):
+                sorted_results[offset][prefix][suffix] = dict(sorted(results[offset][prefix][suffix].items()))
+    
+    # If not requesting pandas format, return the nested dictionary
+    if not as_series:
+        return sorted_results
+    
+    # For pandas output, first check if we have data
+    if not sorted_results:
+        return pd.DataFrame() if len(results) != 1 else pd.Series(name="mauve")
+    
+    # Handle the common case: single offset, prefix, suffix combination
+    if len(sorted_results) == 1:
+        offset = list(sorted_results.keys())[0]
+        if len(sorted_results[offset]) == 1:
+            prefix = list(sorted_results[offset].keys())[0]
+            if len(sorted_results[offset][prefix]) == 1:
+                suffix = list(sorted_results[offset][prefix].keys())[0]
+                # Convert to pandas Series with proper index
+                scores_dict = sorted_results[offset][prefix][suffix]
+                return pd.Series(scores_dict, name="mauve")
+    
+    # For multiple combinations, return a DataFrame
+    records = []
+    for offset, prefix_dict in sorted_results.items():
+        for prefix, suffix_dict in prefix_dict.items():
+            for suffix, rep_dict in suffix_dict.items():
+                for rep, score in rep_dict.items():
+                    records.append({
+                        'offset': offset,
+                        'prefix': prefix,
+                        'suffix': suffix,
+                        'rep': rep,
+                        'mauve': score
+                    })
+    
+    return pd.DataFrame(records) 
 
 
 def find_top_quantile_indices(metric_1_scores, metric_2_scores, q=0.1):

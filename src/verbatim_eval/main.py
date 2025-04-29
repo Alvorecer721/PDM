@@ -1,9 +1,11 @@
 """
 python /capstor/users/cscs/xyixuan/PDM/src/verbatim_eval/main.py \
-    --exprs llama3-1b-15n-8192sl-60gbsz-goldfish \
-    --mode sparse --offset 0 \
-    --prefix-lengths 50 100 250 750 1000 1500 2000 3000 4000 5000 \
-    --suffix-lengths 500
+    --exprs llama3-1b-15n-8192sl-60gbsz-standard \
+    --mode sparse \
+    --offsets 0 \
+    --prefix-lengths 50 500 1000 2000 3000 \
+    --suffix-lengths 500 \
+    --repetitions 1 2 4 8 16 32 64 128
 """
 
 import argparse
@@ -19,10 +21,10 @@ from controlled_expr import (
 def main():
     parser = argparse.ArgumentParser(description="Run evaluation for experiments")
     parser.add_argument("--exprs", nargs="+", required=True, help="List of experiment names")
-    parser.add_argument("--mode", choices=["dense", "sparse"], default="dense", 
+    parser.add_argument("--mode", choices=["dense", "sparse", "swaps"], default="dense", 
                         help="Mode for saving results")
     parser.add_argument("--base-path", type=str, 
-                        default="/iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/",
+                        default="/iopsstor/scratch/cscs/xyixuan/Megatron-LM-BKP/logs/Meg-Runs/",
                         help="Base path for experiments")
     parser.add_argument("--offsets", type=int, nargs="+", 
                         default=[0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048],
@@ -41,8 +43,10 @@ def main():
     # Construct the full base path using mode
     if args.mode == "dense":
         full_base_path = Path(args.base_path) / "DenseGutenberg"
-    else:  # sparse
+    elif args.mode == "sparse": 
         full_base_path = Path(args.base_path) / "SparseGutenberg"
+    elif args.mode == "swaps":
+        full_base_path = Path(args.base_path) / "Offset-Effect"
     
     # Process each experiment
     for expr in args.exprs:

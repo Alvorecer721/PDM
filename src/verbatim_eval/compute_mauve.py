@@ -109,7 +109,7 @@ if __name__ == "__main__":
                         default=[0, 1, 2, 4, 8, 16, 32, 64, 128],
                         help="List of repetition numbers")
     parser.add_argument("--policy", type=str, default="greedy", help="Generation policy")
-    parser.add_argument("--mode", type=str, default="SparseGutenberg", choices=["SparseGutenberg", "DenseGutenberg", "Goldfish-H-Ablation"])
+    parser.add_argument("--mode", type=str, default="SparseGutenberg", choices=["SparseGutenberg", "DenseGutenberg", "Goldfish-H-Ablation", "Offset-Effect"], help="Mode for saving results")
     parser.add_argument("--sample-size", type=int, default=None, help="Sample size for MAUVE computation")
     
     args = parser.parse_args()

@@ -2,7 +2,8 @@ import os
 from difflib import SequenceMatcher
 from datetime import datetime
 from typing import List, Tuple
-from ..verbatim_eval.my_rouge import _compute_dp_matrix_2d, compute_rouge_l_2d, find_contributing_tokens
+from src.verbatim_eval.my_rouge import _compute_dp_matrix_2d, compute_rouge_l_2d, find_contributing_tokens
+from src.verbatim_eval.utils import load_inference_data
 import numpy as np
 
 
@@ -220,24 +221,84 @@ def log_model_generations(
 
 
 if __name__ == "__main__":
+    import argparse
     from transformers import AutoTokenizer, AutoModelForCausalLM
+    import random
+    import torch
 
-    model_path = "/iopsstor/scratch/cscs/xyixuan/experiment/llama_1.5B_Sparse_Gutenberg_K_50_H_13_GBS_60/results/HF"
+    parser = argparse.ArgumentParser(description='Log model generations and visualize differences')
+    parser.add_argument('--experiment-path', type=str, required=True, 
+                        help='Path to experiment directory')
+    parser.add_argument('--data-folder', type=str,
+                        default='/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_swapped',
+                        help='Path to Gutenberg dataset folder')
+    parser.add_argument('--repetition', type=int, required=True,
+                        help='Repetition choice, e.g. 128')
+    parser.add_argument('--offset', type=int, default=0,
+                        help='Offset for text processing')
+    parser.add_argument('--prefix-length', type=int, default=500,
+                        help='Length of prefix sequence')
+    parser.add_argument('--suffix-length', type=int, default=500,
+                        help='Length of suffix sequence')
+    parser.add_argument('--gen-policy', type=str, default='greedy',
+                        help='Generation policy for inference, options: greedy, nucleus')
+    parser.add_argument('--sample-size', type=int, default=10,
+                        help='Number of samples to visualise')
+    parser.add_argument('--mode', type=str, default='swaps',
+                        help='Number of samples to visualise')
 
-    model = AutoModelForCausalLM.from_pretrained(
-        model_path,
-        device_map="auto",  # Automatically handle device placement
-        torch_dtype="auto"   # Automatically choose dtype
-    )
+    args = parser.parse_args()
+
+    output_dir = f"/capstor/users/cscs/xyixuan/PDM/results/case_study/{args.mode}/{os.path.basename(args.experiment_path)}"
+    os.makedirs(output_dir, exist_ok=True)
 
     tokenizer = AutoTokenizer.from_pretrained('meta-llama/Meta-Llama-3-8B')
 
-    # Example usage
-    model_tokens = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    true_tokens = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10]
-    tokenizer = None
-    rep_count = 1
-    seq_idx = 0
-    output_dir = "/capstor/users/cscs/xyixuan/PDM/results"
+    dataset = load_inference_data(
+        f"{args.experiment_path}/inference", 
+        rep=args.repetition, 
+        offset=args.offset,
+        len_prefix=args.prefix_length,
+        len_suffix=args.suffix_length,
+        policy=args.gen_policy
+    )
+
+    if len(dataset) > args.sample_size:
+        sampled_indices = random.sample(range(len(dataset)), args.sample_size)
+        dataset = dataset.select(sampled_indices)
+        print(f"Sampled {args.sample_size} examples from dataset")
     
-    log_model_generations(model_tokens, true_tokens, tokenizer, rep_count, seq_idx, output_dir)
+    for idx, data in enumerate(dataset):
+        # Extract generated and reference tokens
+        gen = data['generated_suffix']
+        ref = data['true_suffix']
+        
+        # Get sequence index from the dataset if available
+        seq_idx = data.get('seq_idx', sampled_indices[idx] if 'sampled_indices' in locals() else idx)
+
+        # Call the visualization function
+        log_model_generations(
+            model_tokens=torch.tensor(gen),
+            true_tokens=ref,
+            tokenizer=tokenizer,
+            rep_count=args.repetition,
+            seq_idx=seq_idx,
+            offset=args.offset,
+            output_dir=output_dir,
+            expr_name=os.path.basename(args.experiment_path)
+        )
+
+        print(f"Generated visualization for sequence {seq_idx}")
+
+
+"""
+python src/vis/output_html.py \
+    --experiment-path /iopsstor/scratch/cscs/xyixuan/Megatron-LM-BKP/logs/Meg-Runs/SparseGutenberg/llama3-1b-15n-8192sl-60gbsz-standard \
+    --data-folder /iopsstor/scratch/cscs/xyixuan/dataset/gutenberg \
+    --repetition 128 \
+    --offset 4000 \
+    --prefix-length 500 \
+    --suffix-length 500 \
+    --gen-policy greedy \
+    --sample-size 10 
+"""

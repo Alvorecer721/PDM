@@ -117,7 +117,7 @@ def main():
         config=config, 
         output_path=output_path
     )
-
+ 
 # def main():
 #     config = DataConfig()
 #     input_path = Path('/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_en_8k') 

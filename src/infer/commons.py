@@ -253,27 +253,6 @@ def calc_generation_nll(generated_sequences, scores):
     return token_nlls, seq_nlls_mean, seq_nlls_std, perplexity
 
 
-def distinct_n(tokens, n):
-    """
-    Memory-optimized version for very large token sequences.
-    Uses a generator to avoid creating intermediate lists.
-    
-    Args:
-        tokens (list): List of tokens
-        n (int): Size of n-grams
-        
-    Returns:
-        float: Distinct-n metric
-    """
-    total_ngrams = len(tokens) - n + 1
-    
-    # Use generator expression to minimize memory usage
-    ngrams_generator = (tuple(tokens[i:i+n]) for i in range(total_ngrams))
-    unique_ngrams = set(ngrams_generator)
-    
-    return len(unique_ngrams) / total_ngrams
-
-
 def calculate_text_metrics(true_seq, gen_seq):
     """
     Calculate various text similarity metrics for a pair of sequences.
@@ -294,19 +273,57 @@ def calculate_text_metrics(true_seq, gen_seq):
     rouge_l = compute_rouge_l_2d(dp_matrix)
     del dp_matrix  # Free memory
 
-    # Distinct-n metrics for reference sequence (optional)
-    distinct_3_gen =  distinct_n(gen_seq, 3)
-    distinct_3_ref = distinct_n(true_seq, 3)
-
     return {
         "TTR_ref": ttr_ref,
         "TTR_gen": ttr_gen,
-        "Distinct-n_ref": distinct_3_ref,
-        "Distinct-n_gen": distinct_3_gen,
         "Rouge-L": rouge_l
     }
 
 
+def calc_reference_nll(model, input_tensor, suffix_length):
+    """
+    Calculate negative log likelihood for a reference sequence.
+
+    Args:
+        model (AutoModelForCausalLM): Pre-trained language model.
+        input_tensor (torch.Tensor): Input tensor of shape [batch_size, 1 + prefix length + suffix length].
+        prefix_length (int, optional): Length of the prefix. Defaults to None.
+
+    Returns:
+        tuple: (token_nlls, seq_nlls_mean, seq_nlls_std, ppl_ref) - NLL and perplexity metrics
+    """
+
+    with torch.no_grad():
+        inputs  = input_tensor[:, :-1]
+        targets = input_tensor[:, 1:]
+
+        outputs = model(inputs)
+        logits = outputs.logits if hasattr(outputs, "logits") else outputs[0]
+    
+    # Calculate token-level NLL
+    criterion = nn.CrossEntropyLoss(reduction="none")
+
+    # Reshape for loss calculation
+    flat_logits = logits.reshape(-1, logits.size(-1)) 
+    flat_targets = targets.reshape(-1)
+
+    # Calculate token-level loss
+    token_nlls_flat = criterion(flat_logits, flat_targets)
+    token_nlls = token_nlls_flat.reshape(targets.shape)
+
+    # Get the suffix portion (last suffix_length tokens)
+    suffix_token_nlls = token_nlls[:, -suffix_length:]
+    
+    # Calculate metrics for suffix
+    seq_nlls_mean = suffix_token_nlls.mean(dim=1)
+    seq_nlls_std = suffix_token_nlls.std(dim=1)
+    ppl_ref = torch.exp(seq_nlls_mean)
+
+    # Clean up memory
+    del flat_logits, flat_targets, token_nlls_flat, logits, outputs
+    torch.cuda.empty_cache()
+    
+    return suffix_token_nlls, seq_nlls_mean, seq_nlls_std, ppl_ref
 
 ########################################################################################################################
 ################################################## INFERENCE ###########################################################
@@ -341,6 +358,8 @@ def run(
     rank = int(os.environ["RANK"])  # Global rank across all nodes
     world_size = int(os.environ["WORLD_SIZE"])  # Total number of processes
     model.to(local_rank)
+
+    model.eval()
 
     # Set same seed for all ranks
     setup_distributed(seed)
@@ -380,14 +399,23 @@ def run(
 
             # Prepend <BoS> token
             # Prepend multiple tokens including <BoS>
-            prepend_tokens = torch.tensor([128000], device=batch_tensor.device)
+            # print(f'BOS Token ID: {model.config.bos_token_id}')
+            prepend_tokens = torch.tensor([model.config.bos_token_id], device=batch_tensor.device)
             input_with_bos = torch.cat(
                 [
                     prepend_tokens.repeat(batch_tensor.shape[0], 1),
-                    batch_tensor[:, :prefix_length],
+                    batch_tensor,
                 ],
                 dim=1,
             )
+
+            # Calculate standard perplexity on reference sequence
+            _, ref_nll_mean, ref_nll_std, ref_perplexity = calc_reference_nll(
+                model, input_with_bos, suffix_length
+            )
+
+            # Trim input_with_bos to only include BOS + prefix for generation
+            input_with_bos = input_with_bos[:,:1+prefix_length]
 
             assert input_with_bos.shape[1] == prefix_length + len(
                 prepend_tokens
@@ -428,19 +456,25 @@ def run(
             lcs = lcs_result['max_length'].to_numpy()
             lcs_norm = lcs / suffix_length
 
+            # Convert tensors to lists for JSON serialization
             lcs = lcs.tolist()
             nlls = seq_nlls.cpu().tolist()
             nll_means = seq_nlls_mean.cpu().tolist()
             nll_stds = seq_nlls_std.cpu().tolist()
             perplexities = perplexity.cpu().tolist()
+            ref_nll_means = ref_nll_mean.cpu().tolist()
+            ref_nll_stds = ref_nll_std.cpu().tolist()
+            ref_perplexities = ref_perplexity.cpu().tolist()
 
             # Clear GPU tensors immediately after use
             del batch_tensor, sequences, outputs, input_with_bos
             del seq_nlls, seq_nlls_mean, seq_nlls_std, perplexity
+            del ref_nll_mean, ref_nll_std, ref_perplexity
 
             # Write results directly without storing in memory
-            for p, t, g, nll, nll_m, nll_s, lcs_n, ppl in zip(
-                prefixes, true_suffixes, generated_suffixes, nlls, nll_means, nll_stds, lcs_norm, perplexities
+            for p, t, g, nll, nll_m, nll_s, lcs_n, ppl, ref_nll_m, ref_nll_s, ref_ppl in zip(
+                prefixes, true_suffixes, generated_suffixes, nlls, nll_means, nll_stds, 
+                lcs_norm, perplexities, ref_nll_means, ref_nll_stds, ref_perplexities
             ):
                 metrics = calculate_text_metrics(t,g)
 
@@ -453,6 +487,9 @@ def run(
                         "nll_mean": nll_m,
                         "nll_std": nll_s,
                         "perplexity": ppl,
+                        "ref_nll_mean": ref_nll_m,
+                        "ref_nll_std": ref_nll_s,
+                        "ref_perplexity": ref_ppl,
                         "lcs_norm": lcs_n,
                         **metrics
                     },
@@ -464,6 +501,7 @@ def run(
             # Clear CPU lists after writing
             del prefixes, true_suffixes, generated_suffixes
             del nlls, nll_means, nll_stds, perplexities
+            del ref_nll_means, ref_nll_stds, ref_perplexities
             del lcs, lcs_norm, lcs_result
             torch.cuda.empty_cache()
 
