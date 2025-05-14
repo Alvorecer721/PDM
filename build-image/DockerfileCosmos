@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/pytorch:24.10-py3
+FROM nvcr.io/nvidia/pytorch:24.11-py3
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
@@ -16,40 +16,72 @@ RUN DEBIAN_FRONTEND=noninteractive \
     gdb \
     build-essential \
     tree \
-    ffmpeg \
-    libsox-fmt-all \
     tmux \
     htop \
     python3-dev \
     python3-setuptools \
     make \
     cmake \
-    libavcodec-dev \
-    libavfilter-dev \
-    libavformat-dev \
-    libavutil-dev \
+    yasm \
+    pkg-config \
+    libx264-dev \
+    libx265-dev \
+    libnuma-dev \
+    libvpx-dev \
+    libfdk-aac-dev \
+    libmp3lame-dev \
+    libopus-dev \
+    libsdl2-dev \
     nvtop && \
     apt-get clean
+
+# Build FFmpeg 4.4.4 from source
+RUN cd /tmp && \
+    wget -q https://ffmpeg.org/releases/ffmpeg-4.4.4.tar.bz2 && \
+    tar -xf ffmpeg-4.4.4.tar.bz2 && \
+    cd ffmpeg-4.4.4 && \
+    ./configure \
+    --prefix=/usr/local/ffmpeg4 \
+    --enable-shared \
+    --disable-static \
+    --enable-gpl \
+    --enable-version3 \
+    --enable-nonfree \
+    --enable-libx264 \
+    --enable-libx265 && \
+    make -j$(nproc) && \
+    make install && \
+    echo "/usr/local/ffmpeg4/lib" > /etc/ld.so.conf.d/ffmpeg4.conf && \
+    ldconfig
+
+# Set FFmpeg 4.x paths
+ENV PATH="/usr/local/ffmpeg4/bin:${PATH}"
+ENV LD_LIBRARY_PATH="/usr/local/ffmpeg4/lib:${LD_LIBRARY_PATH}"
+ENV PKG_CONFIG_PATH="/usr/local/ffmpeg4/lib/pkgconfig:${PKG_CONFIG_PATH}"
+
+# Clean up FFmpeg build files
+RUN rm -rf /tmp/ffmpeg-4.4.4.tar.bz2 /tmp/ffmpeg-4.4.4
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 WORKDIR /opt
 
 COPY ./cosmos-predict1 /opt/cosmos-predict1
-COPY ./PDM/build-image/transformer_engine-1.12.0+7a7225c-cp310-cp310-linux_aarch64.whl /opt
 
-RUN mkdir -p /usr/local/nvidia/lib64 && \
-    cp /host/usr/lib64/libdcgm* /usr/local/nvidia/lib64 && \
-    cp /host/usr/lib64/libnvcuvid.so /usr/local/cuda/lib64 && \
-    cp /host/usr/lib64/libnvcuvid.so.1 /usr/local/cuda/lib64 && \
-    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/nvidia/lib64"
+RUN cp /host/usr/lib64/libnvcuvid.so /usr/local/cuda/lib64 && \
+    cp /host/usr/lib64/libnvcuvid.so.1 /usr/local/cuda/lib64
 
 # Clone and build Decord with CUDA support first (before conda setup)
 RUN cd /opt && \
     git clone --recursive https://github.com/dmlc/decord && \
     cd decord && \
     mkdir build && cd build && \
-    cmake .. -DUSE_CUDA=ON -DCMAKE_BUILD_TYPE=Release && \
+    PKG_CONFIG_PATH=/usr/local/ffmpeg4/lib/pkgconfig \
+    cmake .. -DUSE_CUDA=ON \
+             -DCMAKE_BUILD_TYPE=Release \
+             -DFFMPEG_DIR=/usr/local/ffmpeg4
+
+RUN cd /opt/decord/build && \
     make -j$(nproc) && \
     cd ../python && \
     pip install -e .
@@ -64,27 +96,6 @@ RUN echo "Installing dependencies. This will take a while..." && \
     cd cosmos-predict1 && \
     conda env create --file cosmos-predict1.yaml && \
     conda activate cosmos-predict1 && \
-    # Create bazel configuration to limit parallelism
-    mkdir -p ~/.bazelrc && \
-    echo "build --jobs=50" > ~/.bazelrc && \
-    # Install the requirements
-    pip install --no-cache-dir -r requirements.txt && \
-    # Try to install tensorstore with specific options to limit parallel jobs
-    BAZEL_OPTS="--jobs=50" pip install tensorstore || \
-    # If that fails, try pre-compiled version
-    pip install --no-build-isolation tensorstore && \
-    # Link required include files
-    ln -sf $CONDA_PREFIX/lib/python3.10/site-packages/nvidia/*/include/* $CONDA_PREFIX/include/ && \
-    ln -sf $CONDA_PREFIX/lib/python3.10/site-packages/nvidia/*/include/* $CONDA_PREFIX/include/python3.10 && \
-    ln -sf $CONDA_PREFIX/lib/python3.10/site-packages/triton/backends/nvidia/include/* $CONDA_PREFIX/include/
-
-
-# Second RUN command - Install TransformerEngine and Apex
-RUN source ~/miniconda3/bin/activate && \
-    conda activate cosmos-predict1 && \
-    pip3 install transformer_engine-1.12.0+7a7225c-cp310-cp310-linux_aarch64.whl && \
-    git clone https://github.com/NVIDIA/apex && cd apex && \
-    CUDA_HOME=$CONDA_PREFIX pip install -v --no-cache-dir --no-build-isolation --config-settings "--build-option=--cpp_ext" --config-settings "--build-option=--cuda_ext" . && \
     echo "Environment setup complete"
 
     
@@ -101,3 +112,4 @@ WORKDIR /workspace
 # 0. srun --partition debug --time 01:30:00 -A a-a06 --mem 460000 --pty bash
 # 1. cd /capstor/users/cscs/xyixuan/
 # 2. Build image: podman build --volume /usr/lib64:/host/usr/lib64:ro -f /capstor/users/cscs/xyixuan/PDM/build-image/DockerfileCosmos -t costmos-tok /capstor/users/cscs/xyixuan/
+# 3. Create sqsh image: enroot import -o /iopsstor/scratch/cscs/asolergi/benchmarks/container/benchmarks.sqsh podman://localhost/benchmarks:latest

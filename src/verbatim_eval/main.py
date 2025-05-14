@@ -3,9 +3,9 @@ python /capstor/users/cscs/xyixuan/PDM/src/verbatim_eval/main.py \
     --exprs llama3-1b-15n-8192sl-60gbsz-standard \
     --mode sparse \
     --offsets 0 \
-    --prefix-lengths 50 500 1000 2000 3000 \
+    --prefix-lengths 500 \
     --suffix-lengths 500 \
-    --repetitions 1 2 4 8 16 32 64 128
+    --repetitions 1 2 4 8 16 32 64 128 
 """
 
 import argparse

@@ -267,6 +267,16 @@ def calculate_metrics(config, rep, offset, prefix_length, suffix_length) -> Dict
             'mean': np.mean(data['perplexity']),
             'std': np.std(data['perplexity'])
         },
+        'Ref_NLL': {
+            'scores': data['ref_nll_mean'],
+            'mean': np.mean(data['ref_nll_mean']),
+            'std': np.std(data['ref_nll_mean'])
+        },
+        'Ref_PPL': {
+            'scores': data['ref_perplexity'],
+            'mean': np.mean(data['ref_perplexity']),
+            'std': np.std(data['ref_perplexity'])
+        },
         'Rouge-L': {
             'scores': data['Rouge-L'],
             'mean': np.mean(data['Rouge-L']),

@@ -287,7 +287,7 @@ def calc_reference_nll(model, input_tensor, suffix_length):
     Args:
         model (AutoModelForCausalLM): Pre-trained language model.
         input_tensor (torch.Tensor): Input tensor of shape [batch_size, 1 + prefix length + suffix length].
-        prefix_length (int, optional): Length of the prefix. Defaults to None.
+        suffix_length (int): Length of the suffix.
 
     Returns:
         tuple: (token_nlls, seq_nlls_mean, seq_nlls_std, ppl_ref) - NLL and perplexity metrics
@@ -472,8 +472,8 @@ def run(
             del ref_nll_mean, ref_nll_std, ref_perplexity
 
             # Write results directly without storing in memory
-            for p, t, g, nll, nll_m, nll_s, lcs_n, ppl, ref_nll_m, ref_nll_s, ref_ppl in zip(
-                prefixes, true_suffixes, generated_suffixes, nlls, nll_means, nll_stds, 
+            for p, t, g, nll_m, nll_s, lcs_n, ppl, ref_nll_m, ref_nll_s, ref_ppl in zip(
+                prefixes, true_suffixes, generated_suffixes, nll_means, nll_stds, 
                 lcs_norm, perplexities, ref_nll_means, ref_nll_stds, ref_perplexities
             ):
                 metrics = calculate_text_metrics(t,g)
@@ -483,7 +483,6 @@ def run(
                         "prefix": p,
                         "true_suffix": t,
                         "generated_suffix": g,
-                        "nll": nll,
                         "nll_mean": nll_m,
                         "nll_std": nll_s,
                         "perplexity": ppl,

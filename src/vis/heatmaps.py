@@ -62,13 +62,15 @@ def create_heatmaps_subplots(data_dict, output_file, figsize=(40, 10)):
     
     # plt.tight_layout()
 
-def create_heatmaps_difference_subplots(data_dict1, data_dict2, output_file, figsize=(30, 12), vmin=None, vmax=None):
+def create_heatmaps_difference_subplots(data_dict1, data_dict2, output_file, figsize=(40, 10), vmin=None, vmax=None):
     """
     Create heatmaps showing the difference between two dictionaries of pandas dataframes
+    data_dict1 - data_dict2
     
     Args:
         data_dict1: First dictionary with keys as titles and values as pandas dataframes
         data_dict2: Second dictionary with keys as titles and values as pandas dataframes
+        output_file: Output filename for the plot
         figsize: Tuple for figure size (width, height)
         vmin: Minimum value for the colorbar (optional)
         vmax: Maximum value for the colorbar (optional)
@@ -138,4 +140,5 @@ def create_heatmaps_difference_subplots(data_dict1, data_dict2, output_file, fig
         axes.flat[idx].set_visible(False)
     
     plt.savefig(f"/capstor/users/cscs/xyixuan/PDM/results/plots/{output_file}.pdf", bbox_inches='tight', pad_inches=0.1)
-    plt.tight_layout()
+    
+    # plt.tight_layout()
