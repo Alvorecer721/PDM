@@ -308,10 +308,10 @@ def calculate_metrics(config, rep, offset, prefix_length, suffix_length) -> Dict
     
     # Calculate percentages
     total_samples = len(lcs_norm_values)
-    exact_match_pct = (exact_match / total_samples) * 100 if total_samples > 0 else 0
-    match_75_pct = (match_75 / total_samples) * 100 if total_samples > 0 else 0
-    match_50_pct = (match_50 / total_samples) * 100 if total_samples > 0 else 0
-    match_25_pct = (match_25 / total_samples) * 100 if total_samples > 0 else 0
+    exact_match_pct = (exact_match / total_samples) if total_samples > 0 else 0
+    match_75_pct = (match_75 / total_samples) if total_samples > 0 else 0
+    match_50_pct = (match_50 / total_samples) if total_samples > 0 else 0
+    match_25_pct = (match_25 / total_samples) if total_samples > 0 else 0
     
     # Add to metrics dictionary
     metrics['exact_match'] = {
