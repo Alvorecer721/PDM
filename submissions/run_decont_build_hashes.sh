@@ -7,7 +7,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=72
 #SBATCH --partition=normal
-#SBATCH --array=0-10
+#SBATCH --array=0-9
 #SBATCH --output=/iopsstor/scratch/cscs/xyixuan/PDM/log/decontam_%A_%a.out
 #SBATCH --error=/iopsstor/scratch/cscs/xyixuan/PDM/log/decontam_%A_%a.err
 

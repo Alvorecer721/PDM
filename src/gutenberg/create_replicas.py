@@ -4,6 +4,7 @@ from tqdm import tqdm
 import gc
 import logging
 import os
+import numpy as np
 
 # Import the config
 from config import DataConfig, FILE_NAMES
@@ -89,7 +90,7 @@ def save_replicated_text_in_one(text, config: DataConfig, output_path: Path):
     combined_dataset = concatenate_datasets(all_replicated_text)
     
     # Save combined dataset
-    output_file = str(output_path / "combined_gutenberg_text_1744683000.jsonl")
+    output_file = str(output_path / f"combined_gutenberg_text_{config.seq_length * config.bucket_size * np.sum(config.repetitions())}.jsonl")
     combined_dataset.to_json(output_file)
     
     logging.info(f"Saved combined replicated text dataset ({len(combined_dataset)} samples) to {output_file}")
@@ -100,41 +101,41 @@ def save_replicated_text_in_one(text, config: DataConfig, output_path: Path):
     gc.collect()
 
 
-def main():
-    config = DataConfig()
-    input_path = Path('/capstor/users/cscs/xyixuan/data/raw/gutenberg_en_8k') 
-    output_path = Path("/iopsstor/scratch/cscs/xyixuan/dataset/gunteberg")
-    output_path.mkdir(parents=True, exist_ok=True)
-    
-    logging.info("Loading dataset...")
-    token_seq = load_and_validate_data(config, input_path / FILE_NAMES['TOKEN'])
-    text_seq  = load_and_validate_data(config, input_path / FILE_NAMES['TEXT'])
-    
-    logging.info("Saving replicated datasets...")
-    save_replicated_data(
-        text=text_seq, 
-        token=token_seq, 
-        config=config, 
-        output_path=output_path
-    )
- 
 # def main():
 #     config = DataConfig()
-#     input_path = Path('/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_en_8k') 
-#     output_path = Path("/iopsstor/scratch/cscs/xyixuan/dataset/gunteberg_all_in_one")
+#     input_path = Path('/capstor/users/cscs/xyixuan/data/raw/gutenberg_en_8k') 
+#     output_path = Path("/iopsstor/scratch/cscs/xyixuan/dataset/gunteberg")
 #     output_path.mkdir(parents=True, exist_ok=True)
-
-#     logging.info("Loading dataset...")
-#     text_seq = load_and_validate_data(config, input_path / FILE_NAMES['TEXT'])
     
-#     logging.info("Saving all replicated text in one file...")
-#     save_replicated_text_in_one(
-#         text=text_seq,
-#         config=config,
+#     logging.info("Loading dataset...")
+#     token_seq = load_and_validate_data(config, input_path / FILE_NAMES['TOKEN'])
+#     text_seq  = load_and_validate_data(config, input_path / FILE_NAMES['TEXT'])
+    
+#     logging.info("Saving replicated datasets...")
+#     save_replicated_data(
+#         text=text_seq, 
+#         token=token_seq, 
+#         config=config, 
 #         output_path=output_path
 #     )
+ 
+def main():
+    config = DataConfig()
+    input_path = Path('/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_en_8k_mixtral') 
+    output_path = Path("/iopsstor/scratch/cscs/xyixuan/dataset/gunteberg_mixtral")
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    logging.info("Loading dataset...")
+    text_seq = load_and_validate_data(config, input_path / FILE_NAMES['TEXT'])
     
-#     logging.info("Process completed successfully")
+    logging.info("Saving all replicated text in one file...")
+    save_replicated_text_in_one(
+        text=text_seq,
+        config=config,
+        output_path=output_path
+    )
+    
+    logging.info("Process completed successfully")
 
 if __name__ == "__main__":
     main()

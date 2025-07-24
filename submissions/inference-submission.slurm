@@ -2,14 +2,14 @@
 
 # Parameters
 #SBATCH --cpus-per-task=72
-#SBATCH --environment=/store/swissai/a06/.NeMo/container/nemo.toml
+#SBATCH --environment=ngc24-11
 #SBATCH --error=/store/swissai/a06/.NeMo/Goldfish_Llama3/hf-gfl-infer_%j.err
 #SBATCH --output=/store/swissai/a06/.NeMo/Goldfish_Llama3/hf-gfl-infer_%j.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=gfl-infer
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=00:30:00
+#SBATCH --time=06:00:00
 #SBATCH --partition=debug
 # #SBATCH --time=06:00:00
 # #SBATCH --account a06

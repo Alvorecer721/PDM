@@ -125,7 +125,7 @@ def main(args):
     num_proc = os.cpu_count()
 
     # Load the dataset
-    ds = load_dataset("manu/project_gutenberg", split="en", cache_dir="/iopsstor/scratch/cscs/xyixuan/gutenberg")
+    ds = load_dataset("manu/project_gutenberg", split="en", cache_dir="/capstor/scratch/cscs/xyixuan/gutenberg")
 
     # Load the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
@@ -200,7 +200,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--tokenizer", 
         type=str, 
-        default="meta-llama/Llama-3.1-8B-Instruct", 
+        default="alehc/swissai-tokenizer", 
         help="Path to your tokenizer / Huggingface tokenizer ID"
     )
     parser.add_argument(
@@ -209,19 +209,19 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num-tokens",
         type=int,
-        default=8191, 
-        help="Specifies the number of tokens to extract per article. The referenced script (https://github.com/swiss-ai/data-pipeline-pretrain/blob/main/examples/tokenize_megatron/preprocess_megatron.py) automatically adds a start-of-sentence token, so the actual token count will be one more than the specified number.",
+        default=8190, 
+        help="Specifies the number of tokens to extract per article. BOS and EOS token are added during actual tokenization, so 8192 - 2 = 8190.",
     )
     parser.add_argument(
         "--char-pos-start",
         type=int,
-        default=10_000,
+        default=80_000,
         help="Starting character position for tokenization",
     )
     parser.add_argument(
         "--char-pos-end",
         type=int,
-        default=80_000,
+        default=160_000,
         help="Ending character position for tokenization",
     )
     parser.add_argument(

@@ -1,17 +1,21 @@
 #!/bin/bash
-#SBATCH --account=a-a06
+#SBATCH --account=root
 #SBATCH --cpus-per-task=72
-#SBATCH --environment=nemo
-#SBATCH --error=/capstor/users/cscs/xyixuan/PDM/log/infer/sparse/sparse_%A_%a.err
-#SBATCH --output=/capstor/users/cscs/xyixuan/PDM/log/infer/sparse/sparse_%A_%a.out
+#SBATCH --environment=ngc24-11
+#SBATCH --error=/iopsstor/scratch/cscs/xyixuan/PDM/log/infer/sparse/sparse_%A_%a.err
+#SBATCH --output=/iopsstor/scratch/cscs/xyixuan/PDM/log/infer/sparse/sparse_%A_%a.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=gfl-infer
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=24:00:00
-#SBATCH --array=0-8
+#SBATCH --time=06:00:00
+#SBATCH --array=0-12
 
 set -e  # Exit immediately if any command fails
+
+# Check system architecture and conditionally set up conda
+ARCH=$(uname -m)
+echo "System architecture: $ARCH"
 
 # Setup
 EXPR_PATH="$1"
@@ -31,7 +35,7 @@ export MASTER_PORT
 export MASTER_ADDR
 
 # Define offsets
-declare -a offsets=(1 2 4 8 16 32 64 128 256)
+declare -a offsets=(0 1 2 4 8 16 32 64 128 256 512 1024 2048)
 offset=${offsets[$SLURM_ARRAY_TASK_ID]}
 
 # Define suffix length
@@ -78,16 +82,30 @@ fi
 set -e
 
 # Create the command string
-CMD="srun torchrun \
-    --nproc_per_node=4 \
-    /capstor/users/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py \
-    --experiment-path \"$EXPR_PATH\" \
-    --repetitions 1,2,4,8,16,32,64,128 \
-    --gen-policy greedy \
-    --offset $offset \
-    --prefix-length 500 \
-    --suffix-length 500 \
-    --batch-size 20"
+# Note: srun runs in a new shell, so we need to ensure conda is available
+if [ "$ARCH" = "x86_64" ]; then
+    CMD="srun bash -c 'source /users/xyixuan/miniconda3_x86/etc/profile.d/conda.sh && conda activate decont && torchrun \
+        --nproc_per_node=4 \
+        /iopsstor/scratch/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py \
+        --experiment-path \"$EXPR_PATH\" \
+        --repetitions 128 \
+        --gen-policy greedy \
+        --offset $offset \
+        --prefix-length 500 \
+        --suffix-length 500 \
+        --batch-size 20'"
+else
+    CMD="srun torchrun \
+        --nproc_per_node=4 \
+        /iopsstor/scratch/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py \
+        --experiment-path \"$EXPR_PATH\" \
+        --repetitions 128 \
+        --gen-policy beam \
+        --offset $offset \
+        --prefix-length 500 \
+        --suffix-length 500 \
+        --batch-size 20"
+fi
 
 # Echo the command to stdout only
 echo "Executing command:" >&1
@@ -98,6 +116,7 @@ eval "$CMD"
 
 # Usage:
 # sbatch ./swissai-convert-and-inference.slurm /iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/Goldfish/llama3-1b-15n-8192sl-60gbsz-standard-no-bos
+# sbatch ./swissai
 
 # 64,128,256,512,1024,2048
 # 1,2,3,4,8,16,24,32,48,64,96,128

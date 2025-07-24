@@ -5,7 +5,7 @@ import logging
 from transformers import AutoTokenizer
 
 
-TOKENIZER = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
+TOKENIZER = AutoTokenizer.from_pretrained("nvidia/OpenMath2-Llama3.1-8B")
 TOKENIZER.model_max_length = 200_000
 
 logger = logging.getLogger(__name__)

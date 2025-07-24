@@ -48,19 +48,19 @@ def create_pipeline(file_path, output_folder, config, limit):
     ]
 
 
-def move_output_files(temp_dir, base_folder, chunk_name):
+def move_output_files(temp_dir, chunk_folder):
     """Move output files from temp directory to final location."""
     temp_path = Path(temp_dir)
     
     # Move stats file
     stats_file = temp_path / "stats.json"
-    final_stats_file = base_folder / f"{chunk_name}_stats.json"
+    final_stats_file = chunk_folder / "stats.json"
     if stats_file.exists():
         shutil.move(str(stats_file), str(final_stats_file))
     
     # Move hash file
     hash_file = temp_path / "input.index.hashes"
-    final_hash_file = base_folder / f"{chunk_name}_input.index.hashes"
+    final_hash_file = chunk_folder / "input.index.hashes"
     if hash_file.exists():
         shutil.move(str(hash_file), str(final_hash_file))
 
@@ -70,9 +70,10 @@ def build_index(file_path, output_dir, n_gram_size=13, limit=-1):
     file_path = Path(file_path)
     base_name, chunk_name = parse_filename(file_path)
     
-    # Create base folder structure
+    # Create folder structure with separate folder for each chunk
     base_folder = Path(output_dir) / base_name
-    base_folder.mkdir(parents=True, exist_ok=True)
+    chunk_folder = base_folder / chunk_name
+    chunk_folder.mkdir(parents=True, exist_ok=True)
     
     # Configuration
     config = NGramsDecontConfig(
@@ -82,11 +83,11 @@ def build_index(file_path, output_dir, n_gram_size=13, limit=-1):
     )
     
     # Create unique temporary directory to avoid conflicts
-    temp_dir = tempfile.mkdtemp(prefix=f"{chunk_name}_", dir=base_folder)
+    temp_dir = tempfile.mkdtemp(prefix=f"{chunk_name}_", dir=chunk_folder)
     
     try:
         # Create and run pipeline
-        pipeline = create_pipeline(file_path, base_folder, config, limit)
+        pipeline = create_pipeline(file_path, chunk_folder, config, limit)
         executor = LocalPipelineExecutor(
             pipeline=pipeline,
             tasks=1,
@@ -95,13 +96,13 @@ def build_index(file_path, output_dir, n_gram_size=13, limit=-1):
         executor.run()
         
         # Move output files to final location
-        move_output_files(temp_dir, base_folder, chunk_name)
+        move_output_files(temp_dir, chunk_folder)
         
     finally:
         # Clean up temporary directory
         shutil.rmtree(temp_dir, ignore_errors=True)
     
-    return str(base_folder)
+    return str(chunk_folder)
 
 
 def main():

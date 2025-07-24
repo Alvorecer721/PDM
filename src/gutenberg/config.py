@@ -14,15 +14,15 @@ COLUMN_NAMES = {
 
 FILE_NAMES = {"TOKEN": "token.jsonl", "TEXT": "text.jsonl"}
 
-REPETITIONS = np.array([1, 2, 4, 8, 16, 32, 64, 128, 256])
+REPETITIONS = np.array([1,2,3,4,8,16,24,32,48,64,96,128])
 # REPETITIONS = np.array([2 ** i for i in range(7,12)])
 # REPETITIONS = np.array([2 ** i for i in range(12,17)])
 
 @dataclass
 class DataConfig:
     fineweb_edu_size: int = 81_816_372_499
-    bucket_size: int = 500
-    seq_length: int = 8192
+    bucket_size: int = 167
+    seq_length: int = 8190
 
     gutenberg_tokens = None
     total_tokens = None
@@ -37,7 +37,7 @@ class DataConfig:
 
     def get_gutenberg_tokens(self) -> str:
         """Calculate and return total number of tokens in billions."""
-        self.gutenberg_tokens = np.sum( self.get_gutenberg_sequences() * self.seq_length )
+        self.gutenberg_tokens = self.get_gutenberg_sequences() * self.seq_length
         return f"{(self.gutenberg_tokens / 1e9):.2f}B"
     
     def get_total_tokens(self) -> str:

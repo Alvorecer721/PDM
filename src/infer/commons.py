@@ -378,7 +378,8 @@ def run(
 
     generation_configs = {
         "greedy": {"num_beams": 1, "do_sample": False},
-        "nucleus": {"num_beams": 1, "do_sample": True, "temperature": 1, "top_p": 0.3},
+        "nucleus": {"num_beams": 1, "do_sample": True, "temperature": 1, "top_p": 0.9},
+        "beam": {"num_beams": 5, "do_sample": False},
     }
 
 
