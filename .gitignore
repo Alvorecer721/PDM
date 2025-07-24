@@ -166,3 +166,4 @@ build-image/NeMo
 log
 
 core_nid*
+.claude/
