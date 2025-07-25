@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 from tqdm import tqdm
 import torch
 import numpy as np
@@ -11,14 +12,15 @@ import torch.nn as nn
 from transformers import AutoModelForCausalLM
 from datasets import load_dataset
 
-
 import sys
 # Add the src directory to the path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from verbatim_eval.LCS import find_longest_common_substrings
 from verbatim_eval.my_rouge import compute_rouge_l_2d, _compute_dp_matrix_2d
 
-# Configure logging
+# ------------------------------------------------------------------------------------
+# Logging
+# ------------------------------------------------------------------------------------
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -27,6 +29,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+# ------------------------------------------------------------------------------------
+# Utils
+# ------------------------------------------------------------------------------------
 def set_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
@@ -37,115 +42,52 @@ def set_seed(seed):
 
 
 def is_rank_0():
-    """Helper function to check if current process is rank 0"""
-    # Check if we're in a distributed environment
     if dist.is_initialized():
         return dist.get_rank() == 0
-    # If not distributed, we're on rank 0
     return True
 
 
-
 def setup_distributed(seed):
-    """
-    Set up distributed training environment.
-    
-    Args:
-        seed (int): Random seed
-        
-    Returns:
-        tuple: (local_rank, rank, world_size)
-    """
-    # Set random seed
     set_seed(seed)
-    
-    # Get distributed environment variables
     local_rank = int(os.environ["LOCAL_RANK"])
-    rank = int(os.environ["RANK"])  # Global rank across all nodes
-    world_size = int(os.environ["WORLD_SIZE"])  # Total number of processes
+    rank = int(os.environ["RANK"])
+    world_size = int(os.environ["WORLD_SIZE"])
 
-    # Initialize process group if not already done
     if not dist.is_initialized():
         dist.init_process_group(backend="nccl")
-    
-    # Set CUDA device
+
     torch.cuda.set_device(local_rank)
-    
     return local_rank, rank, world_size
 
 
-########################################################################################################################
-########################################## PROCESS DATASET #############################################################
-########################################################################################################################
-
-
+# ------------------------------------------------------------------------------------
+# Dataset processing
+# ------------------------------------------------------------------------------------
 def batch_processing_gutenberg(batch, _prefix_len, _offset, _suffix_len=None):
-    """
-    Tokenize sequences from a batch of articles between specified character positions.
-
-    Args:
-        batch (dict): Batch of data containing the 'text' field.
-        _tokenizer (AutoTokenizer): The tokenizer used for tokenization.
-        _prefix_len (int): Length of the prefix to extract.
-        _suffix_len (int, optional): Length of the suffix to extract. If None, defaults to prefix length.
-        _offset (int, optional): Starting position for token slicing. Default is 0.
-
-    Returns:
-        dict: Dictionary containing 'prefix_list' and 'suffix_list'.
-    """
     if _suffix_len is None:
         _suffix_len = _prefix_len
 
     prefix_suffix_list = []
-
     for sequence in batch["input_ids"]:
-        # No need to tokenize again if sequences are already tokenized (input_ids)
-        # Adjust slicing based on offset, prefix, and suffix lengths
         assert _offset + _prefix_len + _suffix_len <= len(sequence), (
             f"Requested offset ({_offset}), prefix length ({_prefix_len}), "
             f"and suffix length ({_suffix_len}) exceed sequence length ({len(sequence)})."
         )
-
-        prefix_suffix = sequence[_offset : _offset + _prefix_len + _suffix_len]
+        prefix_suffix = sequence[_offset:_offset + _prefix_len + _suffix_len]
         prefix_suffix_list.append(prefix_suffix)
 
-    return {
-        "prefix_suffix": prefix_suffix_list,
-    }
+    return {"prefix_suffix": prefix_suffix_list}
 
 
 def process_dataset(
     data_path, batch_processing_fn, prefix_length, suffix_length, offset, num_proc
 ):
-    """
-    Load and process a dataset for model inference.
-
-    This function loads data from a JSON file and applies a batched processing function
-    to generate prefix-suffix pairs for inference tasks.
-
-    Args:
-        data_path (str or Path): Path to the JSON file(s) containing the dataset.
-            Can be a single file or a pattern matching multiple files.
-        batch_processing_fn (callable): Function to process the dataset in batches.
-            Must accept batched data and keyword arguments for prefix_len, suffix_len, and offset.
-        prefix_length (int): Length of the prefix sequence to generate.
-        suffix_length (int): Length of the suffix sequence to generate.
-        offset (int): Offset position to start processing text.
-        num_proc (int): Number of processes to use for parallel dataset mapping.
-
-    Returns:
-        Dataset: A processed dataset containing prefix-suffix pairs ready for inference.
-
-    Raises:
-        ValueError: If the dataset cannot be loaded or processed.
-    """
     logger.info(f"Processing dataset from {data_path}")
 
-    # Load dataset (works with both file paths and file patterns)
     dataset = load_dataset(
-        "json", 
-        data_files=str(data_path), 
-        split="train", 
+        "json",
+        data_files=str(data_path),
+        split="train",
         cache_dir="/iopsstor/scratch/cscs/xyixuan/cache"
     )
 
@@ -165,113 +107,30 @@ def process_dataset(
     return processed_dataset
 
 
-########################################################################################################################
-##################################################### PATH #############################################################
-########################################################################################################################
-
-
+# ------------------------------------------------------------------------------------
+# Paths
+# ------------------------------------------------------------------------------------
 def setup_output_directories(experiment_path, offset, prefix_length, suffix_length):
-    """
-    Set up the output directories for inference results.
-
-    Args:
-        experiment_path (Path): Base path for the experiment.
-        offset (int): Offset value used in text processing.
-        prefix_length (int): Length of prefix used.
-        suffix_length (int): Length of suffix used.
-
-    Returns:
-        Path: Path to the output directory.
-    """
     output_dir = experiment_path / "inference"
-    output_path = (
-        output_dir / f"offset_{offset}_prefix_{prefix_length}_suffix_{suffix_length}"
-    )
+    output_path = output_dir / f"offset_{offset}_prefix_{prefix_length}_suffix_{suffix_length}"
     output_path.mkdir(parents=True, exist_ok=True)
-
     return output_path
 
 
 def get_inference_dir(output_path, rep, gen_policy):
-    """
-    Get the inference directory for a specific repetition and policy.
-
-    Args:
-        output_path (Path): Base output path.
-        rep (int): Repetition number.
-        gen_policy (str): Generation policy name.
-
-    Returns:
-        Path: Path to the inference directory.
-    """
-    inference_dir = output_path / f"rep_{rep}_{gen_policy}"
-    return inference_dir
+    return output_path / f"rep_{rep}_{gen_policy}"
 
 
-########################################################################################################################
-#################################################### TEXT METRICS ######################################################
-########################################################################################################################
-
-
-def calc_generation_nll(generated_sequences, scores):
-    """
-    Calculate negative log likelihood for each generated sequence.
-
-    Args:
-        generated_sequences (torch.Tensor): Token sequences [batch_size, seq_length]
-        scores (List[torch.Tensor]): List of score tensors, each [batch_size, vocab_size], length of scores tensor is equal to seq_length
-
-    Returns:
-        tuple: (seq_nlls_mean, seq_nlls_std) - Mean and std of NLL per sequence
-    """
-    suffix = generated_sequences[:, -len(scores) :]
-
-    token_nlls = []
-    criterion = nn.CrossEntropyLoss(reduction="none")
-
-    for step, logits in enumerate(scores):
-        step_nll = criterion(
-            logits, suffix[:, step]
-        )  # Comparing batch_size x vocab_size with batch_size x 1, output is
-        token_nlls.append(step_nll)
-
-        # Clear GPU memory
-        del step_nll
-        del logits
-        if step % 5 == 0:  # Periodic memory cleanup
-            torch.cuda.empty_cache()
-
-    token_nlls = torch.stack(token_nlls, dim=-1)  # shape: [batch_size, seq_length]
-    assert token_nlls.min() >= 0, f"Negative NLL found: {token_nlls.min()}"
-
-    seq_nlls_mean = token_nlls.mean(dim=-1)  # Average NLL per sequence
-    seq_nlls_std = token_nlls.std(dim=-1)    # Std of NLL per sequence
-    
-    # Calculate perplexity per sequence: exp(average NLL)
-    perplexity = torch.exp(seq_nlls_mean)
-    
-    return token_nlls, seq_nlls_mean, seq_nlls_std, perplexity
-
-
+# ------------------------------------------------------------------------------------
+# Metrics
+# ------------------------------------------------------------------------------------
 def calculate_text_metrics(true_seq, gen_seq):
-    """
-    Calculate various text similarity metrics for a pair of sequences.
-
-    Args:
-        true_seq (list): True suffix sequence (token IDs)
-        gen_seq (list): Generated suffix sequence (token IDs)
-
-    Returns:
-        dict: Dictionary with metrics (TTR_ref, TTR_gen, Rouge-L)
-    """
-    # Type-Token-Ratio
     ttr_ref = len(set(true_seq)) / len(true_seq) if true_seq else 0
     ttr_gen = len(set(gen_seq)) / len(gen_seq) if gen_seq else 0
 
-    # Rouge-L
     dp_matrix = _compute_dp_matrix_2d(true_seq, gen_seq)
     rouge_l = compute_rouge_l_2d(dp_matrix)
-    del dp_matrix  # Free memory
+    del dp_matrix
 
     return {
         "TTR_ref": ttr_ref,
@@ -280,63 +139,121 @@ def calculate_text_metrics(true_seq, gen_seq):
     }
 
 
+def process_sequences(sequences, batch_tensor, prefix_length, suffix_length, prepend_tokens):
+    prefixes = batch_tensor[:, :prefix_length].cpu().tolist()
+    true_suffixes = batch_tensor[:, prefix_length:].cpu().tolist()
+    generated_suffixes = (
+        sequences[:, prefix_length + len(prepend_tokens):].cpu().tolist()
+    )  # Skip prepend BOS token
+
+    lcs_result = find_longest_common_substrings(true_suffixes, generated_suffixes)
+    lcs = lcs_result['max_length'].to_numpy()
+    lcs_norm = lcs / suffix_length
+
+    return prefixes, true_suffixes, generated_suffixes, lcs_norm
+
+
+def write_results(jsonl_file, prefixes, true_suffixes, generated_suffixes,
+                  seq_nlls_mean, seq_nlls_std, perplexity, lcs_norm,
+                  ref_nll_mean, ref_nll_std, ref_perplexity):
+
+    nll_means = seq_nlls_mean.cpu().tolist()
+    nll_stds = seq_nlls_std.cpu().tolist()
+    perplexities = perplexity.cpu().tolist()
+    ref_nll_means = ref_nll_mean.cpu().tolist()
+    ref_nll_stds = ref_nll_std.cpu().tolist()
+    ref_perplexities = ref_perplexity.cpu().tolist()
+
+    for p, t, g, nll_m, nll_s, lcs_n, ppl, ref_nll_m, ref_nll_s, ref_ppl in zip(
+        prefixes, true_suffixes, generated_suffixes, nll_means, nll_stds,
+        lcs_norm, perplexities, ref_nll_means, ref_nll_stds, ref_perplexities
+    ):
+        metrics = calculate_text_metrics(t, g)
+        result = {
+            "prefix": p,
+            "true_suffix": t,
+            "generated_suffix": g,
+            "nll_mean": nll_m,
+            "nll_std": nll_s,
+            "perplexity": ppl,
+            "ref_nll_mean": ref_nll_m,
+            "ref_nll_std": ref_nll_s,
+            "ref_perplexity": ref_ppl,
+            "lcs_norm": lcs_n,
+            **metrics
+        }
+        json.dump(result, jsonl_file)
+        jsonl_file.write("\n")
+        jsonl_file.flush()
+
+
+# ------------------------------------------------------------------------------------
+# NLL (reference + generated; forward-pass)
+# ------------------------------------------------------------------------------------
+@torch.no_grad()
 def calc_reference_nll(model, input_tensor, suffix_length):
-    """
-    Calculate negative log likelihood for a reference sequence.
+    inputs = input_tensor[:, :-1]
+    targets = input_tensor[:, 1:]
 
-    Args:
-        model (AutoModelForCausalLM): Pre-trained language model.
-        input_tensor (torch.Tensor): Input tensor of shape [batch_size, 1 + prefix length + suffix length].
-        suffix_length (int): Length of the suffix.
+    outputs = model(inputs)
+    logits = outputs.logits if hasattr(outputs, "logits") else outputs[0]
 
-    Returns:
-        tuple: (token_nlls, seq_nlls_mean, seq_nlls_std, ppl_ref) - NLL and perplexity metrics
-    """
-
-    with torch.no_grad():
-        inputs  = input_tensor[:, :-1]
-        targets = input_tensor[:, 1:]
-
-        outputs = model(inputs)
-        logits = outputs.logits if hasattr(outputs, "logits") else outputs[0]
-    
-    # Calculate token-level NLL
     criterion = nn.CrossEntropyLoss(reduction="none")
-
-    # Reshape for loss calculation
-    flat_logits = logits.reshape(-1, logits.size(-1)) 
+    flat_logits = logits.reshape(-1, logits.size(-1))
     flat_targets = targets.reshape(-1)
 
-    # Calculate token-level loss
     token_nlls_flat = criterion(flat_logits, flat_targets)
     token_nlls = token_nlls_flat.reshape(targets.shape)
 
-    # Get the suffix portion (last suffix_length tokens)
     suffix_token_nlls = token_nlls[:, -suffix_length:]
-    
-    # Calculate metrics for suffix
     seq_nlls_mean = suffix_token_nlls.mean(dim=1)
     seq_nlls_std = suffix_token_nlls.std(dim=1)
     ppl_ref = torch.exp(seq_nlls_mean)
 
-    # Clean up memory
     del flat_logits, flat_targets, token_nlls_flat, logits, outputs
     torch.cuda.empty_cache()
-    
+
     return suffix_token_nlls, seq_nlls_mean, seq_nlls_std, ppl_ref
 
-########################################################################################################################
-################################################## INFERENCE ###########################################################
-########################################################################################################################
+
+@torch.no_grad()
+def calc_generation_nll_forward(model, sequences, suffix_length):
+    """
+    sequences: [B, bos + prefix + suffix]
+    """
+    model.eval()
+
+    inputs = sequences[:, :-1]
+    targets = sequences[:, 1:]
+
+    outputs = model(inputs)
+    logits = outputs.logits if hasattr(outputs, "logits") else outputs[0]
+
+    criterion = nn.CrossEntropyLoss(reduction="none")
+    flat_logits = logits.reshape(-1, logits.size(-1))
+    flat_targets = targets.reshape(-1)
+
+    token_nlls_flat = criterion(flat_logits, flat_targets)
+    token_nlls_full = token_nlls_flat.reshape(targets.shape)  # [B, T-1]
+
+    suffix_token_nlls = token_nlls_full[:, -suffix_length:]
+    seq_nlls_mean = suffix_token_nlls.mean(dim=1)
+    seq_nlls_std = suffix_token_nlls.std(dim=1)
+    ppl = torch.exp(seq_nlls_mean)
+
+    del flat_logits, flat_targets, token_nlls_flat, outputs, logits
+    torch.cuda.empty_cache()
+
+    return suffix_token_nlls, seq_nlls_mean, seq_nlls_std, ppl
 
 
-def load_model(model_path):
-    """Load the model from the specified path."""
+# ------------------------------------------------------------------------------------
+# Inference
+# ------------------------------------------------------------------------------------
+def load_model(model_path: Path):
     logger.info(f"Loading model from {model_path}")
-
     if not model_path.exists():
         raise ValueError(f"Model checkpoint not found at {model_path}")
-
     return AutoModelForCausalLM.from_pretrained(
         model_path,
         torch_dtype=torch.bfloat16,
@@ -352,19 +269,16 @@ def run(
     inference_dir,
     policy,
     seed,
+    num_beams,
 ):
-    """Run distributed inference across multiple nodes and GPUs."""
     local_rank = int(os.environ["LOCAL_RANK"])
-    rank = int(os.environ["RANK"])  # Global rank across all nodes
-    world_size = int(os.environ["WORLD_SIZE"])  # Total number of processes
+    rank = int(os.environ["RANK"])
+    world_size = int(os.environ["WORLD_SIZE"])
     model.to(local_rank)
-
     model.eval()
 
-    # Set same seed for all ranks
     setup_distributed(seed)
 
-    # Setup distributed sampling
     sampler = DistributedSampler(
         dataset, num_replicas=world_size, rank=rank, shuffle=False
     )
@@ -372,18 +286,29 @@ def run(
         dataset, batch_size=batch_size, sampler=sampler, collate_fn=lambda batch: batch
     )
 
-    # Create inference directory for this repetition
     inference_dir.mkdir(parents=True, exist_ok=True)
     output_file = inference_dir / f"rank{rank}.jsonl"
 
     generation_configs = {
-        "greedy": {"num_beams": 1, "do_sample": False},
-        "nucleus": {"num_beams": 1, "do_sample": True, "temperature": 1, "top_p": 0.9},
-        "beam": {"num_beams": 5, "do_sample": False},
+        "greedy": {
+            "num_beams": 1,
+            "do_sample": False,
+            "num_return_sequences": 1,
+        },
+        "nucleus": {
+            "num_beams": 1,
+            "do_sample": True,
+            "temperature": 1.0,
+            "top_p": 0.9,
+            "num_return_sequences": 1,
+        },
+        "beam": {
+            "num_beams": num_beams,
+            "do_sample": False,
+            "num_return_sequences": 1,
+        },
     }
 
-
-    # Process batches
     with open(output_file, "w") as jsonl_file:
         for batch in tqdm(
             dataloader,
@@ -392,15 +317,11 @@ def run(
             ncols=100,
             disable=rank != 0,
         ):
-
-            # Clear cache before processing new batch
             torch.cuda.empty_cache()
 
             batch_tensor = torch.tensor(batch, device=local_rank)
 
             # Prepend <BoS> token
-            # Prepend multiple tokens including <BoS>
-            # print(f'BOS Token ID: {model.config.bos_token_id}')
             prepend_tokens = torch.tensor([model.config.bos_token_id], device=batch_tensor.device)
             input_with_bos = torch.cat(
                 [
@@ -410,20 +331,18 @@ def run(
                 dim=1,
             )
 
-            # Calculate standard perplexity on reference sequence
+            # Reference NLL (gold suffix)
             _, ref_nll_mean, ref_nll_std, ref_perplexity = calc_reference_nll(
                 model, input_with_bos, suffix_length
             )
 
-            # Trim input_with_bos to only include BOS + prefix for generation
-            input_with_bos = input_with_bos[:,:1+prefix_length]
+            # BOS + prefix for generation
+            input_with_bos = input_with_bos[:, : 1 + prefix_length]
 
-            assert input_with_bos.shape[1] == prefix_length + len(
-                prepend_tokens
-            ), f"Input shape mismatch: {input_with_bos.shape}"
-            assert (
-                batch_tensor.shape[1] == prefix_length + suffix_length
-            ), f"Batch shape mismatch: {batch_tensor.shape}"
+            assert input_with_bos.shape[1] == prefix_length + len(prepend_tokens), \
+                f"Input shape mismatch: {input_with_bos.shape}"
+            assert batch_tensor.shape[1] == prefix_length + suffix_length, \
+                f"Batch shape mismatch: {batch_tensor.shape}"
 
             with torch.no_grad():
                 outputs = model.generate(
@@ -431,79 +350,35 @@ def run(
                     max_new_tokens=suffix_length,
                     min_new_tokens=suffix_length,
                     return_dict_in_generate=True,
-                    output_scores=True,
+                    output_scores=False,  # not needed anymore
                     **generation_configs[policy],
                 )
 
-            sequences = outputs.sequences
-            seq_nlls, seq_nlls_mean, seq_nlls_std, perplexity = calc_generation_nll(
-                sequences, outputs.scores
+            sequences = outputs.sequences  # [B, bos + prefix + suffix]
+
+            # Compute NLL for generated suffix with a forward pass
+            _, seq_nlls_mean, seq_nlls_std, perplexity = calc_generation_nll_forward(
+                model, sequences, suffix_length
             )
 
-            # Validate shapes
-            assert (
-                sequences.shape[1]
-                == len(prepend_tokens) + prefix_length + suffix_length
-            ), f"Output shape mismatch: {sequences.shape}"
+            assert sequences.shape[1] == len(prepend_tokens) + prefix_length + suffix_length, \
+                f"Output shape mismatch: {sequences.shape}"
 
-            # Process and write batch results
-            prefixes = batch_tensor[:, :prefix_length].cpu().tolist()
-            true_suffixes = batch_tensor[:, prefix_length:].cpu().tolist()
-            generated_suffixes = (
-                sequences[:, prefix_length + len(prepend_tokens) :].cpu().tolist()
-            )  # Skip prepend BOS token
+            prefixes, true_suffixes, generated_suffixes, lcs_norm = process_sequences(
+                sequences, batch_tensor, prefix_length, suffix_length, prepend_tokens
+            )
 
-            lcs_result = find_longest_common_substrings(true_suffixes, generated_suffixes)
-            lcs = lcs_result['max_length'].to_numpy()
-            lcs_norm = lcs / suffix_length
+            write_results(
+                jsonl_file, prefixes, true_suffixes, generated_suffixes,
+                seq_nlls_mean, seq_nlls_std, perplexity, lcs_norm,
+                ref_nll_mean, ref_nll_std, ref_perplexity
+            )
 
-            # Convert tensors to lists for JSON serialization
-            lcs = lcs.tolist()
-            nlls = seq_nlls.cpu().tolist()
-            nll_means = seq_nlls_mean.cpu().tolist()
-            nll_stds = seq_nlls_std.cpu().tolist()
-            perplexities = perplexity.cpu().tolist()
-            ref_nll_means = ref_nll_mean.cpu().tolist()
-            ref_nll_stds = ref_nll_std.cpu().tolist()
-            ref_perplexities = ref_perplexity.cpu().tolist()
-
-            # Clear GPU tensors immediately after use
+            # Cleanup
             del batch_tensor, sequences, outputs, input_with_bos
-            del seq_nlls, seq_nlls_mean, seq_nlls_std, perplexity
+            del seq_nlls_mean, seq_nlls_std, perplexity
             del ref_nll_mean, ref_nll_std, ref_perplexity
-
-            # Write results directly without storing in memory
-            for p, t, g, nll_m, nll_s, lcs_n, ppl, ref_nll_m, ref_nll_s, ref_ppl in zip(
-                prefixes, true_suffixes, generated_suffixes, nll_means, nll_stds, 
-                lcs_norm, perplexities, ref_nll_means, ref_nll_stds, ref_perplexities
-            ):
-                metrics = calculate_text_metrics(t,g)
-
-                json.dump(
-                    {
-                        "prefix": p,
-                        "true_suffix": t,
-                        "generated_suffix": g,
-                        "nll_mean": nll_m,
-                        "nll_std": nll_s,
-                        "perplexity": ppl,
-                        "ref_nll_mean": ref_nll_m,
-                        "ref_nll_std": ref_nll_s,
-                        "ref_perplexity": ref_ppl,
-                        "lcs_norm": lcs_n,
-                        **metrics
-                    },
-                    jsonl_file,
-                )
-                jsonl_file.write("\n")
-                jsonl_file.flush()
-
-            # Clear CPU lists after writing
-            del prefixes, true_suffixes, generated_suffixes
-            del nlls, nll_means, nll_stds, perplexities
-            del ref_nll_means, ref_nll_stds, ref_perplexities
-            del lcs, lcs_norm, lcs_result
+            del prefixes, true_suffixes, generated_suffixes, lcs_norm
             torch.cuda.empty_cache()
 
-    # Synchronize all processes
     dist.barrier()

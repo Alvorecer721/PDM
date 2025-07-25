@@ -1,4 +1,3 @@
-# distributed_inference_dense.py
 import argparse
 from pathlib import Path
 import logging
@@ -10,7 +9,6 @@ from commons import (
 )
 
 logger = logging.getLogger(__name__)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert SwissAI Megatron checkpoint and run inference on Gutenberg dataset')
@@ -33,7 +31,10 @@ if __name__ == "__main__":
     parser.add_argument('--num-proc', type=int, default=20,
                         help='Number of processes for dataset mapping')
     parser.add_argument('--gen-policy', type=str, default='greedy',
-                        help='Generation policy for inference, options: greedy, nucleus')
+                        choices=['greedy', 'nucleus', 'beam'],
+                        help='Generation policy for inference')
+    parser.add_argument('--num-beams', type=int, default=5,
+                        help='Number of beams for beam search (only used when gen-policy=beam)')
     parser.add_argument('--seed', type=int, default=42,
                         help='Global random seed for all ranks')
     
@@ -44,7 +45,6 @@ if __name__ == "__main__":
     set_seed(args.seed)
 
     # Load model
-    experiment_path = Path(args.experiment_path)
     model_path = experiment_path / "HF"
     model = load_model(model_path)
     
@@ -56,32 +56,32 @@ if __name__ == "__main__":
         args.suffix_length
     )
 
-    # Parse repetitions from command line
-    repetitions = set([int(rep) for rep in args.repetitions.split(',')])
+    # Parse repetitions
+    repetitions = set(int(rep) for rep in args.repetitions.split(','))
     
-    # Find all relevant data files matching requested repetitions
+    # Find all relevant data files
     data_folder = Path(args.data_folder)
     paths = sorted(
         (path for path in data_folder.glob("rep_[0-9]*_token.jsonl") 
-        if int(path.stem.split('_')[1]) in repetitions 
-        and "_swaps_" not in path.name),
+         if int(path.stem.split('_')[1]) in repetitions 
+         and "_swaps_" not in path.name),
         key=lambda path: int(path.stem.split('_')[1])
     )
 
-    # Process each repetition
     for path in paths:
         rep = int(path.stem.split('_')[1])
-        
-        # Check if inference already exists for this repetition
-        inference_dir = get_inference_dir(output_path, rep, args.gen_policy)
+
+        # Directory name that distinguishes beam size if needed
+        tag = args.gen_policy if args.gen_policy != "beam" else f"beam_nb{args.num_beams}"
+        inference_dir = get_inference_dir(output_path, rep, tag)
+
         if inference_dir.exists():
             logger.info(f"Skipping repetition {rep} - already processed")
             continue
-            
-        logger.info(f"\nProcessing repetition {rep}")
+
+        logger.info(f"\nProcessing repetition {rep} ({args.gen_policy})")
         
         # Load and process dataset
-        # Process dataset for this repetition
         bucket = process_dataset(
             path,
             batch_processing_gutenberg,
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         
         logger.info(f"Processing {len(bucket)} samples for repetition {rep}")
         
-        # Run distributed inference for this repetition
+        # Run distributed inference (no beam_idx anymore)
         run(
             model=model,
             dataset=bucket,
@@ -107,11 +107,10 @@ if __name__ == "__main__":
             inference_dir=inference_dir,
             policy=args.gen_policy,
             seed=args.seed,
+            num_beams=args.num_beams,
         )
         
         print(f"Completed processing repetition {rep}")
-        
-        # Clear any cached tensors
         torch.cuda.empty_cache()
     
     print(f"\nAll repetitions processed. Results saved to: {output_path}")
