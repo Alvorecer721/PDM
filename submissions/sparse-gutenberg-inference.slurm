@@ -1,15 +1,16 @@
 #!/bin/bash
 #SBATCH --account=root
 #SBATCH --cpus-per-task=72
-#SBATCH --environment=ngc24-11
+##SBATCH --environment=ngc24-11
+#SBATCH --environment=nemo
 #SBATCH --error=/iopsstor/scratch/cscs/xyixuan/PDM/log/infer/sparse/sparse_%A_%a.err
 #SBATCH --output=/iopsstor/scratch/cscs/xyixuan/PDM/log/infer/sparse/sparse_%A_%a.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=gfl-infer
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=06:00:00
-#SBATCH --array=0-12
+#SBATCH --time=01:00:00
+#SBATCH --array=0-7
 
 set -e  # Exit immediately if any command fails
 
@@ -35,7 +36,8 @@ export MASTER_PORT
 export MASTER_ADDR
 
 # Define offsets
-declare -a offsets=(0 1 2 4 8 16 32 64 128 256 512 1024 2048)
+declare -a offsets=(272 288 304 320 336 352 368 384)
+# declare -a offsets=(0 1 2 4 8 16 32 64 128 256 512 1024 2048)
 offset=${offsets[$SLURM_ARRAY_TASK_ID]}
 
 # Define suffix length
@@ -100,7 +102,7 @@ else
         /iopsstor/scratch/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py \
         --experiment-path \"$EXPR_PATH\" \
         --repetitions 128 \
-        --gen-policy beam \
+        --gen-policy greedy \
         --offset $offset \
         --prefix-length 500 \
         --suffix-length 500 \

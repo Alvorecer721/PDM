@@ -121,19 +121,28 @@ def save_replicated_text_in_one(text, config: DataConfig, output_path: Path):
  
 def main():
     config = DataConfig()
-    input_path = Path('/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_en_8k_mixtral') 
-    output_path = Path("/iopsstor/scratch/cscs/xyixuan/dataset/gunteberg_mixtral")
+    input_path = Path('/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_en_8k') 
+    output_path = Path("/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_continue")
     output_path.mkdir(parents=True, exist_ok=True)
 
     logging.info("Loading dataset...")
+    token_seq = load_and_validate_data(config, input_path / FILE_NAMES['TOKEN'])
     text_seq = load_and_validate_data(config, input_path / FILE_NAMES['TEXT'])
     
-    logging.info("Saving all replicated text in one file...")
-    save_replicated_text_in_one(
-        text=text_seq,
-        config=config,
+    logging.info("Saving replicated datasets...")
+    save_replicated_data(
+        text=text_seq, 
+        token=token_seq, 
+        config=config, 
         output_path=output_path
     )
+    
+    # logging.info("Saving all replicated text in one file...")
+    # save_replicated_text_in_one(
+    #     text=text_seq,
+    #     config=config,
+    #     output_path=output_path
+    # )
     
     logging.info("Process completed successfully")
 

@@ -7,8 +7,12 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 
-from rouge_ttr import batch_rouge_ttr_calc
-from utils import load_inference_data
+try:
+    from .rouge_ttr import batch_rouge_ttr_calc
+    from .utils import load_inference_data
+except ImportError:
+    from rouge_ttr import batch_rouge_ttr_calc
+    from utils import load_inference_data
 
 @dataclass
 class MetricData:
@@ -26,6 +30,7 @@ class MetricData:
 @dataclass
 class Results:
     data: Dict
+    policy: Optional[str] = None
 
     def _get_nested_keys(self, level: int) -> List:
         d = self.data
@@ -77,7 +82,15 @@ class Results:
     @classmethod
     def load(cls, path: str):
         with open(path, 'rb') as f:
-            return cls(cls._convert_to_metric_data(pickle.load(f)))
+            data = pickle.load(f)
+            # Extract policy from filename if available
+            filename = os.path.basename(path)
+            parts = filename.replace('.pkl', '').split('_')
+            policy = None
+            # Check if last part is a policy (not a number)
+            if parts and not parts[-1].isdigit():
+                policy = parts[-1]
+            return cls(cls._convert_to_metric_data(data), policy=policy)
         
     @staticmethod
     def merge_results_as_dict(paths):
@@ -109,8 +122,8 @@ class Results:
         return merged_dict
        
     @classmethod
-    def from_raw_dict(cls, results: Dict):
-        return cls(cls._convert_to_metric_data(results))
+    def from_raw_dict(cls, results: Dict, policy: Optional[str] = None):
+        return cls(cls._convert_to_metric_data(results), policy=policy)
 
     def get_stats(self, expr: str, rep: int, offset: int, prefix: int, suffix: int, metric: str) -> MetricData:
         return self.data[expr][rep][offset][prefix][suffix][metric]
@@ -129,12 +142,16 @@ class Results:
         }
     
     def save(self, folder='sparse'):
-        base_path=f'/capstor/users/cscs/xyixuan/PDM/results/{folder}'
+        base_path=f'/iopsstor/scratch/cscs/xyixuan/PDM/results/{folder}'
 
         offsets_str = '_'.join(map(str, self.offsets))
         prefixes_str = '_'.join(map(str, self.prefixes))
         suffixes_str = '_'.join(map(str, self.suffixes))
-        name = f"offset_{offsets_str}_prefix_{prefixes_str}_suffix_{suffixes_str}.pkl"
+        
+        if self.policy:
+            name = f"offset_{offsets_str}_prefix_{prefixes_str}_suffix_{suffixes_str}_{self.policy}.pkl"
+        else:
+            name = f"offset_{offsets_str}_prefix_{prefixes_str}_suffix_{suffixes_str}.pkl"
 
         path = f"{base_path}/{self.expr[0]}/{name}"
         
@@ -219,7 +236,7 @@ def eval_expr(config: EvalConfig) -> Results:
                     metrics = calculate_metrics(config, r, offset, prefix_length, suffix_length)
                     data[config.expr][r][offset][prefix_length][suffix_length] = metrics
 
-    return Results.from_raw_dict(data)
+    return Results.from_raw_dict(data, policy=config.policy)
 
 
 def calculate_metrics(config, rep, offset, prefix_length, suffix_length) -> Dict[str, Dict]:
@@ -496,3 +513,168 @@ def plot_repetition_metric_dists(results: Results, metric: str, offset: int = 0,
     fig.text(0.5, 0.01, f'{metric} Score Distribution',
             horizontalalignment='center', verticalalignment='bottom', fontsize=30)
     plt.show()
+
+
+def compare_policies(
+    policies: List[str],
+    base_path: str,
+    expr: str,
+    offsets: List[int],
+    prefixes: List[int],
+    suffixes: List[int],
+    metrics: Union[str, List[str]] = 'Rouge-L',
+    offset: Optional[int] = None,
+    prefix: Optional[int] = None,
+    suffix: Optional[int] = None,
+    repetition: int = 128,
+    folder: str = 'sparse',
+    show_std: bool = True
+):
+    """
+    Compare metric statistics across different decoding policies.
+    
+    Parameters
+    ----------
+    policies : list
+        List of policy names to compare
+        e.g., ['greedy', 'beam_nb5', 'nucleus_p0.9']
+    base_path : str
+        Base path to results directory
+    expr : str
+        Experiment name
+    offsets, prefixes, suffixes : list
+        Lists of parameter values used in the experiment
+    metrics : str or list
+        Single metric name or list of metrics to compare
+        If 'all', shows all available metrics
+    offset, prefix, suffix : int, optional
+        Exactly two must be provided; the third varies
+    repetition : int
+        Which repetition to show (default: 128)
+    folder : str
+        Results folder name (default: 'sparse')
+    show_std : bool
+        Whether to show standard deviation (default: True)
+    """
+    if sum(x is not None for x in [offset, prefix, suffix]) != 2:
+        raise ValueError("Exactly two parameters must be provided")
+    
+    # Construct file paths and load results
+    results_dict = {}
+    offsets_str = '_'.join(map(str, offsets))
+    prefixes_str = '_'.join(map(str, prefixes))
+    suffixes_str = '_'.join(map(str, suffixes))
+    
+    for policy in policies:
+        filename = f"offset_{offsets_str}_prefix_{prefixes_str}_suffix_{suffixes_str}_{policy}.pkl"
+        path = f"{base_path}/{folder}/{expr}/{filename}"
+        try:
+            results_dict[policy] = Results.load(path)
+        except FileNotFoundError:
+            print(f"Warning: Could not find file for policy '{policy}' at {path}")
+            continue
+    
+    if not results_dict:
+        print("No results files found!")
+        return
+    
+    # Get first result to determine parameters
+    first_result = next(iter(results_dict.values()))
+    if offset is None:
+        vary_by, iterations = 'offset', first_result.offsets
+    elif prefix is None:
+        vary_by, iterations = 'prefix', first_result.prefixes
+    else:
+        vary_by, iterations = 'suffix', first_result.suffixes
+    
+    fixed_vals = {
+        'offset': offset,
+        'prefix': prefix,
+        'suffix': suffix
+    }
+    
+    # Handle metrics parameter
+    if isinstance(metrics, str):
+        if metrics == 'all':
+            metrics_list = first_result.metrics
+        else:
+            metrics_list = [metrics]
+    else:
+        metrics_list = metrics
+    
+    # Always use multi-metric display format (even for single metric)
+    print(f"\n=== Metric Comparison for Repetition {repetition} ===")
+    print(f"Fixed: prefix={prefix}, suffix={suffix}" if offset is None else
+          f"Fixed: offset={offset}, suffix={suffix}" if prefix is None else
+          f"Fixed: offset={offset}, prefix={prefix}")
+    print()
+    
+    # Define column widths based on show_std
+    if show_std:
+        value_width = 15  # "  0.965 ± 0.135"
+        policy_col_width = 15
+    else:
+        value_width = 9   # "  0.965"
+        policy_col_width = 9
+    
+    # Build header rows
+    header1_parts = [f"{' ':>8} |"]
+    header2_parts = [f"{vary_by.capitalize():>8} |"]
+    
+    for metric in metrics_list:
+        # Calculate metric header span width
+        # For each metric group: policies are separated by " | "
+        metric_group_width = len(policies) * policy_col_width + (len(policies) - 1) * 3
+        header1_parts.append(f" {metric:^{metric_group_width}} |")
+        
+        # Add policy names
+        for i, policy in enumerate(policies):
+            if i == 0:
+                header2_parts.append(f" {policy:>{policy_col_width}} ")
+            else:
+                header2_parts.append(f"| {policy:>{policy_col_width}} ")
+        header2_parts.append("|")
+    
+    header1 = "".join(header1_parts)
+    header2 = "".join(header2_parts)
+    
+    print(header1)
+    print(header2)
+    print("-" * len(header2))
+    
+    # Print data rows
+    for val in iterations:
+        current_offset = val if vary_by == 'offset' else fixed_vals['offset']
+        current_prefix = val if vary_by == 'prefix' else fixed_vals['prefix']
+        current_suffix = val if vary_by == 'suffix' else fixed_vals['suffix']
+        
+        row_parts = [f"{val:8} |"]
+        
+        for metric in metrics_list:
+            for i, (policy, results) in enumerate(results_dict.items()):
+                try:
+                    stats = results.get_stats(
+                        results.expr[0],
+                        repetition,
+                        current_offset,
+                        current_prefix,
+                        current_suffix,
+                        metric
+                    )
+                    if show_std:
+                        value = f"{stats.mean:6.3f} ± {stats.std:5.3f}"
+                    else:
+                        value = f"{stats.mean:6.3f}"
+                    
+                    if i == 0:
+                        row_parts.append(f" {value:>{policy_col_width}} ")
+                    else:
+                        row_parts.append(f"| {value:>{policy_col_width}} ")
+                except:
+                    if i == 0:
+                        row_parts.append(f" {'N/A':>{policy_col_width}} ")
+                    else:
+                        row_parts.append(f"| {'N/A':>{policy_col_width}} ")
+            row_parts.append("|")
+        
+        print("".join(row_parts))

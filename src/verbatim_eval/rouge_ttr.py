@@ -1,6 +1,11 @@
 from typing import List
 import numpy as np
-from utils import load_inference_data
+try:
+    # Try relative import (for when used as a package)
+    from .utils import load_inference_data
+except ImportError:
+    # Fall back to absolute import (for Jupyter notebooks or direct execution)
+    from src.verbatim_eval.utils import load_inference_data
 from tqdm.auto import tqdm
 
 

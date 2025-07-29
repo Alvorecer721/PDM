@@ -11,6 +11,8 @@ from torch.utils.data import DataLoader, DistributedSampler
 import torch.nn as nn
 from transformers import AutoModelForCausalLM
 from datasets import load_dataset
+from datasets import Features, Sequence, Value
+import platform
 
 import sys
 # Add the src directory to the path
@@ -84,11 +86,22 @@ def process_dataset(
 ):
     logger.info(f"Processing dataset from {data_path}")
 
+    # dataset = ydataset(
+    #     "json",
+    #     data_files=str(data_path),
+    #     split="train",
+    #     cache_dir="/iopsstor/scratch/cscs/xyixuan/cache"
+    # )
+
+    features = Features({"input_ids": Sequence(Value("int64"))})
+    arch = platform.machine()
+
     dataset = load_dataset(
         "json",
         data_files=str(data_path),
         split="train",
-        cache_dir="/iopsstor/scratch/cscs/xyixuan/cache"
+        cache_dir=f"/iopsstor/scratch/cscs/xyixuan/cache/{arch}",
+        features=features,
     )
 
     processed_dataset = dataset.map(
@@ -101,7 +114,10 @@ def process_dataset(
             "_suffix_len": suffix_length,
             "_offset": offset,
         },
-    )["prefix_suffix"]
+    )
+    
+    # Extract the prefix_suffix column
+    processed_dataset = processed_dataset["prefix_suffix"]
 
     logger.info(f"Processed {len(processed_dataset)} samples")
     return processed_dataset

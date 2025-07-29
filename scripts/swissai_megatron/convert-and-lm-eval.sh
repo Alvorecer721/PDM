@@ -12,7 +12,7 @@ export PYTHONPATH=$MEGATRON_LM_DIR:$PYTHONPATH
 
 EXPR_PATH="$1"
 EXPR_NAME=$(basename ${EXPR_PATH})
-RES_PATH="/capstor/users/cscs/xyixuan/PDM/results/lm_eval/${EXPR_NAME}"
+RES_PATH="/iopsstor/scratch/cscs/xyixuan/PDM/results/lm_eval/${EXPR_NAME}"
 
 # Clear existing results directory if it exists
 if [ -d "${RES_PATH}" ]; then
@@ -39,7 +39,7 @@ if [ -d "${EXPR_PATH}/torch" ]; then
 else
     # Run the torch distributed to torch conversion
     echo "Converting torch distributed to torch..."
-    CUDA_DEVICE_MAX_CONNECTIONS=1 torchrun /capstor/users/cscs/xyixuan/PDM/src/convert/convert_torch_dist_to_torch.py \
+    CUDA_DEVICE_MAX_CONNECTIONS=1 torchrun /iopsstor/scratch/cscs/xyixuan/PDM/src/convert/convert_torch_dist_to_torch.py \
         --bf16 \
         --load ${EXPR_PATH}/checkpoints \
         --ckpt-convert-save ${EXPR_PATH}
@@ -51,7 +51,7 @@ else
     fi
 fi
 
-python /capstor/users/cscs/xyixuan/PDM/src/convert/convert_megatron_to_hf.py \
+python /iopsstor/scratch/cscs/xyixuan/PDM/src/convert/convert_megatron_to_hf.py \
    --experiment-path ${EXPR_PATH}
 
 # Check if the conversion was successful
