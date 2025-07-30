@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=root
-#SBATCH --cpus-per-task=288
+#SBATCH --cpus-per-task=72
 #SBATCH --environment=/capstor/store/cscs/swissai/a06/containers/NGC-PyTorch/ngc_pt_jan.toml
 #SBATCH --error=/iopsstor/scratch/cscs/xyixuan/PDM/log/eval/lm-eval_%A.err
 #SBATCH --output=/iopsstor/scratch/cscs/xyixuan/PDM/log/eval/lm-eval_%A.out

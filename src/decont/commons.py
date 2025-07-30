@@ -15,42 +15,77 @@ from datatrove.pipeline.decont import NGramsDecontConfig, NGramsDecontIndexer
 def load_hash_index(index_path):
     """Load n-gram hashes from index file (DataTrove binary format).
     
+    Memory-efficient version using numpy arrays instead of Python sets.
+    
     Args:
         index_path: Path to the .index.hashes file
         
     Returns:
-        Dict with 'hashes' key containing the hash values
+        Dict with 'hashes' key containing sorted numpy array
     """
+    import numpy as np
+    
+    # Get file size to pre-allocate array
+    file_size = Path(index_path).stat().st_size
+    num_hashes = file_size // 8
+    
+    # Pre-allocate numpy array
+    hashes = np.zeros(num_hashes, dtype=np.uint64)
+    
+    # Load data in chunks
+    chunk_size = 8 * 1024 * 1024  # 8MB chunks
+    idx = 0
+    
     with open(index_path, 'rb') as f:
-        data = f.read()
-        # DataTrove stores hashes as 64-bit unsigned integers
-        num_hashes = len(data) // 8
-        hashes = struct.unpack(f'{num_hashes}Q', data)
-        # Return in the expected format
-        return {'hashes': hashes}
+        while True:
+            chunk = f.read(chunk_size)
+            if not chunk:
+                break
+            
+            # Process complete 8-byte integers only
+            remainder = len(chunk) % 8
+            if remainder:
+                chunk = chunk[:-remainder]
+                f.seek(-remainder, 1)
+            
+            # Unpack into array
+            n = len(chunk) // 8
+            if n > 0:
+                hashes[idx:idx+n] = struct.unpack(f'{n}Q', chunk)
+                idx += n
+    
+    # Sort for efficient intersection
+    hashes.sort()
+    
+    # Return in the expected format
+    return {'hashes': hashes}
 
 
 def calculate_contamination_ratio(source_hashes, target_hashes):
     """Calculate contamination ratio between two hash sets.
     
     Measures what percentage of source n-grams appear in target.
+    Now uses numpy arrays for memory efficiency.
     
     Args:
-        source_hashes: Dict with 'hashes' key (what we're checking for contamination)
-        target_hashes: Dict with 'hashes' key (reference to check against)
+        source_hashes: Dict with 'hashes' key containing sorted numpy array
+        target_hashes: Dict with 'hashes' key containing sorted numpy array
         
     Returns:
         Dict with contamination statistics
     """
-    # Convert to sets for efficient intersection
-    source_set = set(source_hashes.get('hashes', []))
-    target_set = set(target_hashes.get('hashes', []))
+    import numpy as np
     
-    # Calculate intersection
-    matching_hashes = source_set.intersection(target_set)
+    # Get the sorted arrays
+    source_arr = source_hashes.get('hashes', np.array([], dtype=np.uint64))
+    target_arr = target_hashes.get('hashes', np.array([], dtype=np.uint64))
+    
+    # Calculate intersection efficiently using sorted arrays
+    # np.intersect1d assumes sorted arrays when assume_unique=True
+    matching_hashes = np.intersect1d(source_arr, target_arr, assume_unique=True)
     
     # Calculate contamination ratio
-    total_source_ngrams = len(source_set)
+    total_source_ngrams = len(source_arr)
     matching_ngrams = len(matching_hashes)
     contamination_ratio = matching_ngrams / total_source_ngrams if total_source_ngrams > 0 else 0
     
@@ -58,7 +93,7 @@ def calculate_contamination_ratio(source_hashes, target_hashes):
         'contamination_ratio': contamination_ratio,
         'matching_ngrams': matching_ngrams,
         'total_source_ngrams': total_source_ngrams,
-        'total_target_ngrams': len(target_set)
+        'total_target_ngrams': len(target_arr)
     }
 
 

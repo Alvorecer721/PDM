@@ -1,16 +1,17 @@
 #!/bin/bash
 #SBATCH --account=root
 #SBATCH --environment=ngc24-11
-#SBATCH --job-name=decontam
-#SBATCH --time=12:00:00
+#SBATCH --job-name=decontam_opt
+#SBATCH --time=6:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=288
 #SBATCH --partition=normal
-#SBATCH --output=/iopsstor/scratch/cscs/xyixuan/PDM/log/decont/decontam_%A_%a.out
-#SBATCH --error=/iopsstor/scratch/cscs/xyixuan/PDM/log/decont/decontam_%A_%a.err
-#SBATCH --array=0-42  # 43 jobs (for 169 chunks, 4 chunks each except last)
+#SBATCH --output=/iopsstor/scratch/cscs/xyixuan/PDM/log/decont/decontam_opt_%A_%a.out
+#SBATCH --error=/iopsstor/scratch/cscs/xyixuan/PDM/log/decont/decontam_opt_%A_%a.err
+#SBATCH --array=0-16  # 17 jobs (for 169 chunks, 10 chunks each except last)
 
+# Optimized version with more chunks per node since we have 288 CPUs
 
 # Load environment based on architecture
 ARCH=$(uname -m)
@@ -29,6 +30,7 @@ cd /iopsstor/scratch/cscs/xyixuan/PDM
 
 echo "Starting FineWeb index building - Array task $SLURM_ARRAY_TASK_ID"
 echo "Time: $(date)"
+echo "CPUs available: $(nproc)"
 
 # Get list of all chunks
 CHUNK_DIR="/iopsstor/scratch/cscs/xyixuan/dataset/finewebedu_chunks"
@@ -37,8 +39,8 @@ OUTPUT_DIR="/iopsstor/scratch/cscs/xyixuan/PDM/results/decont/indices/fineweb"
 # Create array of all chunk files, sorted for consistency
 mapfile -t ALL_CHUNKS < <(find "$CHUNK_DIR" -type f -name "*_chunk_*" | sort)
 
-# Calculate which chunks this array task should process (4 chunks per task)
-CHUNKS_PER_TASK=4
+# Calculate which chunks this array task should process (10 chunks per task)
+CHUNKS_PER_TASK=10
 START_IDX=$((SLURM_ARRAY_TASK_ID * CHUNKS_PER_TASK))
 END_IDX=$((START_IDX + CHUNKS_PER_TASK - 1))
 
@@ -58,13 +60,42 @@ done
 echo "This task will process $CHUNK_COUNT chunks"
 
 if [ $CHUNK_COUNT -gt 0 ]; then
+    # Monitor system resources
+    echo -e "\nSystem resources:"
+    free -h
+    echo -e "\nCPU info:"
+    lscpu | grep -E "^CPU\(s\)|Thread\(s\)|Core\(s\)"
+    
     # Process chunks using the parallel script
-    # Use 4 workers to process 4 chunks in parallel (1 worker per chunk)
+    # Use 10 workers to match chunks per task for optimal throughput
+    echo -e "\nStarting parallel processing with 10 workers..."
     python src/decont/build_fineweb_indices_parallel.py \
-        --workers 4 \
+        --workers 10 \
         --chunk-list "$CHUNK_LIST" \
         --output-dir "$OUTPUT_DIR" \
         --n-gram-size 13
+        
+    EXIT_CODE=$?
+    
+    if [ $EXIT_CODE -eq 0 ]; then
+        echo "Successfully processed all chunks"
+        
+        # Quick validation - check that indices were created
+        INDICES_CREATED=0
+        while read -r chunk_path; do
+            chunk_name=$(basename "$chunk_path" .jsonl.gz | sed 's/.jsonl$//')
+            base_name=$(echo "$chunk_name" | cut -d'_' -f1-2)
+            chunk_suffix=$(echo "$chunk_name" | cut -d'_' -f3-)
+            
+            if [ -f "$OUTPUT_DIR/$base_name/$chunk_suffix/input.index.hashes" ]; then
+                ((INDICES_CREATED++))
+            fi
+        done < "$CHUNK_LIST"
+        
+        echo "Indices created: $INDICES_CREATED/$CHUNK_COUNT"
+    else
+        echo "Error occurred during processing (exit code: $EXIT_CODE)"
+    fi
 fi
 
 # Clean up

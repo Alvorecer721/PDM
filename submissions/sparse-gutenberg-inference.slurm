@@ -10,7 +10,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=01:00:00
-#SBATCH --array=0-7
+#SBATCH --array=0-12
 
 set -e  # Exit immediately if any command fails
 
@@ -36,8 +36,7 @@ export MASTER_PORT
 export MASTER_ADDR
 
 # Define offsets
-declare -a offsets=(272 288 304 320 336 352 368 384)
-# declare -a offsets=(0 1 2 4 8 16 32 64 128 256 512 1024 2048)
+declare -a offsets=(0 1 2 4 8 16 32 64 128 256 512 1024 2048)
 offset=${offsets[$SLURM_ARRAY_TASK_ID]}
 
 # Define suffix length
@@ -101,7 +100,7 @@ else
         --nproc_per_node=4 \
         /iopsstor/scratch/cscs/xyixuan/PDM/src/infer/distributed_inference_sparse.py \
         --experiment-path \"$EXPR_PATH\" \
-        --repetitions 128 \
+        --repetitions 1,2,3,4,8,16,24,32,48,64,96,128 \
         --gen-policy greedy \
         --offset $offset \
         --prefix-length 500 \
