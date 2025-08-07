@@ -86,13 +86,6 @@ def process_dataset(
 ):
     logger.info(f"Processing dataset from {data_path}")
 
-    # dataset = ydataset(
-    #     "json",
-    #     data_files=str(data_path),
-    #     split="train",
-    #     cache_dir="/iopsstor/scratch/cscs/xyixuan/cache"
-    # )
-
     features = Features({"input_ids": Sequence(Value("int64"))})
     arch = platform.machine()
 
