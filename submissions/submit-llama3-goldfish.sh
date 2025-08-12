@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#SBATCH --account=a-a06
-#SBATCH --time=10:00:00
-#SBATCH --job-name=goldfish
-#SBATCH --output=/iopsstor/scratch/cscs/%u/Megatron-LM/logs/slurm/training/%x-%j.out
-#SBATCH --error=/iopsstor/scratch/cscs/%u/Megatron-LM/logs/slurm/training/%x-%j.err
+#SBATCH --account=root
+#SBATCH --time=12:00:00
+#SBATCH --job-name=memorisation
+#SBATCH --output=/iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/slurm/training/%x-%j.out
+#SBATCH --error=/iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/slurm/training/%x-%j.err
 #SBATCH --nodes=15
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-node=4
@@ -12,18 +12,22 @@
 #SBATCH --mem=460000
 #SBATCH --environment=/capstor/store/cscs/swissai/a06/containers/NGC-PyTorch/ngc_pt_jan.toml	# Vanilla 25.01 PyTorch NGC Image 
 #SBATCH --no-requeue	# Prevent Slurm to requeue the job if the execution crashes (e.g. node failure) so we don't loose the logs
+#SBATCH --partition=normal
 
 echo "START TIME: $(date)"
 
 ################ Configs ################
 # Use the FineWeb Edu dataset
-DATASETS="/capstor/scratch/cscs/xyixuan/fineweb-edu-80B/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_1/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_2/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_3/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_4/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_8/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_16/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_24/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_32/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_48/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_64/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_96/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_128/"
+DATASETS="/capstor/store/cscs/swissai/a06/users/xyixuan/finewebedu-sample-100BT/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_1/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_2/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_3/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_4/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_8/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_16/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_24/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_32/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_48/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_64/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_96/,/iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_128/"
 
+# This config trains for ~100B tokens with 504 * 4096 = 2_064_384 tokens per batch.
+# Results in 504 / 3 = 168 forward passes with 4 replicas per node requires a 
+# maximum of 42 nodes such that each replica does batch accumulation of 1.
 MBS=1
 GBS=60
 SEQ_LEN=8192
 TRAINING_STEPS=170005
-CHECKPOINT_STEPS=15455
+CHECKPOINT_STEPS=34001
 
 #### Debugging ####
 LOG_NCCL=false # Log NCCL_DEBUG=info. Every process will dump the logging into separate files, check `NCCL_DEBUG_FILE`
@@ -32,12 +36,12 @@ MOCK_DATA=false # Set to `true` to use mock data
 ###################
 
 # Megatron source and dataset cache WARNING (!) MUST BE ON IOPSSTOR (!)
-MEGATRON_LM_DIR=/iopsstor/scratch/cscs/$USER/Megatron-LM
-DATASET_CACHE_DIR=/iopsstor/scratch/cscs/$USER/datasets/cache
+MEGATRON_LM_DIR=/iopsstor/scratch/cscs/xyixuan/Megatron-LM
+DATASET_CACHE_DIR=/iopsstor/scratch/cscs/xyixuan/datasets/cache
 
 # Logging directories & artifacts
-PROJECT_NAME=Goldfish
-EXP_NAME=llama3-1b-${SLURM_NNODES}n-${SEQ_LEN}sl-${GBS}gbsz-standard
+PROJECT_NAME=Continue-1B
+EXP_NAME=llama3-1b-${SLURM_NNODES}n-${SEQ_LEN}sl-${GBS}gbsz-continue
 PROJECT_DIR=$MEGATRON_LM_DIR/logs/Meg-Runs/$PROJECT_NAME
 
 #########################################
@@ -68,6 +72,8 @@ export PYTHONPATH=$MEGATRON_LM_DIR:$PYTHONPATH
 export TORCH_NCCL_AVOID_RECORD_STREAMS=1
 export TORCH_NCCL_ASYNC_ERROR_HANDLING=1
 export CUDA_DEVICE_MAX_CONNECTIONS=1
+export TORCH_LOAD_WEIGHTS_ONLY=False
+export PYTORCH_LOAD_WEIGHTS_ONLY=0
 export WANDB_API_KEY=74bc2e3d0aa09e4d4e8a89659496aa4697714938
 MASTER_ADDR=$(hostname)
 MASTER_PORT=25678
@@ -84,6 +90,7 @@ TRANSFORMER_ENGINE_ARGS=(
 	--main-grads-dtype bf16
 )
 
+# 1.23B
 NETWORK_SIZE_ARGS=(
 	--num-layers 16
 	--hidden-size 2048
@@ -100,6 +107,24 @@ NETWORK_SIZE_ARGS=(
 	--normalization RMSNorm
 	--swiglu
 )
+
+# # 3B
+# NETWORK_SIZE_ARGS=(
+# 	--num-layers 28
+# 	--hidden-size 3072
+# 	--ffn-hidden-size 8192
+# 	--num-attention-heads 24
+# 	--group-query-attention
+# 	--num-query-groups 8
+# 	--max-position-embeddings $SEQ_LEN
+# 	--position-embedding-type rope
+# 	--rotary-base 500000
+# 	--use-rope-scaling
+# 	--rope-scaling-factor 32
+# 	--make-vocab-size-divisible-by 128
+# 	--normalization RMSNorm
+# 	--swiglu
+# )
 
 LOGGING_ARGS=(
 	--log-throughput
@@ -140,18 +165,20 @@ INITIALIZATION_ARGS=(
 
 # NOTE(tj.solergibert) Check all the arguments in megatron/training/arguments.py#L1548 or https://github.com/NVIDIA/Megatron-LM/blob/0dd78ddcdb117ce4f2e9761449274d87af717674/megatron/training/arguments.py#L1548-L1606
 LEARNING_RATE_ARGS=(
-	--lr 0.0003
-	--min-lr 0.00003  # x10 reduction
+	--lr 0.00005
+	--min-lr 0.00001  # x10 reduction
 	--lr-decay-style cosine
-	--lr-warmup-iters 2000
+	--lr-warmup-iters 1000
 )
 
 CHECKPOINTING_ARGS=(
 	--save $CKPT_DIR
 	--save-interval $CHECKPOINT_STEPS
-	--load $CKPT_DIR  # delete this to NOT reload from the latest checkpoint
+	--load $CKPT_DIR  # Load the latest checkpoint
+	# --load /iopsstor/scratch/cscs/xyixuan/Megatron-LM/logs/Meg-Runs/Continue-1B/checkpoints-modern  # Load modern core checkpoint
+	--finetune  # Reset iteration to 0, fresh optimizer
 	--ckpt-format torch_dist
-	# --async-save
+	--async-save
 )
 
 MIXED_PRECISION_ARGS=(
@@ -170,7 +197,7 @@ DISTRIBUTED_ARGS=(
 
 TOKENIZER_ARGS=(
 	--tokenizer-type HuggingFaceTokenizer
-	--tokenizer-model nvidia/OpenMath2-Llama3.1-8B
+	--tokenizer-model /iopsstor/scratch/cscs/xyixuan/PDM/Llama-3.2-1B
 )
 
 DATA_ARGS=(
@@ -178,16 +205,16 @@ DATA_ARGS=(
 	--seq-length $SEQ_LEN
 	--num-workers 2
 	--num-dataset-builder-threads 1
-    --reset-attention-mask
-    --bod-hiding
-    --goldfish-loss
-    --goldfish-k 50
-    --goldfish-h 50
+	# --reset-attention-mask
+	# --bod-hiding
+    # --goldfish-loss
+    # --goldfish-k 50
+    # --goldfish-h 13
 )
 
 CONVERTER_ARGS=(
-	--ckpt-convert-format torch
-	--ckpt-convert-save $EXP_DIR
+	# --ckpt-convert-format torch
+	# --ckpt-convert-save $EXP_DIR
 )
 
 # Data Args
@@ -220,7 +247,7 @@ TRAINING_CMD="torchrun ${TORCHRUN_ARGS[@]} $MEGATRON_LM_DIR/pretrain_gpt.py \
     ${MIXED_PRECISION_ARGS[@]} \
     ${DISTRIBUTED_ARGS[@]} \
     ${TOKENIZER_ARGS[@]} \
-	${CONVERTER_ARGS[@]} \
+    ${CONVERTER_ARGS[@]} \
     $DATA_ARGS"
 
 # WANDB Logging
