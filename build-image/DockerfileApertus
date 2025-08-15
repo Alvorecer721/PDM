@@ -1,0 +1,50 @@
+# Build from the sgl base image
+# First run: podman load --input /capstor/store/cscs/swissai/infra01/users/xyixuan/image.tar
+FROM sgl
+
+# Install useful system tools
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    tmux \
+    htop \
+    nvtop \
+    tree \
+    bc \
+    ncdu \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Reset git configuration to remove any credentials from base image
+# This ensures each user can set their own git identity
+RUN git config --global --unset user.name || true && \
+    git config --global --unset user.email || true && \
+    echo "Git config cleared. Users should set their own credentials with:" > /etc/motd && \
+    echo "  git config --global user.name 'Your Name'" >> /etc/motd && \
+    echo "  git config --global user.email 'your.email@example.com'" >> /etc/motd
+
+# Install Swiss AI's custom transformers with CUDA optimizations
+RUN cd /tmp && \
+    rm -rf transformers && \
+    git clone https://github.com/swiss-ai/transformers.git && \
+    cd transformers && \
+    git fetch origin && \
+    git checkout v4.51.1+swissai+cuda && \
+    pip install --no-deps --no-cache-dir --force-reinstall . && \
+    pip install --no-cache-dir --no-build-isolation git+https://github.com/nickjbrowning/XIELU && \
+    cd / && rm -rf /tmp/transformers
+
+# Install additional Python packages required by the PDM codebase
+RUN pip install --no-cache-dir \
+    numba \
+    matplotlib \
+    seaborn \
+    evaluate \
+    pytorch-ignite \
+    nltk \
+    webdataset
+
+# Set working directory to a generic workspace
+WORKDIR /workspace
+
+# Keep the same entrypoint/cmd as the base image
+CMD ["/bin/bash"]

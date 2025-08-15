@@ -121,8 +121,8 @@ def save_replicated_text_in_one(text, config: DataConfig, output_path: Path):
  
 def main():
     config = DataConfig()
-    input_path = Path('/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_en_8k') 
-    output_path = Path("/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_continue")
+    input_path = Path('/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_en_8k_mixtral') 
+    output_path = Path("/iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_apertus_buk167")
     output_path.mkdir(parents=True, exist_ok=True)
 
     logging.info("Loading dataset...")

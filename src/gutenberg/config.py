@@ -22,7 +22,7 @@ REPETITIONS = np.array([1,2,3,4,8,16,24,32,48,64,96,128])
 class DataConfig:
     fineweb_edu_size: int = 81_816_372_499
     bucket_size: int = 500
-    seq_length: int = 8191
+    seq_length: int = 8190
 
     gutenberg_tokens = None
     total_tokens = None

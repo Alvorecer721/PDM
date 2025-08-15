@@ -109,7 +109,7 @@ ENV PYTHONPATH="${PYTHONPATH}:/opt/cosmos-predict1:/opt/decord"
 WORKDIR /workspace
 
 # Instructions:
-# 0. srun --partition debug --time 01:30:00 -A a-a06 --mem 460000 --pty bash
+# 0. srun --container-writable --partition debug --time 01:30:00 -A a-a06 --mem 460000 --pty bash
 # 1. cd /capstor/users/cscs/xyixuan/
 # 2. Build image: podman build --volume /usr/lib64:/host/usr/lib64:ro -f /capstor/users/cscs/xyixuan/PDM/build-image/DockerfileCosmos -t costmos-tok /capstor/users/cscs/xyixuan/
 # 3. Create sqsh image: enroot import -o /iopsstor/scratch/cscs/asolergi/benchmarks/container/benchmarks.sqsh podman://localhost/benchmarks:latest
