@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --account=root
+#SBATCH --account=a-infra01
 #SBATCH --cpus-per-task=72
-#SBATCH --environment=/capstor/store/cscs/swissai/a06/containers/NGC-PyTorch/ngc_pt_jan.toml
-#SBATCH --error=/iopsstor/scratch/cscs/xyixuan/PDM/log/eval/lm-eval_%A.err
-#SBATCH --output=/iopsstor/scratch/cscs/xyixuan/PDM/log/eval/lm-eval_%A.out
+#SBATCH --environment=/iopsstor/scratch/cscs/ahernnde/ncg_new_v2.toml
+#SBATCH --error=/iopsstor/scratch/cscs/nirmiger/PDM/log/eval/lm-eval_%A.err
+#SBATCH --output=/iopsstor/scratch/cscs/nirmiger/PDM/log/eval/lm-eval_%A.out
 #SBATCH --gres=gpu:4
 #SBATCH --job-name=lm-eval
 #SBATCH --nodes=1
@@ -26,6 +26,6 @@ mkdir -p /iopsstor/scratch/cscs/$USER/PDM/log/eval
 
 # Execute the script inside the compute node using srun
 echo "Executing conversion and evaluation script on compute node..."
-srun /iopsstor/scratch/cscs/xyixuan/PDM/scripts/swissai_megatron/convert-and-lm-eval.sh "$EXPR_PATH"
+srun /iopsstor/scratch/cscs/$USER/PDM/scripts/swissai_megatron/convert-and-lm-eval.sh "$EXPR_PATH"
 
 echo "Job completed"

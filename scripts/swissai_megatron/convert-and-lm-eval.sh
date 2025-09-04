@@ -12,7 +12,7 @@ export PYTHONPATH=$MEGATRON_LM_DIR:$PYTHONPATH
 
 EXPR_PATH="$1"
 EXPR_NAME=$(basename ${EXPR_PATH})
-RES_PATH="/iopsstor/scratch/cscs/xyixuan/PDM/results/lm_eval/${EXPR_NAME}"
+RES_PATH="/iopsstor/scratch/cscs/$USER/PDM/results/lm_eval/${EXPR_NAME}"
 
 # Clear existing results directory if it exists
 if [ -d "${RES_PATH}" ]; then
@@ -39,9 +39,9 @@ if [ -d "${EXPR_PATH}/torch" ]; then
 else
     # Run the torch distributed to torch conversion
     echo "Converting torch distributed to torch..."
-    CUDA_DEVICE_MAX_CONNECTIONS=1 torchrun /iopsstor/scratch/cscs/xyixuan/PDM/src/convert/convert_torch_dist_to_torch.py \
+    CUDA_DEVICE_MAX_CONNECTIONS=1 torchrun /iopsstor/scratch/cscs/$USER/PDM/src/convert/convert_torch_dist_to_torch.py \
         --bf16 \
-        --load ${EXPR_PATH}/checkpoints \
+        --load ${EXPR_PATH}/checkpoints/3B \
         --ckpt-convert-save ${EXPR_PATH}
 
     # Check if the conversion was successful
@@ -51,7 +51,7 @@ else
     fi
 fi
 
-python /iopsstor/scratch/cscs/xyixuan/PDM/src/convert/convert_megatron_to_hf.py \
+python /iopsstor/scratch/cscs/$USER/PDM/src/convert/convert_megatron_to_hf.py \
    --experiment-path ${EXPR_PATH}
 
 # Check if the conversion was successful
@@ -67,7 +67,7 @@ pip install -e .
 
 # Then run your evaluation command
 accelerate launch -m lm_eval --model hf \
-   --model_args pretrained=${EXPR_PATH}/HF,tokenizer=meta-llama/Llama-3.1-8B-Instruct \
+   --model_args pretrained=${EXPR_PATH}/HF,tokenizer=meta-llama/Llama-3.2-3B \
    --tasks hellaswag,mmlu,winogrande,wikitext,arc_easy,arc_challenge,piqa,commonsense_qa \
    --batch_size 4 \
    --output_path ${RES_PATH}

@@ -58,7 +58,7 @@ def main():
         "no_load_rng": True,
         "no_load_optim": True,
         "no_save_optim": True,
-        "--untie-embeddings-and-output-weights": True,
+        "--untie-embeddings-and-output-weights": False,
         
         # Fake args for initialization
         "micro_batch_size": 1,
