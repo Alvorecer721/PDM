@@ -4,6 +4,8 @@ import numpy as np
 from pathlib import Path
 import re
 
+RATIO_PATTERN = re.compile(r'(\d\.\d{1,2})(?:i)?-(\d\.\d{1,2})(?:t)?')
+
 def extract_model_name(path):
     """Extract a short model name from the path."""
     p = Path(path)
@@ -12,12 +14,17 @@ def extract_model_name(path):
     if parent.startswith("__"):
         parent = p.parent.parent.name
 
-    # Try to find pattern like 0.4-0.6 or 1.0-0.0
-    match = re.search(r'(\d\.\d{1,2})-(\d\.\d{1,2})', parent)
+    # Try to find pattern like 0.4-0.6 or 0.6i-0.4t
+    match = RATIO_PATTERN.search(parent)
     if match:
-        return match.group(0)  # e.g., "0.4-0.6"
+        x, y = match.groups()
+        # Return in the format "xi-yt" if the original had i/t, else just x-y
+        if 'i' in parent or 't' in parent:
+            return f"{x}i-{y}t"
+        else:
+            return f"{x}-{y}"
     else:
-        return parent  # fallback
+        return parent  # fallback if no match
 
 def load_benchmarks(json_file):
     """Load benchmark results from a single JSON file."""
@@ -47,7 +54,7 @@ def load_benchmarks(json_file):
 
 def sort_files_by_config(files):
     def extract_ratio_key(path):
-        match = re.search(r'(\d\.\d{1,2})-(\d\.\d{1,2})', path)
+        match = RATIO_PATTERN.search(path)
         if match:
             alpha = float(match.group(1))
             beta = float(match.group(2))
@@ -100,13 +107,9 @@ def plot_multiple_models(json_files, output_file="llm_comparison.png"):
 if __name__ == "__main__":
     files = [
         "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/Llama-3.2-3B/__iopsstor__scratch__cscs__nirmiger__Llama-3.2-3B/results_2025-09-02T14-11-42.014991.json",
-        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-2n-8192sl-120gbsz-0.4-0.6/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-2n-8192sl-120gbsz-0.4-0.6__HF/results_2025-09-04T12-19-35.645805.json",
-        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-2n-8192sl-120gbsz-0.5-0.5/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-2n-8192sl-120gbsz-0.5-0.5__HF/results_2025-09-04T12-19-57.320606.json",
-        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-2n-8192sl-120gbsz-0.6-0.4/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-2n-8192sl-120gbsz-0.6-0.4__HF/results_2025-09-04T12-20-10.204845.json",
-        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-2n-8192sl-120gbsz-0.8-0.2/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-2n-8192sl-120gbsz-0.8-0.2__HF/results_2025-09-04T12-20-13.740250.json",
-        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-2n-8192sl-120gbsz-1.0-0.0/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-2n-8192sl-120gbsz-1.0-0.0__HF/results_2025-09-04T12-20-41.271584.json",
-        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-2n-8192sl-120gbsz-0.0-1.0/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-2n-8192sl-120gbsz-0.0-1.0__HF/results_2025-09-05T11-02-00.921162.json",
-        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-2n-8192sl-120gbsz-0.9-0.1/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-2n-8192sl-120gbsz-0.9-0.1__HF/results_2025-09-05T11-02-41.151412.json",
-        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-2n-8192sl-120gbsz-0.95-0.05/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-2n-8192sl-120gbsz-0.95-0.05__HF/results_2025-09-05T11-02-09.866610.json",
+        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t__HF/results_2025-09-15T09-57-15.632974.json",
+        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t__HF/results_2025-09-15T10-13-43.507556.json",
+        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000__HF/results_2025-09-15T09-59-25.371298.json",
+        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-2n-8192sl-120gbsz-0.9-0.1/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-2n-8192sl-120gbsz-0.9-0.1__HF/results_2025-09-05T11-02-41.151412.json"
     ]
-    plot_multiple_models(files, output_file="comparison.png")
+    plot_multiple_models(files, output_file="comparison_long.png")
