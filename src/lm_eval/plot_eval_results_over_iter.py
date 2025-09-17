@@ -47,7 +47,7 @@ def load_benchmarks(json_file):
 
     return accs, stderrs
 
-def plot_progress(json_files, output_file="training_progress.png"):
+def plot_progress(json_files, output_file="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/training_progress.png"):
     # Sort by iteration number
     parsed = [(extract_iteration(f), f) for f in json_files]
     for i, (it, f) in enumerate(parsed):
@@ -100,4 +100,4 @@ if __name__ == "__main__":
         "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000__HF/results_2025-09-15T09-59-25.371298.json",
         "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/Llama-3.2-3B/__iopsstor__scratch__cscs__nirmiger__Llama-3.2-3B/results_2025-09-02T14-11-42.014991.json",
     ]
-    plot_progress(files, output_file="training_progress.png")
+    plot_progress(files, output_file="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/training_progress_2.png")

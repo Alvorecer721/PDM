@@ -65,7 +65,7 @@ def sort_files_by_config(files):
     return sorted(files, key=extract_ratio_key)
 
 
-def plot_multiple_models(json_files, output_file="llm_comparison.png"):
+def plot_multiple_models(json_files, output_file="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/llm_comparison.png"):
     json_files = sort_files_by_config(json_files)
 
     all_labels = None
@@ -112,4 +112,4 @@ if __name__ == "__main__":
         "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000__HF/results_2025-09-15T09-59-25.371298.json",
         "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-2n-8192sl-120gbsz-0.9-0.1/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-2n-8192sl-120gbsz-0.9-0.1__HF/results_2025-09-05T11-02-41.151412.json"
     ]
-    plot_multiple_models(files, output_file="comparison_long.png")
+    plot_multiple_models(files, output_file="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/comparison_long_2.png")
