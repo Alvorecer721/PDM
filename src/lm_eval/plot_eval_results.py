@@ -18,9 +18,10 @@ def extract_model_name(path):
     match = RATIO_PATTERN.search(parent)
     if match:
         x, y = match.groups()
-        # Return in the format "xi-yt" if the original had i/t, else just x-y
+        x = float(x)*100
+        y = float(y)*100
         if 'i' in parent or 't' in parent:
-            return f"{x}image-{y}text"
+            return f"Pre-trained with {x}\\% image and {y}\\% text tokens"
         else:
             return f"{x}-{y}"
     else:
@@ -69,20 +70,25 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-def plot_multiple_models(json_files, output_file="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/llm_comparison_icml.png"):
-    # Set font to DejaVu Sans for better compatibility
-    sns.set_theme(style="whitegrid", font="DejaVu Sans", font_scale=1.2)
+def plot_multiple_models(json_files, output_file="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/llm_comparison_icml.pdf"):
+    # Set up LaTeX fonts and styling
+    plt.rc('text', usetex=True)  # Enable LaTeX rendering for text
+    plt.rc('font', family='serif')  # Set font to serif (LaTeX default)
     
-    # Update Matplotlib rcParams for consistent font and layout
+    sns.set_theme(style="whitegrid", font="serif", font_scale=1.5)  # Increased font scale for larger text
+
     plt.rcParams.update({
-        "axes.labelsize": 14,  # Axis labels size
-        "xtick.labelsize": 12,  # X tick labels size
-        "ytick.labelsize": 12,  # Y tick labels size
-        "legend.fontsize": 10,  # Reduce legend font size to make it more compact
-        "figure.figsize": (8, 4.5),  # Increase figure size to give more space to the plot
+        "axes.labelsize": 16,  # Increased axis label size
+        "xtick.labelsize": 14,  # Increased X tick label size
+        "ytick.labelsize": 14,  # Increased Y tick label size
+        "legend.fontsize": 12,  # Increased legend font size
+        "figure.figsize": (12, 6),  # Make the plot narrower (increase height if needed)
         "lines.linewidth": 2,  # Lines thickness
         "axes.linewidth": 1.0,  # Axis line thickness
-        "legend.title_fontsize": 11,  # Legend title size
+        "legend.title_fontsize": 14,  # Increased legend title size
+        "axes.titlesize": 18,  # Increased title size
+        "axes.titleweight": 'bold',  # Bold title
+        "font.family": "serif",  # Ensures consistent font across plots
     })
 
     # Sort the files by their config
@@ -109,7 +115,7 @@ def plot_multiple_models(json_files, output_file="/iopsstor/scratch/cscs/nirmige
     width = 0.8 / num_models  # Adjust bar width based on the number of models
 
     # Plot the bars
-    plt.figure(figsize=(8, 4.5))  # Larger figure size for better readability
+    plt.figure(figsize=(12, 6))  # Larger figure size for better readability
 
     # Use colorblind-friendly colors
     colors = sns.color_palette("colorblind", num_models)
@@ -120,26 +126,42 @@ def plot_multiple_models(json_files, output_file="/iopsstor/scratch/cscs/nirmige
         plt.bar(x + offset, accs, width, yerr=errs, capsize=4, label=model_names[i], color=colors[i])
 
     # Adjust axis labels and ticks
-    plt.xticks(x, all_labels, rotation=45, ha="right")
-    plt.ylabel("Accuracy", weight="bold")
+    plt.xticks(x, all_labels, rotation=45, ha="right", fontsize=14)
+    plt.ylabel(r"Accuracy", weight="bold", fontsize=16)
 
-    # Reduce the legend size and reposition it to avoid crowding
-    plt.legend(title="Model Variant", bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=10, title_fontsize=11)
+    # Place the legend inside the plot (bottom right) with semi-transparent background
+    plt.legend(
+        title=r"\textbf{Models}",
+        loc='lower right',  # Place the legend inside the plot at the bottom right
+        fontsize=10, 
+        title_fontsize=11,
+        frameon=True,  # Keep the frame for the legend
+        framealpha=0.7,  # Set transparency (0.0 is fully transparent, 1.0 is fully opaque)
+        ncol=1,  # One column, but broad
+        borderpad=1,  # Add padding around the legend box
+        labelspacing=1.5,  # Increase space between legend entries
+        handlelength=3,  # Increase length of the legend box handles
+        columnspacing=1.5  # Add more space between legend columns (if you had more columns)
+    )
+
+    # Add gridlines and increase the prominence of the axes
+    plt.grid(True, axis='y', linestyle='--', alpha=0.7)  # Light grid lines for better readability
 
     # Ensure the layout is tight and the plot is clean
     plt.tight_layout()
 
-    # Save the figure
-    plt.savefig(output_file, dpi=300, bbox_inches="tight")
+    # Save the figure as a PDF (better for LaTeX)
+    plt.savefig(output_file, dpi=300, bbox_inches="tight", format='pdf')
     plt.close()
 
     print(f"✅ Plot saved to {output_file}")
 
+
 if __name__ == "__main__":
     files = [
-        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/Llama-3.2-3B/__iopsstor__scratch__cscs__nirmiger__Llama-3.2-3B/results_2025-09-02T14-11-42.014991.json",
-        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t__HF/results_2025-09-15T09-57-15.632974.json",
-        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t__HF/results_2025-09-15T10-13-43.507556.json",
-        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000__HF/results_2025-09-15T09-59-25.371298.json",
+        "/Users/nicolairmiger/PDM/results/lm_eval/Llama-3.2-3B/__iopsstor__scratch__cscs__nirmiger__Llama-3.2-3B/results_2025-09-02T14-11-42.014991.json",
+        "/Users/nicolairmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t__HF/results_2025-09-15T09-57-15.632974.json",
+        "/Users/nicolairmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t__HF/results_2025-09-15T10-13-43.507556.json",
+        "/Users/nicolairmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000__HF/results_2025-09-15T09-59-25.371298.json",
     ]
-    plot_multiple_models(files, output_file="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/comparison_long_2.png")
+    plot_multiple_models(files, output_file="/Users/nicolairmiger/PDM/results/lm_eval/plots/comparison_long_2.pdf")
