@@ -47,7 +47,13 @@ def load_benchmarks(json_file):
 
     return accs, stderrs
 
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
 def plot_progress(json_files, output_file="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/training_progress.png"):
+    sns.set_theme(style="whitegrid", font_scale=1.1)  # Seaborn style setup
+
     # Sort by iteration number
     parsed = [(extract_iteration(f), f) for f in json_files]
     for i, (it, f) in enumerate(parsed):
@@ -61,29 +67,33 @@ def plot_progress(json_files, output_file="/iopsstor/scratch/cscs/nirmiger/PDM/r
 
     for it, f in parsed:
         accs, errs = load_benchmarks(f)
-        iterations.append(it)
+        iterations.append(it * 8192 * 120 * 0.9 / 1e9)  # Consumed image tokens (in billions)
         for name in accs:
             benchmark_history.setdefault(name, []).append(accs[name])
             benchmark_stderr.setdefault(name, []).append(errs[name])
 
     # Plot
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(14, 6))
     for name in benchmark_history:
         accs = np.array(benchmark_history[name])
         errs = np.array(benchmark_stderr[name])
-        plt.plot(iterations, accs, marker="o", label=name)
+        plt.plot(iterations, accs, marker="o", label=name, linewidth=2, markersize=6)
         plt.fill_between(iterations, accs - errs, accs + errs, alpha=0.2)
 
-    plt.xlabel("Training Iterations")
-    plt.ylabel("Accuracy")
-    plt.title("Benchmark Accuracy vs Training Iterations")
-    plt.legend(title="Benchmark", loc="lower right")  # 👈 place legend bottom right
-    plt.grid(True, linestyle="--", alpha=0.5)
+    plt.xlabel("Consumed Image Tokens (B)", fontsize=12, weight="bold")
+    plt.ylabel("Accuracy", fontsize=12, weight="bold")
+    plt.title("Benchmark Accuracy vs Consumed Image Tokens\n(0.9 Image - 0.1 Text Training)", fontsize=16, weight="bold")
+    plt.legend(title="Benchmark", loc="lower right", fontsize=10, title_fontsize=11)
+    plt.grid(True, linestyle="--", alpha=0.4)
+    plt.xticks(fontsize=10)
+    plt.yticks(fontsize=10)
+
     plt.tight_layout()
-    plt.savefig(output_file, dpi=300)
+    plt.savefig(output_file, dpi=300, bbox_inches="tight")
     plt.close()
 
     print(f"✅ Saved plot to {output_file}")
+
 
 
 if __name__ == "__main__":

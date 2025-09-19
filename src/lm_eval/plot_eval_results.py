@@ -20,7 +20,7 @@ def extract_model_name(path):
         x, y = match.groups()
         # Return in the format "xi-yt" if the original had i/t, else just x-y
         if 'i' in parent or 't' in parent:
-            return f"{x}i-{y}t"
+            return f"{x}image-{y}text"
         else:
             return f"{x}-{y}"
     else:
@@ -65,9 +65,30 @@ def sort_files_by_config(files):
     return sorted(files, key=extract_ratio_key)
 
 
-def plot_multiple_models(json_files, output_file="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/llm_comparison.png"):
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+def plot_multiple_models(json_files, output_file="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/llm_comparison_icml.png"):
+    # Set font to DejaVu Sans for better compatibility
+    sns.set_theme(style="whitegrid", font="DejaVu Sans", font_scale=1.2)
+    
+    # Update Matplotlib rcParams for consistent font and layout
+    plt.rcParams.update({
+        "axes.labelsize": 14,  # Axis labels size
+        "xtick.labelsize": 12,  # X tick labels size
+        "ytick.labelsize": 12,  # Y tick labels size
+        "legend.fontsize": 10,  # Reduce legend font size to make it more compact
+        "figure.figsize": (8, 4.5),  # Increase figure size to give more space to the plot
+        "lines.linewidth": 2,  # Lines thickness
+        "axes.linewidth": 1.0,  # Axis line thickness
+        "legend.title_fontsize": 11,  # Legend title size
+    })
+
+    # Sort the files by their config
     json_files = sort_files_by_config(json_files)
 
+    # Prepare data for plotting
     all_labels = None
     all_accuracies = []
     all_errors = []
@@ -82,27 +103,37 @@ def plot_multiple_models(json_files, output_file="/iopsstor/scratch/cscs/nirmige
         all_accuracies.append(accs)
         all_errors.append(errs)
 
-    # Plot grouped bars
+    # Create the x locations for each benchmark
     x = np.arange(len(all_labels))
     num_models = len(model_names)
-    width = 0.8 / num_models  # distribute total width of 0.8
+    width = 0.8 / num_models  # Adjust bar width based on the number of models
 
-    plt.figure(figsize=(16, 8))
+    # Plot the bars
+    plt.figure(figsize=(8, 4.5))  # Larger figure size for better readability
 
+    # Use colorblind-friendly colors
+    colors = sns.color_palette("colorblind", num_models)
+
+    # Plot each model's bars with error bars
     for i, (accs, errs) in enumerate(zip(all_accuracies, all_errors)):
         offset = (i - num_models / 2) * width + width / 2
-        plt.bar(x + offset, accs, width, yerr=errs, capsize=4, label=model_names[i])
+        plt.bar(x + offset, accs, width, yerr=errs, capsize=4, label=model_names[i], color=colors[i])
 
+    # Adjust axis labels and ticks
     plt.xticks(x, all_labels, rotation=45, ha="right")
-    plt.ylabel("Accuracy")
-    plt.title("LLM Benchmark Comparison (1B image tokens)")
-    plt.legend(title="Model Variant", bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.ylabel("Accuracy", weight="bold")
+
+    # Reduce the legend size and reposition it to avoid crowding
+    plt.legend(title="Model Variant", bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=10, title_fontsize=11)
+
+    # Ensure the layout is tight and the plot is clean
     plt.tight_layout()
 
-    plt.savefig(output_file, dpi=300)
+    # Save the figure
+    plt.savefig(output_file, dpi=300, bbox_inches="tight")
     plt.close()
-    print(f"✅ Plot saved to {output_file}")
 
+    print(f"✅ Plot saved to {output_file}")
 
 if __name__ == "__main__":
     files = [
@@ -110,6 +141,5 @@ if __name__ == "__main__":
         "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t__HF/results_2025-09-15T09-57-15.632974.json",
         "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t__HF/results_2025-09-15T10-13-43.507556.json",
         "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000__HF/results_2025-09-15T09-59-25.371298.json",
-        "/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/llama3-3b-2n-8192sl-120gbsz-0.9-0.1/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-2n-8192sl-120gbsz-0.9-0.1__HF/results_2025-09-05T11-02-41.151412.json"
     ]
     plot_multiple_models(files, output_file="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/comparison_long_2.png")
