@@ -69,7 +69,7 @@ pip install qwen_vl_utils
 
 # Then run your evaluation command
 accelerate launch --num_processes=4 -m lmms_eval \
-    --model llama_vision \
+    --model llama_emu3 \
     --model_args pretrained=${EXPR_PATH}/HF \
     --tasks ai2d,docvqa_val \
     --batch_size 1 \
