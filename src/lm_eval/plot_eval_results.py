@@ -1,6 +1,16 @@
+"""
+plot_eval_results.py:
+
+generate bar-plot comparing different models on different benchmarks.
+Specify the path to respective json_files (results of PDM eval) down below and run the script like this:
+    python -m lm_eval.plot_eval_results --output-path=[PATH_TO_RES_FILE] [--use-latex-text-renderer]
+"""
+
+import argparse
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 from pathlib import Path
 import re
 
@@ -66,19 +76,17 @@ def sort_files_by_config(files):
     return sorted(files, key=extract_ratio_key)
 
 
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
-
-def plot_multiple_models(json_files, output_file="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/llm_comparison_icml.pdf"):
-    # Set up LaTeX fonts and styling
-    plt.rc('text', usetex=True)  # Enable LaTeX rendering for text
-    plt.rc('font', family='serif')  # Set font to serif (LaTeX default)
+def plot_multiple_models(json_files: list, output_file: str, use_tex_text_renderer: bool = False):
+    if use_tex_text_renderer:
+        # Set up LaTeX fonts and styling
+        plt.rc('text', usetex=True)  # Enable LaTeX rendering for text
+        plt.rc('font', family='serif')  # Set font to serif (LaTeX default)
     
     sns.set_theme(style="whitegrid", font="serif", font_scale=1.5)  # Increased font scale for larger text
 
     plt.rcParams.update({
-        "axes.labelsize": 16,  # Increased axis label size
+        "axes.labelsize": 16,  # Increased axis label
+        # size
         "xtick.labelsize": 14,  # Increased X tick label size
         "ytick.labelsize": 14,  # Increased Y tick label size
         "legend.fontsize": 12,  # Increased legend font size
@@ -158,10 +166,16 @@ def plot_multiple_models(json_files, output_file="/iopsstor/scratch/cscs/nirmige
 
 
 if __name__ == "__main__":
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("--use-latex-text-renderer", action="store_true", help="Use LaTeX to render text in plots. Only works with local tex installation")
+    argparser.add_argument("--output-path", type=str, default="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/llm_comparison.pdf", help="Path to save the plot")
+    args = argparser.parse_args()
+
+    # Specify the paths to the JSON files that contain the benchmark results
     files = [
         "/Users/nicolairmiger/PDM/results/lm_eval/Llama-3.2-3B/__iopsstor__scratch__cscs__nirmiger__Llama-3.2-3B/results_2025-09-02T14-11-42.014991.json",
         "/Users/nicolairmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t__HF/results_2025-09-15T09-57-15.632974.json",
         "/Users/nicolairmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t__HF/results_2025-09-15T10-13-43.507556.json",
         "/Users/nicolairmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000__HF/results_2025-09-15T09-59-25.371298.json",
     ]
-    plot_multiple_models(files, output_file="/Users/nicolairmiger/PDM/results/lm_eval/plots/comparison_long_2.pdf")
+    plot_multiple_models(files, output_file=args.output_path, use_tex_text_renderer=args.use_latex_text_renderer)

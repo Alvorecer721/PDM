@@ -28,4 +28,26 @@ The `convert-and-lm-eval.sh` script will:
 
 👉 If instead of running `submit-lm-eval.slurm` you run `submit-mllm-eval.slurm`, the same process occurs, but evaluations are performed using the [lmms-eval](https://github.com/nirmiger/lmms-eval.git) repository for **vision-language benchmarks**.  
 
+### Plots
 
+To generate plots there are two options:
+
+1. Compare multiple models on common benchmarks (bar plot)
+   - What it does: Loads multiple lm-eval results JSON files and produces a grouped bar chart with accuracy (and stderr) per benchmark, one color per model.
+   - How to run:
+     ```bash
+     python -m lm_eval.plot_eval_results --output-path /path/to/plots/llm_comparison.pdf [--use-latex-text-renderer]
+     ```
+     Notes:
+     - Edit the script to list the result JSON files you want to compare.
+     - The optional --use-latex-text-renderer flag uses a local LaTeX installation for text rendering (if available).
+
+2. Track a single model over training/checkpoints (line plot)
+   - What it does: Recursively collects lm-eval results JSON files from one or more result folders and plots accuracy with uncertainty over training progress (consumed tokens) for several benchmarks.
+   - How to run:
+     ```bash
+     python -m lm_eval.plot_eval_results_over_iter --output-path /path/to/plots/training_progress.pdf [--use-latex-text-renderer]
+     ```
+     Notes:
+     - Edit the script to list the folders containing your evaluation results; JSON files inside will be picked up automatically.
+     - The horizontal axis reflects consumed tokens computed from checkpoint metadata and run settings embedded in paths; adjust assumptions in the script if your setup differs.
