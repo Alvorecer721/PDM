@@ -4,7 +4,7 @@
 #SBATCH --error=/iopsstor/scratch/cscs/%u/PDM/log/eval/lm-eval_%A.err
 #SBATCH --output=/iopsstor/scratch/cscs/%u/PDM/log/eval/lm-eval_%A.out
 #SBATCH --gres=gpu:4
-#SBATCH --job-name=lm-eval
+#SBATCH --job-name=cp-conversion
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=1:00:00
@@ -25,6 +25,6 @@ mkdir -p /iopsstor/scratch/cscs/$USER/PDM/log/eval
 
 # Execute the script inside the compute node using srun
 echo "Executing conversion and evaluation script on compute node..."
-srun /iopsstor/scratch/cscs/$USER/PDM/scripts/swissai_megatron/convert-and-lm-eval.sh "$EXPR_PATH"
+srun /iopsstor/scratch/cscs/$USER/PDM/scripts/swissai_megatron/convert.sh "$EXPR_PATH"
 
 echo "Job completed"
