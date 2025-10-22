@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Parameters
-#SBATCH --account=root
+#SBATCH --account=infra01
 #SBATCH --cpus-per-task=72
 #SBATCH --environment=data-pipeline
 #SBATCH --error=/iopsstor/scratch/cscs/xyixuan/PDM/log/preprocess/tokenise_%A_%a.err
@@ -37,9 +37,27 @@ rep=${reps[$SLURM_ARRAY_TASK_ID]}
 # sbatch --array=0-< length of reps - 1 > submissions/megatron-tokenisation.slurm
 # sbatch --array=0-11 submissions/megatron-tokenisation.slurm
 
+# export PYTHONPATH=/iopsstor/scratch/cscs/xyixuan/data-pipeline-pretrain/src:$PYTHONPATH
+#
+# srun --cpu-bind=none \
+#     --wait 60 \
+#     --unbuffered \
+#     bash -c "python3 examples/tokenize_megatron/preprocess_megatron.py --tokenizer-name-or-path meta-llama/Meta-Llama-3-8B --output-folder /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_${rep} --n-tasks 1 jsonl --dataset /iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_continue/rep_${rep}_text.jsonl"
+
+# NEW: OpenMathInstruct-2 tokenization
+# USAGE: sbatch submissions/megatron-tokenisation.slurm
+
 export PYTHONPATH=/iopsstor/scratch/cscs/xyixuan/data-pipeline-pretrain/src:$PYTHONPATH
 
 srun --cpu-bind=none \
     --wait 60 \
     --unbuffered \
-    bash -c "python3 examples/tokenize_megatron/preprocess_megatron.py --tokenizer-name-or-path meta-llama/Meta-Llama-3-8B --output-folder /iopsstor/scratch/cscs/xyixuan/dataset/sparse_gutenberg/rep_${rep} --n-tasks 1 jsonl --dataset /iopsstor/scratch/cscs/xyixuan/dataset/gutenberg_continue/rep_${rep}_text.jsonl"
+    bash -c "python3 /iopsstor/scratch/cscs/xyixuan/data-pipeline-pretrain/examples/tokenize_megatron/preprocess_megatron.py \
+        --tokenizer-name-or-path /capstor/store/cscs/swissai/infra01/MLLM/llama3_vision_instruct_emu3_tokenizer \
+        --output-folder /capstor/store/cscs/swissai/infra01/vision-datasets/text_openorca_tokenized \
+        --n-tasks 1 \
+        --no-add-special-tokens \
+        hf \
+        --dataset parquet \
+        --data-files /capstor/store/cscs/swissai/infra01/vision-datasets/text_openorca_formatted.parquet \
+        --column text"
