@@ -3,13 +3,14 @@ plot_eval_results.py:
 
 generate bar-plot comparing different models on different benchmarks.
 Specify the path to respective json_files (results of PDM eval) down below and run the script like this:
-    python -m lm_eval.plot_eval_results --output-path=[PATH_TO_RES_FILE] [--use-latex-text-renderer] [--title="Custom Title"] [--no-sort]
+    python -m lm_eval.plot_eval_results --output-path=[PATH_TO_RES_FILE] [--use-latex-text-renderer] [--title="Custom Title"] [--no-sort] [--format=png]
 
 You can specify files in two ways:
     1. Just file paths: The model name will be extracted automatically from the path
     2. Tuples of (file_path, display_name): Use custom display names in the legend
 
 By default, files are sorted by their ratio pattern (e.g., 0.6i-0.4t). Use --no-sort to preserve the order as specified.
+Output format defaults to PDF. Use --format to specify png, jpg, svg, or other matplotlib-supported formats.
 """
 
 import argparse
@@ -107,7 +108,7 @@ def sort_files_by_config(files):
     return sorted(files, key=extract_ratio_key)
 
 
-def plot_multiple_models(json_files: list, output_file: str, use_tex_text_renderer: bool = False, title: str = None, sort_files: bool = True):
+def plot_multiple_models(json_files: list, output_file: str, use_tex_text_renderer: bool = False, title: str = None, sort_files: bool = True, output_format: str = 'pdf'):
     """
     Plot benchmark results for multiple models.
 
@@ -117,6 +118,7 @@ def plot_multiple_models(json_files: list, output_file: str, use_tex_text_render
         use_tex_text_renderer: Whether to use LaTeX for text rendering
         title: Custom title for the plot (default: None, no title shown)
         sort_files: Whether to sort files by their ratio pattern (default: True)
+        output_format: Output file format (default: 'pdf'). Supports 'png', 'jpg', 'svg', etc.
     """
     if use_tex_text_renderer:
         # Set up LaTeX fonts and styling
@@ -190,10 +192,12 @@ def plot_multiple_models(json_files: list, output_file: str, use_tex_text_render
         plt.title(title, fontsize=18, weight='bold', pad=20)
 
     # Place the legend inside the plot (bottom right) with semi-transparent background
+    # Use LaTeX formatting for legend title only if LaTeX renderer is active
+    legend_title = r"\textbf{Models}" if use_tex_text_renderer else "Models"
     plt.legend(
-        title=r"\textbf{Models}",
+        title=legend_title,
         loc='lower right',  # Place the legend inside the plot at the bottom right
-        fontsize=10, 
+        fontsize=10,
         title_fontsize=11,
         frameon=True,  # Keep the frame for the legend
         framealpha=0.7,  # Set transparency (0.0 is fully transparent, 1.0 is fully opaque)
@@ -210,8 +214,8 @@ def plot_multiple_models(json_files: list, output_file: str, use_tex_text_render
     # Ensure the layout is tight and the plot is clean
     plt.tight_layout()
 
-    # Save the figure as a PDF (better for LaTeX)
-    plt.savefig(output_file, dpi=300, bbox_inches="tight", format='pdf')
+    # Save the figure in the specified format
+    plt.savefig(output_file, dpi=300, bbox_inches="tight", format=output_format)
     plt.close()
 
     print(f"✅ Plot saved to {output_file}")
@@ -223,6 +227,7 @@ if __name__ == "__main__":
     argparser.add_argument("--output-path", type=str, default="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/llm_comparison.pdf", help="Path to save the plot")
     argparser.add_argument("--title", type=str, default=None, help="Custom title for the plot (optional)")
     argparser.add_argument("--no-sort", action="store_true", help="Disable automatic sorting of files by ratio pattern (preserves input order)")
+    argparser.add_argument("--format", type=str, default="pdf", help="Output file format (default: pdf). Supports png, jpg, svg, etc.")
     args = argparser.parse_args()
 
     # Specify the paths to the JSON files that contain the benchmark results
@@ -247,5 +252,6 @@ if __name__ == "__main__":
         output_file=args.output_path,
         use_tex_text_renderer=args.use_latex_text_renderer,
         title=args.title,
-        sort_files=not args.no_sort
+        sort_files=not args.no_sort,
+        output_format=args.format
     )
