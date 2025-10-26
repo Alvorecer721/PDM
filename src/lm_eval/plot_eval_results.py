@@ -191,28 +191,37 @@ def plot_multiple_models(json_files: list, output_file: str, use_tex_text_render
     if title:
         plt.title(title, fontsize=18, weight='bold', pad=20)
 
-    # Place the legend inside the plot (bottom right) with semi-transparent background
-    # Use LaTeX formatting for legend title only if LaTeX renderer is active
-    legend_title = r"\textbf{Models}" if use_tex_text_renderer else "Models"
-    plt.legend(
-        title=legend_title,
-        loc='lower right',  # Place the legend inside the plot at the bottom right
-        fontsize=10,
-        title_fontsize=11,
-        frameon=True,  # Keep the frame for the legend
-        framealpha=0.7,  # Set transparency (0.0 is fully transparent, 1.0 is fully opaque)
-        ncol=1,  # One column, but broad
-        borderpad=1,  # Add padding around the legend box
-        labelspacing=1.5,  # Increase space between legend entries
-        handlelength=3,  # Increase length of the legend box handles
-        columnspacing=1.5  # Add more space between legend columns (if you had more columns)
-    )
-
     # Add gridlines and increase the prominence of the axes
     plt.grid(True, axis='y', linestyle='--', alpha=0.7)  # Light grid lines for better readability
 
+    # Place the legend below the plot, outside the chart area
+    # Use LaTeX formatting for legend title only if LaTeX renderer is active
+    legend_title = r"\textbf{Models}" if use_tex_text_renderer else "Models"
+
+    # Determine number of columns based on number of models (max 4 columns)
+    ncol = min(num_models, 4)
+
+    plt.legend(
+        title=legend_title,
+        loc='upper center',  # Anchor point
+        bbox_to_anchor=(0.5, -0.15),  # Place below the x-axis
+        fontsize=10,
+        title_fontsize=11,
+        frameon=True,
+        framealpha=0.9,
+        ncol=ncol,  # Multiple columns to save vertical space
+        borderpad=1,
+        labelspacing=0.5,
+        handlelength=2,
+        columnspacing=1.5,
+        fancybox=True,
+        shadow=True
+    )
+
     # Ensure the layout is tight and the plot is clean
+    # Add extra space at bottom for legend
     plt.tight_layout()
+    plt.subplots_adjust(bottom=0.25 + (0.03 * ((num_models - 1) // ncol)))
 
     # Save the figure in the specified format
     plt.savefig(output_file, dpi=300, bbox_inches="tight", format=output_format)
