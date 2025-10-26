@@ -184,7 +184,7 @@ def plot_multiple_models(json_files: list, output_file: str, use_tex_text_render
         plt.bar(x + offset, accs, width, yerr=errs, capsize=4, label=model_names[i], color=colors[i])
 
     # Adjust axis labels and ticks
-    plt.xticks(x, all_labels, rotation=45, ha="right", fontsize=14)
+    plt.xticks(x, all_labels, rotation=0, ha="center", fontsize=14)
     plt.ylabel(r"Accuracy", weight="bold", fontsize=16)
 
     # Add title if provided
