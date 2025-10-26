@@ -3,7 +3,13 @@ plot_eval_results.py:
 
 generate bar-plot comparing different models on different benchmarks.
 Specify the path to respective json_files (results of PDM eval) down below and run the script like this:
-    python -m lm_eval.plot_eval_results --output-path=[PATH_TO_RES_FILE] [--use-latex-text-renderer]
+    python -m lm_eval.plot_eval_results --output-path=[PATH_TO_RES_FILE] [--use-latex-text-renderer] [--title="Custom Title"] [--no-sort]
+
+You can specify files in two ways:
+    1. Just file paths: The model name will be extracted automatically from the path
+    2. Tuples of (file_path, display_name): Use custom display names in the legend
+
+By default, files are sorted by their ratio pattern (e.g., 0.6i-0.4t). Use --no-sort to preserve the order as specified.
 """
 
 import argparse
@@ -16,8 +22,25 @@ import re
 
 RATIO_PATTERN = re.compile(r'(\d\.\d{1,2})(?:i)?-(\d\.\d{1,2})(?:t)?')
 
-def extract_model_name(path):
-    """Extract a short model name from the path."""
+def extract_model_name(path_or_tuple):
+    """
+    Extract a short model name from the path or tuple.
+
+    Args:
+        path_or_tuple: Either a file path string, or a tuple of (file_path, display_name)
+
+    Returns:
+        tuple: (file_path, display_name)
+    """
+    # Check if it's a tuple with a custom name
+    if isinstance(path_or_tuple, tuple):
+        if len(path_or_tuple) == 2:
+            return path_or_tuple[0], path_or_tuple[1]
+        else:
+            raise ValueError(f"Tuple must have exactly 2 elements (path, name), got {len(path_or_tuple)}")
+
+    # Otherwise, extract name from path
+    path = path_or_tuple
     p = Path(path)
     parent = p.parent.name
 
@@ -31,11 +54,13 @@ def extract_model_name(path):
         x = float(x)*100
         y = float(y)*100
         if 'i' in parent or 't' in parent:
-            return f"Pre-trained with {x}\\% image and {y}\\% text tokens"
+            display_name = f"Pre-trained with {x}\\% image and {y}\\% text tokens"
         else:
-            return f"{x}-{y}"
+            display_name = f"{x}-{y}"
     else:
-        return parent  # fallback if no match
+        display_name = parent  # fallback if no match
+
+    return path, display_name
 
 def load_benchmarks(json_file):
     """Load benchmark results from a single JSON file."""
@@ -64,7 +89,13 @@ def load_benchmarks(json_file):
     return labels, accuracies, errors
 
 def sort_files_by_config(files):
-    def extract_ratio_key(path):
+    def extract_ratio_key(path_or_tuple):
+        # Extract path from tuple if needed
+        if isinstance(path_or_tuple, tuple):
+            path = path_or_tuple[0]
+        else:
+            path = path_or_tuple
+
         match = RATIO_PATTERN.search(path)
         if match:
             alpha = float(match.group(1))
@@ -76,12 +107,22 @@ def sort_files_by_config(files):
     return sorted(files, key=extract_ratio_key)
 
 
-def plot_multiple_models(json_files: list, output_file: str, use_tex_text_renderer: bool = False):
+def plot_multiple_models(json_files: list, output_file: str, use_tex_text_renderer: bool = False, title: str = None, sort_files: bool = True):
+    """
+    Plot benchmark results for multiple models.
+
+    Args:
+        json_files: List of file paths (str) or tuples of (file_path, display_name)
+        output_file: Path to save the output plot
+        use_tex_text_renderer: Whether to use LaTeX for text rendering
+        title: Custom title for the plot (default: None, no title shown)
+        sort_files: Whether to sort files by their ratio pattern (default: True)
+    """
     if use_tex_text_renderer:
         # Set up LaTeX fonts and styling
         plt.rc('text', usetex=True)  # Enable LaTeX rendering for text
         plt.rc('font', family='serif')  # Set font to serif (LaTeX default)
-    
+
     sns.set_theme(style="whitegrid", font="serif", font_scale=1.5)  # Increased font scale for larger text
 
     plt.rcParams.update({
@@ -99,16 +140,23 @@ def plot_multiple_models(json_files: list, output_file: str, use_tex_text_render
         "font.family": "serif",  # Ensures consistent font across plots
     })
 
-    # Sort the files by their config
-    json_files = sort_files_by_config(json_files)
+    # Sort the files by their config if requested
+    if sort_files:
+        json_files = sort_files_by_config(json_files)
 
-    # Prepare data for plotting
+    # Prepare data for plotting - extract paths and names
     all_labels = None
     all_accuracies = []
     all_errors = []
-    model_names = [extract_model_name(f) for f in json_files]
+    file_paths = []
+    model_names = []
 
-    for jf in json_files:
+    for f in json_files:
+        path, name = extract_model_name(f)
+        file_paths.append(path)
+        model_names.append(name)
+
+    for jf in file_paths:
         labels, accs, errs = load_benchmarks(jf)
         if all_labels is None:
             all_labels = labels
@@ -136,6 +184,10 @@ def plot_multiple_models(json_files: list, output_file: str, use_tex_text_render
     # Adjust axis labels and ticks
     plt.xticks(x, all_labels, rotation=45, ha="right", fontsize=14)
     plt.ylabel(r"Accuracy", weight="bold", fontsize=16)
+
+    # Add title if provided
+    if title:
+        plt.title(title, fontsize=18, weight='bold', pad=20)
 
     # Place the legend inside the plot (bottom right) with semi-transparent background
     plt.legend(
@@ -169,13 +221,31 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument("--use-latex-text-renderer", action="store_true", help="Use LaTeX to render text in plots. Only works with local tex installation")
     argparser.add_argument("--output-path", type=str, default="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/llm_comparison.pdf", help="Path to save the plot")
+    argparser.add_argument("--title", type=str, default=None, help="Custom title for the plot (optional)")
+    argparser.add_argument("--no-sort", action="store_true", help="Disable automatic sorting of files by ratio pattern (preserves input order)")
     args = argparser.parse_args()
 
     # Specify the paths to the JSON files that contain the benchmark results
+    # You can use either:
+    # 1. Plain file paths (names will be auto-extracted):
     files = [
         "/Users/nicolairmiger/PDM/results/lm_eval/Llama-3.2-3B/__iopsstor__scratch__cscs__nirmiger__Llama-3.2-3B/results_2025-09-02T14-11-42.014991.json",
         "/Users/nicolairmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t__HF/results_2025-09-15T09-57-15.632974.json",
         "/Users/nicolairmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t__HF/results_2025-09-15T10-13-43.507556.json",
         "/Users/nicolairmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000__HF/results_2025-09-15T09-59-25.371298.json",
     ]
-    plot_multiple_models(files, output_file=args.output_path, use_tex_text_renderer=args.use_latex_text_renderer)
+
+    # 2. Or tuples of (file_path, custom_display_name):
+    # files = [
+    #     ("/path/to/model1.json", "Baseline Model"),
+    #     ("/path/to/model2.json", "Fine-tuned Model"),
+    #     ("/path/to/model3.json", "Custom Architecture"),
+    # ]
+
+    plot_multiple_models(
+        files,
+        output_file=args.output_path,
+        use_tex_text_renderer=args.use_latex_text_renderer,
+        title=args.title,
+        sort_files=not args.no_sort
+    )
