@@ -1,4 +1,12 @@
 #!/bin/bash
+
+# Clones lm-eval if not exists to scratch, updates the repo and installs it.
+# Converts to torch dist and HF checkpoints if not already done.
+# Finally runs lm-eval on the converted HF model.
+# ATTENTION: 
+# this script should be run inside computing node with:
+# --environment=/capstor/store/cscs/swissai/a06/containers/NGC-PyTorch/ngc_pt_jan.toml
+
 if [ "$#" -ne 1 ]; then
     echo "ERROR: Please provide experiment path"
     echo "Usage: $0 /path/to/experiment/directory"
@@ -66,12 +74,8 @@ cd "$EVAL_DIR"
 pip install -e .
 
 # Then run your evaluation command
-accelerate launch -m lm_eval --model hf \
+HF_DATASETS_OFFLINE=1 accelerate launch -m lm_eval --model hf \
    --model_args pretrained=${EXPR_PATH}/HF,tokenizer=meta-llama/Llama-3.2-3B \
    --tasks hellaswag,mmlu,winogrande,wikitext,arc_easy,arc_challenge,piqa,commonsense_qa \
    --batch_size 4 \
    --output_path ${RES_PATH}
-
-# ATTENTION: 
-# this script should be run inside computing node with:
-# --environment=/capstor/store/cscs/swissai/a06/containers/NGC-PyTorch/ngc_pt_jan.toml

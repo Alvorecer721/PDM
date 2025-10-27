@@ -1,4 +1,12 @@
 #!/bin/bash
+
+# Clones llms-eval if not exists to scratch, updates the repo and installs it.
+# Converts to torch dist and HF checkpoints if not already done.
+# Finally runs lm-eval on the converted HF model.
+# ATTENTION: 
+# this script should be run inside computing node with:
+# --environment=/iopsstor/scratch/cscs/ahernnde/ncg_new_v2.toml
+
 if [ "$#" -ne 1 ]; then
     echo "ERROR: Please provide experiment path"
     echo "Usage: $0 /path/to/experiment/directory"
@@ -74,7 +82,3 @@ accelerate launch --num_processes=4 -m lmms_eval \
     --tasks ai2d,docvqa_val \
     --batch_size 1 \
     --output_path ${RES_PATH}
-
-# ATTENTION: 
-# this script should be run inside computing node with:
-# --environment=/iopsstor/scratch/cscs/ahernnde/ncg_new_v2.toml
