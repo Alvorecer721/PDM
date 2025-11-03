@@ -7,7 +7,7 @@
 #SBATCH --job-name=lm-eval
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=1:00:00
+#SBATCH --time=12:00:00
 
 set -e  # Exit immediately if any command fails
 set -x  # Print commands for debugging
@@ -15,8 +15,9 @@ set -x  # Print commands for debugging
 # Default values
 DEFAULT_TOKENIZER="meta-llama/Llama-3.2-3B"
 DEFAULT_TASKS="hellaswag,mmlu,winogrande,wikitext,arc_easy,arc_challenge,piqa,commonsense_qa"
-DEFAULT_INSTRUCT_TASKS="mmlu,gsm8k,ifeval,truthfulqa_mc2"
-DEFAULT_BATCH_SIZE=4
+DEFAULT_INSTRUCT_TASKS="mmlu,gsm8k,ifeval,truthfulqa_mc2,bbh,hellaswag" # mbpp executes code, so not run for now
+DEFAULT_INSTRUCT_TOKENIZER="/capstor/store/cscs/swissai/infra01/MLLM/llama3_vision_instruct_emu3_tokenizer"
+DEFAULT_BATCH_SIZE="16"
 DEFAULT_MAX_LENGTH=""
 DEFAULT_APPLY_CHAT_TEMPLATE="false"
 DEFAULT_OFFLINE_DATASETS="true"
@@ -64,6 +65,7 @@ while [[ $# -gt 0 ]]; do
             INSTRUCT_MODE="true"
             TASKS="${DEFAULT_INSTRUCT_TASKS}"
             APPLY_CHAT_TEMPLATE="true"
+            TOKENIZER="${DEFAULT_INSTRUCT_TOKENIZER}"
             shift
             ;;
         --batch-size)
@@ -130,6 +132,6 @@ fi
 
 # Execute the script inside the compute node using srun
 echo "Executing conversion and evaluation script on compute node..."
-srun /iopsstor/scratch/cscs/$USER/PDM/scripts/swissai_megatron/convert-and-lm-eval.sh "$EVAL_ARGS"
+srun /iopsstor/scratch/cscs/$USER/PDM/scripts/swissai_megatron/convert-and-lm-eval.sh $EVAL_ARGS
 
 echo "Job completed"
