@@ -10,7 +10,7 @@
 # Default values
 DEFAULT_TOKENIZER="meta-llama/Llama-3.2-3B"
 DEFAULT_TASKS="hellaswag,mmlu,winogrande,wikitext,arc_easy,arc_challenge,piqa,commonsense_qa"
-DEFAULT_BATCH_SIZE=4
+DEFAULT_BATCH_SIZE="16"
 DEFAULT_MAX_LENGTH=""  # Empty means no max_length constraint
 DEFAULT_APPLY_CHAT_TEMPLATE="false"
 DEFAULT_OFFLINE_DATASETS="true"
@@ -92,7 +92,6 @@ echo "Max length:           ${MAX_LENGTH:-no limit}"
 echo "Apply chat template:  ${APPLY_CHAT_TEMPLATE}"
 echo "Offline datasets:     ${OFFLINE_DATASETS}"
 echo "Num GPU:              ${NUM_GPUS}"
-echo "Global Batch Size     $((NUM_GPUS * BATCH_SIZE))"
 echo "========================================"
 echo ""
 
@@ -138,13 +137,33 @@ echo "📦 Setting up lm-eval package..."
 cd "$EVAL_DIR" || exit
 pip install -e .
 
+# Install optional dependencies for each task
+echo "📦 Installing optional task dependencies..."
+IFS=',' read -ra TASK_ARRAY <<< "$TASKS"
+for task in "${TASK_ARRAY[@]}"; do
+    # Remove any whitespace
+    task=$(echo "$task" | xargs)
+    echo "  Attempting to install dependencies for task: $task"
+
+    # Try to install, but don't fail if extras don't exist
+    if pip install -e ".[$task]" 2>&1 | grep -q "No extras are defined"; then
+        echo "    ℹ️  No optional dependencies defined for '$task'"
+    elif [ ${PIPESTATUS[0]} -eq 0 ]; then
+        echo "    ✓ Installed dependencies for '$task'"
+    else
+        echo "    ⚠️  Could not install dependencies for '$task' (may not exist)"
+    fi
+done
+echo "📦 Task dependency installation complete"
+
 # Build model_args
 MODEL_ARGS="pretrained=${EXPR_PATH}/HF,tokenizer=${TOKENIZER}"
 if [ -n "$MAX_LENGTH" ]; then
     MODEL_ARGS="${MODEL_ARGS},max_length=${MAX_LENGTH}"
 fi
+APPLY_CHAT=""
 if [ "$APPLY_CHAT_TEMPLATE" = "true" ]; then
-    MODEL_ARGS="${MODEL_ARGS},apply_chat_template=true"
+    APPLY_CHAT="--apply_chat_template --fewshot_as_multiturn"
 fi
 
 # Run evaluation command
@@ -152,10 +171,11 @@ echo "Running LM evaluation..."
 # Conditionally set offline mode
 [ "$OFFLINE_DATASETS" = "true" ] && export HF_DATASETS_OFFLINE=1
 
-accelerate launch --num_processes="${NUM_GPUS}" -m lm_eval --model hf \
+accelerate launch -m lm_eval --model hf \
    --model_args "${MODEL_ARGS}" \
    --tasks "${TASKS}" \
    --batch_size "${BATCH_SIZE}" \
-   --output_path "${RES_PATH}"
+   --output_path "${RES_PATH}" \
+   ${APPLY_CHAT}
 
 echo "Evaluation completed. Results saved to: ${RES_PATH}"
