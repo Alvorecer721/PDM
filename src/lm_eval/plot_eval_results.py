@@ -3,7 +3,7 @@ plot_eval_results.py:
 
 generate bar-plot comparing different models on different benchmarks.
 Specify the path to respective json_files (results of PDM eval) down below and run the script like this:
-    python -m lm_eval.plot_eval_results --output-path=[PATH_TO_RES_FILE] [--use-latex-text-renderer] [--title="Custom Title"] [--no-sort] [--format=png]
+    python -m lm_eval.plot_eval_results --output-path=[PATH_TO_RES_FILE] [--use-latex-text-renderer] [--title="Custom Title"] [--no-sort] [--format=png] [--instruct-bench]
 
 You can specify files in two ways:
     1. Just file paths: The model name will be extracted automatically from the path
@@ -11,6 +11,10 @@ You can specify files in two ways:
 
 By default, files are sorted by their ratio pattern (e.g., 0.6i-0.4t). Use --no-sort to preserve the order as specified.
 Output format defaults to PDF. Use --format to specify png, jpg, svg, or other matplotlib-supported formats.
+
+Benchmark sets:
+    - Default: arc_challenge, arc_easy, hellaswag, piqa, winogrande
+    - Instruct (--instruct-bench): bbh, mmlu, hellaswag, gsm8k, truthfulqa_mc2, ifeval
 """
 
 import argparse
@@ -22,6 +26,25 @@ from pathlib import Path
 import re
 
 RATIO_PATTERN = re.compile(r'(\d\.\d{1,2})(?:i)?-(\d\.\d{1,2})(?:t)?')
+
+# Benchmark configurations: (benchmark_key, metric_key, stderr_key)
+DEFAULT_BENCHMARKS = {
+    "arc_challenge": ("acc,none", "acc_stderr,none"),
+    "arc_easy": ("acc,none", "acc_stderr,none"),
+    "hellaswag": ("acc,none", "acc_stderr,none"),
+    "piqa": ("acc,none", "acc_stderr,none"),
+    "winogrande": ("acc,none", "acc_stderr,none"),
+}
+
+INSTRUCT_BENCHMARKS = {
+    "bbh": ("exact_match,get-answer", "exact_match_stderr,get-answer"),
+    "mmlu": ("acc,none", "acc_stderr,none"),
+    "hellaswag": ("acc,none", "acc_stderr,none"),
+    "gsm8k": ("exact_match,strict-match", "exact_match_stderr,strict-match"),
+    "truthfulqa_mc2": ("acc,none", "acc_stderr,none"),
+    "ifeval_prompt": ("prompt_level_strict_acc,none", "prompt_level_strict_acc_stderr,none"),
+    "ifeval_instruct": ("inst_level_strict_acc,none", "inst_level_strict_acc_stderr,none"),
+}
 
 def extract_model_name(path_or_tuple):
     """
@@ -63,25 +86,39 @@ def extract_model_name(path_or_tuple):
 
     return path, display_name
 
-def load_benchmarks(json_file):
-    """Load benchmark results from a single JSON file."""
+def load_benchmarks(json_file, benchmark_config=None):
+    """Load benchmark results from a single JSON file.
+
+    Args:
+        json_file: Path to the JSON results file
+        benchmark_config: Dict mapping benchmark names to (metric_key, stderr_key) tuples.
+                         If None, uses DEFAULT_BENCHMARKS.
+
+    Returns:
+        tuple: (labels, accuracies, errors) lists
+    """
+    if benchmark_config is None:
+        benchmark_config = DEFAULT_BENCHMARKS
+
     with open(json_file, "r") as f:
         data = json.load(f)
 
     results = data["results"]
 
-    benchmarks = {
-        "arc_challenge": results["arc_challenge"],
-        "arc_easy": results["arc_easy"],
-        "hellaswag": results["hellaswag"],
-        "piqa": results["piqa"],
-        "winogrande": results["winogrande"],
-    }
-
     labels, accuracies, errors = [], [], []
-    for name, vals in benchmarks.items():
-        acc = vals.get("acc,none")
-        stderr = vals.get("acc_stderr,none", 0.0)
+    for name, (metric_key, stderr_key) in benchmark_config.items():
+        if name not in results:
+            print(f"Warning: Benchmark '{name}' not found in {json_file}, skipping.")
+            continue
+
+        vals = results[name]
+        acc = vals.get(metric_key)
+        stderr = vals.get(stderr_key, 0.0)
+
+        # Handle "N/A" stderr values
+        if stderr == "N/A":
+            stderr = 0.0
+
         if acc is not None:
             labels.append(vals.get("alias", name).strip())
             accuracies.append(acc)
@@ -108,7 +145,7 @@ def sort_files_by_config(files):
     return sorted(files, key=extract_ratio_key)
 
 
-def plot_multiple_models(json_files: list, output_file: str, use_tex_text_renderer: bool = False, title: str = None, sort_files: bool = True, output_format: str = 'pdf'):
+def plot_multiple_models(json_files: list, output_file: str, use_tex_text_renderer: bool = False, title: str = None, sort_files: bool = True, output_format: str = 'pdf', benchmark_config=None):
     """
     Plot benchmark results for multiple models.
 
@@ -119,6 +156,8 @@ def plot_multiple_models(json_files: list, output_file: str, use_tex_text_render
         title: Custom title for the plot (default: None, no title shown)
         sort_files: Whether to sort files by their ratio pattern (default: True)
         output_format: Output file format (default: 'pdf'). Supports 'png', 'jpg', 'svg', etc.
+        benchmark_config: Dict mapping benchmark names to (metric_key, stderr_key) tuples.
+                         If None, uses DEFAULT_BENCHMARKS.
     """
     if use_tex_text_renderer:
         # Set up LaTeX fonts and styling
@@ -159,7 +198,7 @@ def plot_multiple_models(json_files: list, output_file: str, use_tex_text_render
         model_names.append(name)
 
     for jf in file_paths:
-        labels, accs, errs = load_benchmarks(jf)
+        labels, accs, errs = load_benchmarks(jf, benchmark_config)
         if all_labels is None:
             all_labels = labels
         else:
@@ -237,7 +276,11 @@ if __name__ == "__main__":
     argparser.add_argument("--title", type=str, default=None, help="Custom title for the plot (optional)")
     argparser.add_argument("--no-sort", action="store_true", help="Disable automatic sorting of files by ratio pattern (preserves input order)")
     argparser.add_argument("--format", type=str, default="pdf", help="Output file format (default: pdf). Supports png, jpg, svg, etc.")
+    argparser.add_argument("--instruct-bench", action="store_true", help="Use instruct benchmarks (bbh, mmlu, hellaswag, gsm8k, truthfulqa_mc2, ifeval) instead of default benchmarks")
     args = argparser.parse_args()
+
+    # Select benchmark configuration based on flag
+    benchmark_config = INSTRUCT_BENCHMARKS if args.instruct_bench else DEFAULT_BENCHMARKS
 
     # Specify the paths to the JSON files that contain the benchmark results
     # You can use either:
@@ -262,5 +305,6 @@ if __name__ == "__main__":
         use_tex_text_renderer=args.use_latex_text_renderer,
         title=args.title,
         sort_files=not args.no_sort,
-        output_format=args.format
+        output_format=args.format,
+        benchmark_config=benchmark_config
     )
