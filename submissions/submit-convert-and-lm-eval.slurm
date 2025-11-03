@@ -24,8 +24,12 @@ DEFAULT_OFFLINE_DATASETS="true"
 
 # Parse arguments
 if [ "$#" -lt 1 ]; then
-    echo "Error: No experiment path provided!"
-    echo "Usage: sbatch $0 /path/to/experiment/directory [OPTIONS]"
+    echo "Error: No experiment path or HuggingFace model identifier provided!"
+    echo "Usage: sbatch $0 <experiment_path|hf_model_id> [OPTIONS]"
+    echo ""
+    echo "Examples:"
+    echo "  sbatch $0 /path/to/megatron/experiment"
+    echo "  sbatch $0 meta-llama/Llama-3.2-3B --instruct"
     echo ""
     echo "Options:"
     echo "  --tokenizer TOKENIZER         Tokenizer to use (default: ${DEFAULT_TOKENIZER})"

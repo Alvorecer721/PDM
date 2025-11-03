@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Clones lm-eval if not exists to scratch, updates the repo and installs it.
-# Converts to torch dist and HF checkpoints if not already done.
-# Finally runs lm-eval on the converted HF model.
+# For local Megatron checkpoints: converts to torch dist and HF checkpoints if not already done.
+# For HuggingFace model identifiers: skips conversion and uses model directly from HF Hub.
+# Finally runs lm-eval on the model.
 # ATTENTION:
 # this script should be run inside computing node with:
 # --environment=/capstor/store/cscs/swissai/a06/containers/NGC-PyTorch/ngc_pt_jan.toml
@@ -17,8 +18,12 @@ DEFAULT_OFFLINE_DATASETS="true"
 
 # Parse arguments
 if [ "$#" -lt 1 ]; then
-    echo "ERROR: Please provide experiment path"
-    echo "Usage: $0 /path/to/experiment/directory [OPTIONS]"
+    echo "ERROR: Please provide experiment path or HuggingFace model identifier"
+    echo "Usage: $0 <experiment_path|hf_model_id> [OPTIONS]"
+    echo ""
+    echo "Examples:"
+    echo "  $0 /path/to/megatron/experiment"
+    echo "  $0 meta-llama/Llama-3.2-3B --instruct"
     echo ""
     echo "Options:"
     echo "  --tokenizer TOKENIZER         Tokenizer to use (default: ${DEFAULT_TOKENIZER})"
@@ -80,11 +85,28 @@ NUM_GPUS=$(echo "$CUDA_VISIBLE_DEVICES" | awk -F',' '{print NF}')
 echo "Number of GPUs available: $NUM_GPUS"
 echo "GPUS: $CUDA_VISIBLE_DEVICES"
 
+# Detect if EXPR_PATH is a HuggingFace identifier or a local path
+# HF identifiers typically have format: org/model or model
+# Local paths start with / or . or are existing directories
+IS_HF_IDENTIFIER="false"
+if [[ ! "$EXPR_PATH" =~ ^[/.] ]] && [[ ! -d "$EXPR_PATH" ]]; then
+    # Looks like a HF identifier (doesn't start with / or . and is not an existing directory)
+    IS_HF_IDENTIFIER="true"
+    MODEL_PATH="$EXPR_PATH"
+    echo "Detected HuggingFace model identifier: ${EXPR_PATH}"
+else
+    # Local Megatron experiment path
+    MODEL_PATH="${EXPR_PATH}/HF"
+    echo "Detected local Megatron experiment path: ${EXPR_PATH}"
+fi
+
 # Print configuration
 echo "========================================"
 echo "LM Evaluation Configuration"
 echo "========================================"
 echo "Experiment path:      ${EXPR_PATH}"
+echo "Is HF identifier:     ${IS_HF_IDENTIFIER}"
+echo "Model path:           ${MODEL_PATH}"
 echo "Tokenizer:            ${TOKENIZER}"
 echo "Tasks:                ${TASKS}"
 echo "Batch size(per GPU):  ${BATCH_SIZE}"
@@ -101,7 +123,13 @@ PDM_DIR=/iopsstor/scratch/cscs/$USER/PDM
 
 export PYTHONPATH=$MEGATRON_LM_DIR:$PYTHONPATH
 
-EXPR_NAME=$(basename ${EXPR_PATH})
+# Generate a safe experiment name for results directory
+if [ "$IS_HF_IDENTIFIER" = "true" ]; then
+    # Replace slashes with double underscores for HF identifiers
+    EXPR_NAME=$(echo "${EXPR_PATH}" | sed 's/\//__/g')
+else
+    EXPR_NAME=$(basename ${EXPR_PATH})
+fi
 RES_PATH="/iopsstor/scratch/cscs/$USER/PDM/results/lm_eval/${EXPR_NAME}"
 
 # Clear existing results directory if it exists
@@ -122,14 +150,19 @@ fi
 # Create results directory
 mkdir -p "${RES_PATH}"
 
-# Run conversion using shared script
-echo "Running checkpoint conversion..."
-bash ${PDM_DIR}/scripts/swissai_megatron/convert.sh "${EXPR_PATH}"
+# Run conversion only for local Megatron checkpoints
+if [ "$IS_HF_IDENTIFIER" = "true" ]; then
+    echo "Skipping conversion for HuggingFace model identifier..."
+else
+    # Run conversion using shared script
+    echo "Running checkpoint conversion..."
+    bash ${PDM_DIR}/scripts/swissai_megatron/convert.sh "${EXPR_PATH}"
 
-# Check if the conversion was successful
-if [ $? -ne 0 ]; then
-   echo "Model conversion failed"
-   exit 1
+    # Check if the conversion was successful
+    if [ $? -ne 0 ]; then
+       echo "Model conversion failed"
+       exit 1
+    fi
 fi
 
 # Install/update lm-eval
@@ -157,7 +190,7 @@ done
 echo "📦 Task dependency installation complete"
 
 # Build model_args
-MODEL_ARGS="pretrained=${EXPR_PATH}/HF,tokenizer=${TOKENIZER}"
+MODEL_ARGS="pretrained=${MODEL_PATH},tokenizer=${TOKENIZER}"
 if [ -n "$MAX_LENGTH" ]; then
     MODEL_ARGS="${MODEL_ARGS},max_length=${MAX_LENGTH}"
 fi
