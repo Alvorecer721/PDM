@@ -7,7 +7,7 @@
 #SBATCH --job-name=lm-eval
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=12:00:00
+#SBATCH --time=03:00:00
 
 set -e  # Exit immediately if any command fails
 set -x  # Print commands for debugging
@@ -59,6 +59,7 @@ TOKENIZER_EXPLICITLY_SET="false"
 IS_HF_IDENTIFIER="false"
 if [[ ! "$EXPR_PATH" =~ ^[/.] ]] && [[ ! -d "$EXPR_PATH" ]]; then
     IS_HF_IDENTIFIER="true"
+    TOKENIZER="Inferred from HF model"
 fi
 
 # Parse optional arguments
