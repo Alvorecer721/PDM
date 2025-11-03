@@ -45,12 +45,14 @@ BATCH_SIZE="${DEFAULT_BATCH_SIZE}"
 MAX_LENGTH="${DEFAULT_MAX_LENGTH}"
 APPLY_CHAT_TEMPLATE="${DEFAULT_APPLY_CHAT_TEMPLATE}"
 OFFLINE_DATASETS="${DEFAULT_OFFLINE_DATASETS}"
+TOKENIZER_EXPLICITLY_SET="false"
 
 # Parse optional arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         --tokenizer)
             TOKENIZER="$2"
+            TOKENIZER_EXPLICITLY_SET="true"
             shift 2
             ;;
         --tasks)
@@ -190,7 +192,11 @@ done
 echo "📦 Task dependency installation complete"
 
 # Build model_args
-MODEL_ARGS="pretrained=${MODEL_PATH},tokenizer=${TOKENIZER}"
+MODEL_ARGS="pretrained=${MODEL_PATH}"
+# Only add tokenizer if explicitly set OR if it's not a HF identifier
+if [ "$TOKENIZER_EXPLICITLY_SET" = "true" ] || [ "$IS_HF_IDENTIFIER" = "false" ]; then
+    MODEL_ARGS="${MODEL_ARGS},tokenizer=${TOKENIZER}"
+fi
 if [ -n "$MAX_LENGTH" ]; then
     MODEL_ARGS="${MODEL_ARGS},max_length=${MAX_LENGTH}"
 fi

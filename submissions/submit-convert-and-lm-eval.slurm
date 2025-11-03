@@ -53,12 +53,20 @@ MAX_LENGTH="${DEFAULT_MAX_LENGTH}"
 APPLY_CHAT_TEMPLATE="${DEFAULT_APPLY_CHAT_TEMPLATE}"
 OFFLINE_DATASETS="${DEFAULT_OFFLINE_DATASETS}"
 INSTRUCT_MODE="false"
+TOKENIZER_EXPLICITLY_SET="false"
+
+# Detect if EXPR_PATH is a HuggingFace identifier or a local path
+IS_HF_IDENTIFIER="false"
+if [[ ! "$EXPR_PATH" =~ ^[/.] ]] && [[ ! -d "$EXPR_PATH" ]]; then
+    IS_HF_IDENTIFIER="true"
+fi
 
 # Parse optional arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         --tokenizer)
             TOKENIZER="$2"
+            TOKENIZER_EXPLICITLY_SET="true"
             shift 2
             ;;
         --tasks)
@@ -69,7 +77,10 @@ while [[ $# -gt 0 ]]; do
             INSTRUCT_MODE="true"
             TASKS="${DEFAULT_INSTRUCT_TASKS}"
             APPLY_CHAT_TEMPLATE="true"
-            TOKENIZER="${DEFAULT_INSTRUCT_TOKENIZER}"
+            # only set default instruct tokenizer, if not hf identifier
+            if [ "$IS_HF_IDENTIFIER" = "false" ]; then
+              TOKENIZER="${DEFAULT_INSTRUCT_TOKENIZER}"
+            fi
             shift
             ;;
         --batch-size)
@@ -115,7 +126,8 @@ mkdir -p /iopsstor/scratch/cscs/$USER/PDM/log/eval
 
 # Build arguments for the evaluation script
 EVAL_ARGS="$EXPR_PATH"
-if [ "$TOKENIZER" != "${DEFAULT_TOKENIZER}" ]; then
+# Only pass tokenizer if explicitly set OR if it's not a HF identifier
+if [ "$TOKENIZER_EXPLICITLY_SET" = "true" ] || [ "$IS_HF_IDENTIFIER" = "false" ]; then
     EVAL_ARGS="$EVAL_ARGS --tokenizer $TOKENIZER"
 fi
 if [ "$TASKS" != "${DEFAULT_TASKS}" ]; then
