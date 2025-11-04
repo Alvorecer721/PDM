@@ -42,8 +42,11 @@ INSTRUCT_BENCHMARKS = {
     "hellaswag": ("acc,none", "acc_stderr,none"),
     "gsm8k": ("exact_match,strict-match", "exact_match_stderr,strict-match"),
     "truthfulqa_mc2": ("acc,none", "acc_stderr,none"),
-    "ifeval_prompt": ("prompt_level_strict_acc,none", "prompt_level_strict_acc_stderr,none"),
-    "ifeval_instruct": ("inst_level_strict_acc,none", "inst_level_strict_acc_stderr,none"),
+    "ifeval": ("prompt_level_strict_acc,none", "prompt_level_strict_acc_stderr,none"),
+}
+
+MULTIMODAL_BENCHMARKS = {
+    'ai2d': ('exact_match,flexible-extract', 'exact_match_stderr,flexible-extract'),
 }
 
 def extract_model_name(path_or_tuple):
@@ -78,7 +81,7 @@ def extract_model_name(path_or_tuple):
         x = float(x)*100
         y = float(y)*100
         if 'i' in parent or 't' in parent:
-            display_name = f"Pre-trained with {x}\\% image and {y}\\% text tokens"
+            display_name = f"{x}% img - {y}% txt"
         else:
             display_name = f"{x}-{y}"
     else:
@@ -272,24 +275,101 @@ def plot_multiple_models(json_files: list, output_file: str, use_tex_text_render
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument("--use-latex-text-renderer", action="store_true", help="Use LaTeX to render text in plots. Only works with local tex installation")
-    argparser.add_argument("--output-path", type=str, default="/iopsstor/scratch/cscs/nirmiger/PDM/results/lm_eval/plots/llm_comparison.pdf", help="Path to save the plot")
+    argparser.add_argument("--output-path", type=str, default="test.pdf", help="Path to save the plot")
     argparser.add_argument("--title", type=str, default=None, help="Custom title for the plot (optional)")
     argparser.add_argument("--no-sort", action="store_true", help="Disable automatic sorting of files by ratio pattern (preserves input order)")
     argparser.add_argument("--format", type=str, default="pdf", help="Output file format (default: pdf). Supports png, jpg, svg, etc.")
     argparser.add_argument("--instruct-bench", action="store_true", help="Use instruct benchmarks (bbh, mmlu, hellaswag, gsm8k, truthfulqa_mc2, ifeval) instead of default benchmarks")
+    argparser.add_argument("--multi-modal-bench", action="store_true", help="Use multi-modal benchmarks (ai2d, etc.) instead of default benchmarks")
     args = argparser.parse_args()
 
-    # Select benchmark configuration based on flag
-    benchmark_config = INSTRUCT_BENCHMARKS if args.instruct_bench else DEFAULT_BENCHMARKS
+    # Only use default benchmarks if no flag is given.
+    benchmark_config = DEFAULT_BENCHMARKS if not (args.instruct_bench, args.multi_modal_bench) else {}
+
+    # Merge with multi-modal benchmarks if specified
+    if args.multi_modal_bench:
+        benchmark_config = {**benchmark_config, **MULTIMODAL_BENCHMARKS}
+
+    # Merge with instruct benchmarks if specified
+    if args.instruct_bench:
+        benchmark_config = {**benchmark_config, **INSTRUCT_BENCHMARKS}
 
     # Specify the paths to the JSON files that contain the benchmark results
     # You can use either:
     # 1. Plain file paths (names will be auto-extracted):
     files = [
-        "/Users/nicolairmiger/PDM/results/lm_eval/Llama-3.2-3B/__iopsstor__scratch__cscs__nirmiger__Llama-3.2-3B/results_2025-09-02T14-11-42.014991.json",
-        "/Users/nicolairmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.6i-0.4t__HF/results_2025-09-15T09-57-15.632974.json",
-        "/Users/nicolairmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.8i-0.2t__HF/results_2025-09-15T10-13-43.507556.json",
-        "/Users/nicolairmiger/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-27000__HF/results_2025-09-15T09-59-25.371298.json",
+        # Base-Model
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-paired-0022700/__iopsstor__scratch__cscs__nirmiger__Megatron-LM__logs__Meg-Runs__image-extension__llama3-3b-15n-8192sl-120gbsz-0.9i-0.1t-paired-0022700__HF/results_2025-09-20T20-17-47.711456.json", "base-model"),
+        # non-packed
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1__HF/results_2025-10-20T17-57-51.888868.json", "PLW0.1"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.2/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.2__HF/results_2025-10-21T10-28-22.423863.json", "PLW0.2"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.3/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.3__HF/results_2025-10-20T17-58-01.747630.json", "PLW0.3"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.4/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.4__HF/results_2025-10-21T10-03-39.507673.json", "PLW0.4"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-USR-MASKED-FIXES-RPAD/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-USR-MASKED-FIXES-RPAD__HF/results_2025-10-20T17-43-05.318718.json", "PLW1.0"),
+        
+        # packed plw confs
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/results_2025-10-23T13-26-46.692574.json", "PLW0.1-Packed"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.2-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.2-PACKED__HF/results_2025-10-23T13-27-03.584325.json", "PLW0.2-Packed"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.3-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.3-PACKED__HF/results_2025-10-24T16-34-15.613037.json", "PLW0.3-Packed"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.4-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.4-PACKED__HF/results_2025-10-23T13-27-25.966743.json", "PLW0.4-Packed"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.5-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.5-PACKED__HF/results_2025-10-23T13-27-37.564768.json", "PLW0.5-Packed"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-USR-MASKED-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-USR-MASKED-PACKED__HF/results_2025-10-23T13-29-01.138137.json", "PLW1.0-Packed"),
+        
+        # Different seeds
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/results_2025-10-23T13-26-46.692574.json", "Seed-28"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-t-stage2-base-ST-MASKED-PLW0.1-PACKED-SEED42/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-t-stage2-base-ST-MASKED-PLW0.1-PACKED-SEED42__HF/results_2025-10-27T09-33-48.790959.json", "Seed-42"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-t-stage2-base-ST-MASKED-PLW0.1-PACKED-SEED3298/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-t-stage2-base-ST-MASKED-PLW0.1-PACKED-SEED3298__HF/results_2025-10-27T09-34-22.960774.json", "Seed-3298"),
+        
+        # Different txt/img ratios
+        #"/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/results_2025-10-23T13-26-46.692574.json",
+        #"/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-0.95i-0.05t-stage2-base-ST-MASKED-PLW0.1-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-0.95i-0.05t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/results_2025-10-27T11-40-43.573701.json",
+        #"/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-0.9i-0.1t-stage2-base-ST-MASKED-PLW0.1-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-0.9i-0.1t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/results_2025-10-27T09-28-01.380367.json",
+        #"/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-0.85i-0.15t-stage2-base-ST-MASKED-PLW0.1-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-0.85i-0.15t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/results_2025-10-27T17-32-55.441214.json"
+
+        ## Instruct benchmarks ##
+
+        # Different txt/img ratios
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-0.9i-0.1t-stage2-base-ST-MASKED-PLW0.1-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-0.9i-0.1t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/results_2025-10-31T21-51-09.526498.json", "0.9i-0.1t-plw0.1-packed"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-0.95i-0.05t-stage2-base-ST-MASKED-PLW0.1-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-0.95i-0.05t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/results_2025-10-31T21-55-18.338526.json", "0.95i-0.05t-plw0.1-packed"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-0.85i-0.15t-stage2-base-ST-MASKED-PLW0.1-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-0.85i-0.15t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/results_2025-10-31T21-56-28.163100.json", "0.85i-0.15t-plw0.1-packed"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/results_2025-10-31T22-14-49.090708.json", "1.0i-0.0t-plw0.1-packed"),
+
+        # Different PLW values (all only img sft - packed)
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/results_2025-10-31T22-14-49.090708.json", "plw0.1-packed"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.2-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.2-PACKED__HF/results_2025-10-31T22-06-45.945390.json", "plw0.2-packed"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.3-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.3-PACKED__HF/results_2025-10-31T22-04-30.293906.json", "plw0.3-packed"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.4-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.4-PACKED__HF/results_2025-10-31T18-31-22.531173.json", "plw0.4-packed"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.5-PACKED/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.5-PACKED__HF/results_2025-10-31T22-07-06.185690.json", "plw0.5-packed"),
+        
+         # Different PLW values (all only img sft - non-packed)
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1__HF/results_2025-11-03T11-43-02.387805.json", "plw0.1"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.2/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.2__HF/results_2025-10-31T22-12-46.392290.json", "plw0.2"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.3/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.3__HF/results_2025-10-31T22-10-10.012631.json", "plw0.3"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.4/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.4__HF/results_2025-10-31T22-11-38.505649.json", "plw0.4"),
+        #("/users/rkreft/PDM/results/lm_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-USR-MASKED-FIXES-RPAD/__users__rkreft__megatron-repo__logs__Meg-Runs__image-extension__llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-USR-MASKED-FIXES-RPAD__HF/results_2025-10-31T22-17-50.278613.json", "plw1.0"),
+    
+        # LLaMa3.2-3B-Instruct baseline
+        #("/users/rkreft/PDM/results/lm_eval/meta-llama__Llama-3.2-3B-Instruct/meta-llama__Llama-3.2-3B-Instruct/results_2025-11-03T13-01-46.805749.json", "LLaMA3.2-3B-Instruct"),
+
+        ## Multi-modal benchmarks ##
+        #("/users/rkreft/PDM/results/lmms_eval/llama3-3b-SFT-15n-8192sl-240gbsz-0.9i-0.1t-stage2-base-ST-MASKED-PLW0.1-PACKED/llama3-3b-SFT-15n-8192sl-240gbsz-0.9i-0.1t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/20251104_062906_results.json", "plw0.1-packed-0.9i-0.1t"),
+        #("/users/rkreft/PDM/results/lmms_eval/llama3-3b-SFT-15n-8192sl-240gbsz-0.85i-0.15t-stage2-base-ST-MASKED-PLW0.1-PACKED/llama3-3b-SFT-15n-8192sl-240gbsz-0.85i-0.15t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/20251104_062907_results.json", "plw0.1-packed-0.85i-0.15t"),
+        #("/users/rkreft/PDM/results/lmms_eval/llama3-3b-SFT-15n-8192sl-240gbsz-0.95i-0.05t-stage2-base-ST-MASKED-PLW0.1-PACKED/llama3-3b-SFT-15n-8192sl-240gbsz-0.95i-0.05t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/20251104_062909_results.json", "plw0.1-packed-0.95i-0.05t"),
+        ("/users/rkreft/PDM/results/lmms_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1-PACKED/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1-PACKED__HF/20251104_062915_results.json", "plw0.1-packed-1.0i-0.0t"),
+
+        # Plw variants
+        ("/users/rkreft/PDM/results/lmms_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.1__HF/20251104_062914_results.json", "plw0.1"),
+        ("/users/rkreft/PDM/results/lmms_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.2/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.2__HF/20251104_062911_results.json", "plw0.2"),
+        ("/users/rkreft/PDM/results/lmms_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.3/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.3__HF/20251104_062908_results.json", "plw0.3"),
+        ("/users/rkreft/PDM/results/lmms_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.4/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.4__HF/20251104_062912_results.json", "plw0.4"),
+        ("/users/rkreft/PDM/results/lmms_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-USR-MASKED-FIXES-RPAD/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-USR-MASKED-FIXES-RPAD__HF/20251104_063048_results.json", "plw1.0"),
+
+        # Plw-Packed variants
+        ("/users/rkreft/PDM/results/lmms_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.2-PACKED/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.2-PACKED__HF/20251104_062910_results.json", "plw0.2-packed"),
+        ("/users/rkreft/PDM/results/lmms_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.3-PACKED/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.3-PACKED__HF/20251104_062915_results.json", "plw0.3-packed"),
+        ("/users/rkreft/PDM/results/lmms_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.4-PACKED/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.4-PACKED__HF/20251104_062905_results.json", "plw0.4-packed"),
+        ("/users/rkreft/PDM/results/lmms_eval/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.5-PACKED/llama3-3b-SFT-15n-8192sl-240gbsz-1.0i-0.0t-stage2-base-ST-MASKED-PLW0.5-PACKED__HF/20251104_063029_results.json", "plw0.5-packed"),
+
     ]
 
     # 2. Or tuples of (file_path, custom_display_name):

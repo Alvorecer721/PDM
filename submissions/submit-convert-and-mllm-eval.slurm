@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --account=a-infra01
-#SBATCH --cpus-per-task=72
 #SBATCH --environment=/iopsstor/scratch/cscs/ahernnde/ncg_new_v2.toml
 #SBATCH --error=/iopsstor/scratch/cscs/%u/PDM/log/eval/mllm-eval_%A.err
 #SBATCH --output=/iopsstor/scratch/cscs/%u/PDM/log/eval/mllm-eval_%A.out
@@ -15,8 +14,8 @@ set -x  # Print commands for debugging
 
 # Default values
 DEFAULT_MODEL="llama_emu3"
-DEFAULT_TASKS="ai2d,docvqa_val"
-DEFAULT_BATCH_SIZE=1
+DEFAULT_TASKS="ai2d, mmmu_val, pope, vqav2, mme, gqa, mmstar, ocrbench, seedbench, textvqa, mathvista_testmini, chartqa"
+DEFAULT_BATCH_SIZE="1"
 DEFAULT_MAX_LENGTH=""
 DEFAULT_OFFLINE_DATASETS="true"
 
@@ -106,13 +105,13 @@ if [ "$NUM_PROCESSES" != "${DEFAULT_NUM_PROCESSES}" ]; then
 fi
 if [ -n "$MAX_LENGTH" ]; then
     EVAL_ARGS="$EVAL_ARGS --max-length $MAX_LENGTH"
-fi
+fi  
 if [ "$OFFLINE_DATASETS" = "false" ]; then
     EVAL_ARGS="$EVAL_ARGS --no-offline-datasets"
 fi
 
 # Execute the script inside the compute node using srun
 echo "Executing conversion and evaluation script on compute node..."
-srun /iopsstor/scratch/cscs/$USER/PDM/scripts/swissai_megatron/convert-and-mllm-eval.sh "$EVAL_ARGS"
+srun /iopsstor/scratch/cscs/$USER/PDM/scripts/swissai_megatron/convert-and-mllm-eval.sh $EVAL_ARGS
 
 echo "Job completed"

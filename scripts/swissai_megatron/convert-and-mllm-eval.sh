@@ -9,8 +9,8 @@
 
 # Default values (current as-is status)
 DEFAULT_MODEL="llama_emu3"
-DEFAULT_TASKS="ai2d,docvqa_val"
-DEFAULT_BATCH_SIZE=4
+DEFAULT_TASKS="ai2d"
+DEFAULT_BATCH_SIZE="1"
 DEFAULT_MAX_LENGTH=""  # Empty means no max_length constraint
 DEFAULT_OFFLINE_DATASETS="true"
 
@@ -84,7 +84,6 @@ echo "Batch size(per GPU):  ${BATCH_SIZE}"
 echo "Max length:           ${MAX_LENGTH:-no limit}"
 echo "Offline datasets:     ${OFFLINE_DATASETS}"
 echo "Num GPU:              ${NUM_GPUS}"
-echo "Global Batch Size     $((NUM_GPUS * BATCH_SIZE))"
 echo "========================================"
 echo ""
 
@@ -143,7 +142,7 @@ echo "Running MLLM evaluation..."
 # Conditionally set offline mode
 [ "$OFFLINE_DATASETS" = "true" ] && export HF_DATASETS_OFFLINE=1
 
-accelerate launch --num_processes="${NUM_GPUS}" -m lmms_eval \
+accelerate launch -m lmms_eval \
     --model "${MODEL}" \
     --model_args "${MODEL_ARGS}" \
     --tasks "${TASKS}" \
