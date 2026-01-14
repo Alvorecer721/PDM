@@ -39,6 +39,7 @@ if [ "$#" -lt 1 ]; then
     echo "  --max-length LENGTH           Maximum sequence length (default: no limit)"
     echo "  --apply-chat-template         Apply chat template to inputs (default: ${DEFAULT_APPLY_CHAT_TEMPLATE})"
     echo "  --no-offline-datasets         Disable offline mode for HF datasets (default: offline mode enabled)"
+    echo "  --no-convert                  Skip model conversion (expects HF directory to exist)"
     exit 1
 fi
 
@@ -54,6 +55,7 @@ APPLY_CHAT_TEMPLATE="${DEFAULT_APPLY_CHAT_TEMPLATE}"
 OFFLINE_DATASETS="${DEFAULT_OFFLINE_DATASETS}"
 INSTRUCT_MODE="false"
 TOKENIZER_EXPLICITLY_SET="false"
+NO_CONVERT="false"
 
 # Detect if EXPR_PATH is a HuggingFace identifier or a local path
 IS_HF_IDENTIFIER="false"
@@ -100,6 +102,10 @@ while [[ $# -gt 0 ]]; do
             OFFLINE_DATASETS="false"
             shift
             ;;
+        --no-convert)
+            NO_CONVERT="true"
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
             exit 1
@@ -119,6 +125,7 @@ echo "Batch size:           ${BATCH_SIZE}"
 echo "Max length:           ${MAX_LENGTH:-no limit}"
 echo "Apply chat template:  ${APPLY_CHAT_TEMPLATE}"
 echo "Offline datasets:     ${OFFLINE_DATASETS}"
+echo "No convert:           ${NO_CONVERT}"
 echo "========================================"
 echo ""
 
@@ -145,6 +152,9 @@ if [ "$APPLY_CHAT_TEMPLATE" = "true" ]; then
 fi
 if [ "$OFFLINE_DATASETS" = "false" ]; then
     EVAL_ARGS="$EVAL_ARGS --no-offline-datasets"
+fi
+if [ "$NO_CONVERT" = "true" ]; then
+    EVAL_ARGS="$EVAL_ARGS --no-convert"
 fi
 
 # Execute the script inside the compute node using srun

@@ -30,6 +30,7 @@ if [ "$#" -lt 1 ]; then
     echo "  --batch-size SIZE             Batch size for evaluation (default: ${DEFAULT_BATCH_SIZE})"
     echo "  --max-length LENGTH           Maximum sequence length (default: no limit)"
     echo "  --no-offline-datasets         Disable offline mode for HF datasets (default: offline mode enabled)"
+    echo "  --no-convert                  Skip model conversion (expects HF directory to exist)"
     exit 1
 fi
 
@@ -42,6 +43,7 @@ TASKS="${DEFAULT_TASKS}"
 BATCH_SIZE="${DEFAULT_BATCH_SIZE}"
 MAX_LENGTH="${DEFAULT_MAX_LENGTH}"
 OFFLINE_DATASETS="${DEFAULT_OFFLINE_DATASETS}"
+NO_CONVERT="false"
 
 # Parse optional arguments
 while [[ $# -gt 0 ]]; do
@@ -66,6 +68,10 @@ while [[ $# -gt 0 ]]; do
             OFFLINE_DATASETS="false"
             shift
             ;;
+        --no-convert)
+            NO_CONVERT="true"
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
             exit 1
@@ -83,6 +89,7 @@ echo "Tasks:                ${TASKS}"
 echo "Batch size:           ${BATCH_SIZE}"
 echo "Max length:           ${MAX_LENGTH:-no limit}"
 echo "Offline datasets:     ${OFFLINE_DATASETS}"
+echo "No convert:           ${NO_CONVERT}"
 echo "========================================"
 echo ""
 
@@ -108,6 +115,9 @@ if [ -n "$MAX_LENGTH" ]; then
 fi  
 if [ "$OFFLINE_DATASETS" = "false" ]; then
     EVAL_ARGS="$EVAL_ARGS --no-offline-datasets"
+fi
+if [ "$NO_CONVERT" = "true" ]; then
+    EVAL_ARGS="$EVAL_ARGS --no-convert"
 fi
 
 # Execute the script inside the compute node using srun

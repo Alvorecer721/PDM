@@ -15,6 +15,7 @@ DEFAULT_BATCH_SIZE="16"
 DEFAULT_MAX_LENGTH=""  # Empty means no max_length constraint
 DEFAULT_APPLY_CHAT_TEMPLATE="false"
 DEFAULT_OFFLINE_DATASETS="true"
+DEFAULT_NO_CONVERT="false"
 
 # Parse arguments
 if [ "$#" -lt 1 ]; then
@@ -32,6 +33,7 @@ if [ "$#" -lt 1 ]; then
     echo "  --max-length LENGTH           Maximum sequence length (default: no limit)"
     echo "  --apply-chat-template         Apply chat template to inputs (default: ${DEFAULT_APPLY_CHAT_TEMPLATE})"
     echo "  --no-offline-datasets         Disable offline mode for HF datasets (default: offline mode enabled)"
+    echo "  --no-convert                  Skip model conversion (expects HF directory to exist)"
     exit 1
 fi
 
@@ -45,6 +47,7 @@ BATCH_SIZE="${DEFAULT_BATCH_SIZE}"
 MAX_LENGTH="${DEFAULT_MAX_LENGTH}"
 APPLY_CHAT_TEMPLATE="${DEFAULT_APPLY_CHAT_TEMPLATE}"
 OFFLINE_DATASETS="${DEFAULT_OFFLINE_DATASETS}"
+NO_CONVERT="${DEFAULT_NO_CONVERT}"
 TOKENIZER_EXPLICITLY_SET="false"
 
 # Parse optional arguments
@@ -73,6 +76,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-offline-datasets)
             OFFLINE_DATASETS="false"
+            shift
+            ;;
+        --no-convert)
+            NO_CONVERT="true"
             shift
             ;;
         *)
@@ -115,6 +122,7 @@ echo "Batch size(per GPU):  ${BATCH_SIZE}"
 echo "Max length:           ${MAX_LENGTH:-no limit}"
 echo "Apply chat template:  ${APPLY_CHAT_TEMPLATE}"
 echo "Offline datasets:     ${OFFLINE_DATASETS}"
+echo "No convert:           ${NO_CONVERT}"
 echo "Num GPU:              ${NUM_GPUS}"
 echo "========================================"
 echo ""
@@ -143,11 +151,15 @@ fi
 if [ ! -d "$EVAL_DIR" ]; then
     echo "Creating lm-evaluation-harness directory..."
     git clone https://github.com/EleutherAI/lm-evaluation-harness.git "$EVAL_DIR"
-else
-    echo "lm-evaluation-harness directory exists, updating repository..."
-    cd "$EVAL_DIR" || exit
-    git pull
 fi
+
+# Pin to a stable version that works with transformers 4.48.2
+echo "Checking out stable lm-evaluation-harness version..."
+cd "$EVAL_DIR" || exit
+git fetch
+# Use v0.4.9.1 tag which is compatible with transformers 4.48.2
+# This version doesn't pass dtype to model initialization
+git checkout v0.4.9.1 2>/dev/null || git checkout tags/v0.4.9.1 2>/dev/null || echo "⚠️  Could not checkout v0.4.9, using current version"
 
 # Create results directory
 mkdir -p "${RES_PATH}"
@@ -155,6 +167,15 @@ mkdir -p "${RES_PATH}"
 # Run conversion only for local Megatron checkpoints
 if [ "$IS_HF_IDENTIFIER" = "true" ]; then
     echo "Skipping conversion for HuggingFace model identifier..."
+elif [ "$NO_CONVERT" = "true" ]; then
+    echo "Skipping conversion as requested (--no-convert)..."
+    # Validate HF directory exists
+    if [ ! -d "${MODEL_PATH}" ]; then
+        echo "ERROR: HF directory does not exist: ${MODEL_PATH}"
+        echo "       Please run conversion first or remove --no-convert flag"
+        exit 1
+    fi
+    echo "HF directory found: ${MODEL_PATH}"
 else
     # Run conversion using shared script
     echo "Running checkpoint conversion..."
@@ -171,6 +192,10 @@ fi
 echo "📦 Setting up lm-eval package..."
 cd "$EVAL_DIR" || exit
 pip install -e .
+
+# Pin PEFT to compatible version for transformers 4.48.2 in NGC container
+echo "📦 Pinning PEFT to compatible version..."
+pip install "peft==0.13.2"
 
 # Install optional dependencies for each task
 echo "📦 Installing optional task dependencies..."
@@ -207,8 +232,12 @@ fi
 
 # Run evaluation command
 echo "Running LM evaluation..."
-# Conditionally set offline mode
-[ "$OFFLINE_DATASETS" = "true" ] && export HF_DATASETS_OFFLINE=1
+# Conditionally set/unset offline mode
+if [ "$OFFLINE_DATASETS" = "true" ]; then
+    export HF_DATASETS_OFFLINE=1
+else
+    unset HF_DATASETS_OFFLINE
+fi
 
 accelerate launch -m lm_eval --model hf \
    --model_args "${MODEL_ARGS}" \

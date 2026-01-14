@@ -13,6 +13,7 @@ DEFAULT_TASKS="ai2d"
 DEFAULT_BATCH_SIZE="1"
 DEFAULT_MAX_LENGTH=""  # Empty means no max_length constraint
 DEFAULT_OFFLINE_DATASETS="true"
+DEFAULT_NO_CONVERT="false"
 
 # Parse arguments
 if [ "$#" -lt 1 ]; then
@@ -25,6 +26,7 @@ if [ "$#" -lt 1 ]; then
     echo "  --batch-size SIZE             Batch size per GPU for evaluation (default: ${DEFAULT_BATCH_SIZE})"
     echo "  --max-length LENGTH           Maximum sequence length (default: no limit, will be set internally)"
     echo "  --no-offline-datasets         Disable offline mode for HF datasets (default: offline mode enabled)"
+    echo "  --no-convert                  Skip model conversion (expects HF directory to exist)"
     exit 1
 fi
 
@@ -37,6 +39,7 @@ TASKS="${DEFAULT_TASKS}"
 BATCH_SIZE="${DEFAULT_BATCH_SIZE}"
 MAX_LENGTH="${DEFAULT_MAX_LENGTH}"
 OFFLINE_DATASETS="${DEFAULT_OFFLINE_DATASETS}"
+NO_CONVERT="${DEFAULT_NO_CONVERT}"
 
 # Parse optional arguments
 while [[ $# -gt 0 ]]; do
@@ -61,6 +64,10 @@ while [[ $# -gt 0 ]]; do
             OFFLINE_DATASETS="false"
             shift
             ;;
+        --no-convert)
+            NO_CONVERT="true"
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
             exit 1
@@ -83,6 +90,7 @@ echo "Tasks:                ${TASKS}"
 echo "Batch size(per GPU):  ${BATCH_SIZE}"
 echo "Max length:           ${MAX_LENGTH:-no limit}"
 echo "Offline datasets:     ${OFFLINE_DATASETS}"
+echo "No convert:           ${NO_CONVERT}"
 echo "Num GPU:              ${NUM_GPUS}"
 echo "========================================"
 echo ""
@@ -114,14 +122,26 @@ fi
 # Create results directory
 mkdir -p "${RES_PATH}"
 
-# Run conversion using shared script
-echo "Running checkpoint conversion..."
-bash ${PDM_DIR}/scripts/swissai_megatron/convert.sh "${EXPR_PATH}"
+# Run conversion only if not skipped
+if [ "$NO_CONVERT" = "true" ]; then
+    echo "Skipping conversion as requested (--no-convert)..."
+    # Validate HF directory exists
+    if [ ! -d "${EXPR_PATH}/HF" ]; then
+        echo "ERROR: HF directory does not exist: ${EXPR_PATH}/HF"
+        echo "       Please run conversion first or remove --no-convert flag"
+        exit 1
+    fi
+    echo "HF directory found: ${EXPR_PATH}/HF"
+else
+    # Run conversion using shared script
+    echo "Running checkpoint conversion..."
+    bash ${PDM_DIR}/scripts/swissai_megatron/convert.sh "${EXPR_PATH}"
 
-# Check if the conversion was successful
-if [ $? -ne 0 ]; then
-   echo "Model conversion failed"
-   exit 1
+    # Check if the conversion was successful
+    if [ $? -ne 0 ]; then
+       echo "Model conversion failed"
+       exit 1
+    fi
 fi
 
 # Install/update lmms-eval
@@ -130,6 +150,10 @@ cd "$EVAL_DIR" || exit
 pip uninstall jupyterlab -y  # Uninstall conflicting package
 pip install -e .
 pip install qwen_vl_utils
+
+# Pin PEFT to compatible version for transformers 4.48.2 in NGC container
+echo "📦 Pinning PEFT to compatible version..."
+pip install "peft==0.13.2"
 
 # Build model_args
 MODEL_ARGS="pretrained=${EXPR_PATH}/HF"
