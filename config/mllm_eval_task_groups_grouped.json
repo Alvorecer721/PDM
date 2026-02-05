@@ -1,0 +1,5 @@
+[
+  {"name": "pope+mme+ai2d+chartqa", "tasks": "pope,mme,ai2d,chartqa"},
+  {"name": "gqa+mmmu_val+docvqa+infovqa", "tasks": "gqa,mmmu_val_group_img,docvqa,infovqa"},
+  {"name": "ocrbench_v2", "tasks": "ocrbench_v2"}
+]

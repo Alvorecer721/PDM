@@ -9,6 +9,7 @@
 # --environment=/capstor/store/cscs/swissai/a06/containers/NGC-PyTorch/ngc_pt_jan.toml
 
 # Default values
+DEFAULT_MODEL_TYPE="llama3"
 DEFAULT_TOKENIZER="meta-llama/Llama-3.2-3B"
 DEFAULT_TASKS="hellaswag,mmlu,winogrande,wikitext,arc_easy,arc_challenge,piqa,commonsense_qa"
 DEFAULT_BATCH_SIZE="16"
@@ -27,7 +28,9 @@ if [ "$#" -lt 1 ]; then
     echo "  $0 meta-llama/Llama-3.2-3B --instruct"
     echo ""
     echo "Options:"
-    echo "  --tokenizer TOKENIZER         Tokenizer to use (default: ${DEFAULT_TOKENIZER})"
+    echo "  --model-type TYPE             Model architecture type (default: ${DEFAULT_MODEL_TYPE})"
+    echo "                                Options: llama3, apertus"
+    echo "  --tokenizer TOKENIZER         Tokenizer to use (default: model-type specific)"
     echo "  --tasks TASKS                 Comma-separated list of tasks (default: ${DEFAULT_TASKS})"
     echo "  --batch-size SIZE             Batch size for evaluation (default: ${DEFAULT_BATCH_SIZE})"
     echo "  --max-length LENGTH           Maximum sequence length (default: no limit)"
@@ -41,6 +44,7 @@ EXPR_PATH="$1"
 shift
 
 # Initialize with defaults
+MODEL_TYPE="${DEFAULT_MODEL_TYPE}"
 TOKENIZER="${DEFAULT_TOKENIZER}"
 TASKS="${DEFAULT_TASKS}"
 BATCH_SIZE="${DEFAULT_BATCH_SIZE}"
@@ -53,6 +57,10 @@ TOKENIZER_EXPLICITLY_SET="false"
 # Parse optional arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --model-type)
+            MODEL_TYPE="$2"
+            shift 2
+            ;;
         --tokenizer)
             TOKENIZER="$2"
             TOKENIZER_EXPLICITLY_SET="true"
@@ -89,6 +97,15 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Set model-type specific defaults if tokenizer not explicitly set
+if [ "$TOKENIZER_EXPLICITLY_SET" = "false" ]; then
+    if [ "$MODEL_TYPE" = "apertus" ]; then
+        TOKENIZER="alehc/swissai-tokenizer"
+    else
+        TOKENIZER="meta-llama/Llama-3.2-3B"
+    fi
+fi
+
 # Automatically get number of available GPUS to configure accelerate properöy
 NUM_GPUS=$(echo "$CUDA_VISIBLE_DEVICES" | awk -F',' '{print NF}')
 echo "Number of GPUs available: $NUM_GPUS"
@@ -105,8 +122,15 @@ if [[ ! "$EXPR_PATH" =~ ^[/.] ]] && [[ ! -d "$EXPR_PATH" ]]; then
     echo "Detected HuggingFace model identifier: ${EXPR_PATH}"
 else
     # Local Megatron experiment path
-    MODEL_PATH="${EXPR_PATH}/HF"
-    echo "Detected local Megatron experiment path: ${EXPR_PATH}"
+    if [ "$NO_CONVERT" = "true" ]; then
+        # When --no-convert is used, pass the path as-is (don't append /HF)
+        MODEL_PATH="${EXPR_PATH}"
+        echo "Using experiment path as-is (no /HF suffix): ${EXPR_PATH}"
+    else
+        # When conversion is performed, append /HF to the path
+        MODEL_PATH="${EXPR_PATH}/HF"
+        echo "Detected local Megatron experiment path: ${EXPR_PATH}"
+    fi
 fi
 
 # Print configuration
@@ -116,6 +140,7 @@ echo "========================================"
 echo "Experiment path:      ${EXPR_PATH}"
 echo "Is HF identifier:     ${IS_HF_IDENTIFIER}"
 echo "Model path:           ${MODEL_PATH}"
+echo "Model type:           ${MODEL_TYPE}"
 echo "Tokenizer:            ${TOKENIZER}"
 echo "Tasks:                ${TASKS}"
 echo "Batch size(per GPU):  ${BATCH_SIZE}"
@@ -179,7 +204,14 @@ elif [ "$NO_CONVERT" = "true" ]; then
 else
     # Run conversion using shared script
     echo "Running checkpoint conversion..."
-    bash ${PDM_DIR}/scripts/swissai_megatron/convert.sh "${EXPR_PATH}"
+
+    # Build conversion arguments
+    CONVERT_ARGS="${EXPR_PATH} --model-type ${MODEL_TYPE}"
+    if [ "$TOKENIZER_EXPLICITLY_SET" = "true" ]; then
+        CONVERT_ARGS="${CONVERT_ARGS} --tokenizer ${TOKENIZER}"
+    fi
+
+    bash ${PDM_DIR}/scripts/swissai_megatron/convert.sh ${CONVERT_ARGS}
 
     # Check if the conversion was successful
     if [ $? -ne 0 ]; then
@@ -196,6 +228,7 @@ pip install -e .
 # Pin PEFT to compatible version for transformers 4.48.2 in NGC container
 echo "📦 Pinning PEFT to compatible version..."
 pip install "peft==0.13.2"
+pip install --upgrade "transformers>=4.56,<5.0.0"
 
 # Install optional dependencies for each task
 echo "📦 Installing optional task dependencies..."

@@ -49,17 +49,18 @@ from pretrain_gpt import model_provider
 
 def main():
     
-    # Apply ALL model configuration parameters directly 
+    # Apply ALL model configuration parameters directly
     args_defaults = {
         "transformer_impl": "transformer_engine",
         "use_checkpoint_args": True,
+        #"use_mp_args_from_checkpoint_args": True,  # Auto-detect TP/PP from checkpoint
         "ckpt_format": "torch_dist",
         "ckpt_convert_format": "torch",
         "no_load_rng": True,
         "no_load_optim": True,
         "no_save_optim": True,
-        "--untie-embeddings-and-output-weights": False,
-        
+        #"untie_embeddings_and_output_weights": False,
+
         # Fake args for initialization
         "micro_batch_size": 1,
         "train_iters": 1,

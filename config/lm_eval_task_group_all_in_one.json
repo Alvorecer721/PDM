@@ -1,0 +1,3 @@
+[
+  {"name": "all", "tasks": "hellaswag,mmlu,winogrande,wikitext,arc_easy,arc_challenge,commonsense_qa,piqa"}
+]
