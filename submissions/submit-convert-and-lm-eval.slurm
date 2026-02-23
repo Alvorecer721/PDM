@@ -55,6 +55,8 @@ if [ "$#" -lt 1 ]; then
     echo "  --no-convert                  Skip model conversion (expects HF directory to exist)"
     echo "  --log-subdir SUBDIR           Log subdirectory relative to PDM root (default: ${DEFAULT_LOG_SUBDIR})"
     echo "  --group-name NAME             Group name for organizing logs (default: ${DEFAULT_GROUP_NAME})"
+    echo "  --no-wandb                    Disable wandb logging (default: enabled)"
+    echo "  --wandb-project PROJECT       Wandb project name (default: lm-eval)"
     exit 1
 fi
 
@@ -74,6 +76,8 @@ TOKENIZER_EXPLICITLY_SET="false"
 NO_CONVERT="false"
 LOG_SUBDIR="${DEFAULT_LOG_SUBDIR}"
 GROUP_NAME="${DEFAULT_GROUP_NAME}"
+WANDB_ENABLED="true"
+WANDB_PROJECT=""
 
 # Detect if EXPR_PATH is a HuggingFace identifier or a local path
 IS_HF_IDENTIFIER="false"
@@ -136,6 +140,14 @@ while [[ $# -gt 0 ]]; do
             GROUP_NAME="$2"
             shift 2
             ;;
+        --no-wandb)
+            WANDB_ENABLED="false"
+            shift
+            ;;
+        --wandb-project)
+            WANDB_PROJECT="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown option: $1"
             exit 1
@@ -173,6 +185,8 @@ echo "Max length:           ${MAX_LENGTH:-no limit}"
 echo "Apply chat template:  ${APPLY_CHAT_TEMPLATE}"
 echo "Offline datasets:     ${OFFLINE_DATASETS}"
 echo "No convert:           ${NO_CONVERT}"
+echo "Wandb enabled:        ${WANDB_ENABLED}"
+echo "Wandb project:        ${WANDB_PROJECT:-lm-eval (default)}"
 echo "========================================"
 echo ""
 
@@ -203,6 +217,15 @@ if [ "$OFFLINE_DATASETS" = "false" ]; then
 fi
 if [ "$NO_CONVERT" = "true" ]; then
     EVAL_ARGS="$EVAL_ARGS --no-convert"
+fi
+if [ "$WANDB_ENABLED" = "false" ]; then
+    EVAL_ARGS="$EVAL_ARGS --no-wandb"
+fi
+if [ -n "$WANDB_PROJECT" ]; then
+    EVAL_ARGS="$EVAL_ARGS --wandb-project $WANDB_PROJECT"
+fi
+if [ -n "$GROUP_NAME" ]; then
+    EVAL_ARGS="$EVAL_ARGS --group-name $GROUP_NAME"
 fi
 
 # Execute the script inside the compute node using srun

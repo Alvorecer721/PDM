@@ -52,13 +52,23 @@ usage() {
     echo ""
     echo "Evaluation Options:"
     echo "  --instruct                     Use instruct mode for LM eval (sets chat template)"
-    echo "  --batch-size SIZE              Batch size for evaluation"
+    echo "  --lm-batch-size SIZE           Batch size for LM evaluation (default: 6)"
+    echo "  --mllm-batch-size SIZE         Batch size for MLLM evaluation (default: 3)"
     echo "  --tokenizer TOKENIZER          Tokenizer to use"
     echo "  --model MODEL                  MLLM model type (MLLM eval only)"
+    echo ""
+    echo "Wandb Options:"
+    echo "  --no-offline-datasets           Disable offline mode for HF datasets (default: offline mode enabled)"
+    echo "  --no-wandb                     Disable wandb logging (default: enabled)"
+    echo "  --wandb-project PROJECT        Wandb project name (default: lm-eval for LM, lmms-eval for MLLM)"
     echo ""
     echo "Environment Options:"
     echo "  --environment ENV              SLURM environment to use (default: nemo_container)"
     echo "                                 Can be a container name or path to environment file"
+    echo ""
+    echo "Dependency Options:"
+    echo "  --dependency JOB_ID            SLURM job ID to wait for before starting conversion"
+    echo "                                 Uses afterany relation (runs regardless of job status)"
     echo ""
     echo "Task Group JSON Format:"
     echo '  [{"name":"reasoning","tasks":"gsm8k,bbh,mmlu"},{"name":"text","tasks":"hellaswag,winogrande"}]'
@@ -214,11 +224,16 @@ MLLM_TASK_GROUPS_FILE=""
 MODEL_TYPE="llama3"
 CHECKPOINT_PATH=""
 INSTRUCT_FLAG=""
-BATCH_SIZE=""
+LM_BATCH_SIZE="6"
+MLLM_BATCH_SIZE="3"
 TOKENIZER=""
 MODEL=""
 DEBUG=""
+OFFLINE_DATASETS="true"
+WANDB_ENABLED="true"
+WANDB_PROJECT=""
 ENVIRONMENT="/iopsstor/scratch/cscs/ahernnde/ncg_new_v2.toml"
+DEPENDENCY_JOB=""
 #ENVIRONMENT="/capstor/store/cscs/swissai/infra01/containers/nemo.toml"
 
 # Parse optional arguments
@@ -260,8 +275,12 @@ while [[ $# -gt 0 ]]; do
             INSTRUCT_FLAG="--apply-chat-template" # only set apply chat template, as --instruct would also set tokenizer and instruct mode
             shift
             ;;
-        --batch-size)
-            BATCH_SIZE="$2"
+        --lm-batch-size)
+            LM_BATCH_SIZE="$2"
+            shift 2
+            ;;
+        --mllm-batch-size)
+            MLLM_BATCH_SIZE="$2"
             shift 2
             ;;
         --tokenizer)
@@ -272,8 +291,24 @@ while [[ $# -gt 0 ]]; do
             MODEL="$2"
             shift 2
             ;;
+        --no-offline-datasets)
+            OFFLINE_DATASETS="false"
+            shift
+            ;;
+        --no-wandb)
+            WANDB_ENABLED="false"
+            shift
+            ;;
+        --wandb-project)
+            WANDB_PROJECT="$2"
+            shift 2
+            ;;
         --environment)
             ENVIRONMENT="$2"
+            shift 2
+            ;;
+        --dependency)
+            DEPENDENCY_JOB="$2"
             shift 2
             ;;
         -h|--help)
@@ -291,7 +326,9 @@ validate
 
 # Generate unique log subdirectory
 TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
-EXPERIMENT_BASENAME=$(basename "$EXPERIMENT_PATH" | sed 's/\//__/g')
+# Use last two path components joined with __ for a meaningful log dir name
+CLEAN_EXP_PATH="${EXPERIMENT_PATH%/}"
+EXPERIMENT_BASENAME="$(basename "$(dirname "$CLEAN_EXP_PATH")")__$(basename "$CLEAN_EXP_PATH")"
 LOG_SUBDIR="log/run_${TIMESTAMP}_${EXPERIMENT_BASENAME}"
 LOG_DIR="${SCRIPT_DIR}/../${LOG_SUBDIR}"
 mkdir -p "$LOG_DIR"
@@ -323,6 +360,9 @@ echo -e "${BLUE}========================================${NC}"
 echo "Experiment:        ${EXPERIMENT_PATH}"
 echo "Is HF identifier:  ${IS_HF_IDENTIFIER}"
 echo "Environment:       ${ENVIRONMENT}"
+if [ -n "$DEPENDENCY_JOB" ]; then
+    echo "Dependency:        ${DEPENDENCY_JOB} (afterany)"
+fi
 echo "Convert:           ${DO_CONVERT}"
 if [ "$DO_LM_EVAL" = "true" ]; then
     echo "LM Eval:           Yes (${NUM_LM_GROUPS} task groups)"
@@ -360,6 +400,11 @@ if [ "$DO_CONVERT" = "true" ]; then
     # Build sbatch command
     SBATCH_CMD="sbatch"
 
+    # Add dependency if specified
+    if [ -n "$DEPENDENCY_JOB" ]; then
+        SBATCH_CMD="$SBATCH_CMD --dependency=afterany:${DEPENDENCY_JOB}"
+    fi
+
     # Add environment if specified
     if [ -n "$ENVIRONMENT" ]; then
         SBATCH_CMD="$SBATCH_CMD --environment=$ENVIRONMENT"
@@ -369,9 +414,19 @@ if [ "$DO_CONVERT" = "true" ]; then
     JOB_OUTPUT=$(eval "$SBATCH_CMD ${SCRIPT_DIR}/submit-convert.slurm $CONVERT_ARGS")
     CONVERT_JOB_ID=$(echo "$JOB_OUTPUT" | grep -oP '\d+$')
 
-    echo "  Job ID: ${CONVERT_JOB_ID}"
+    if [ -n "$DEPENDENCY_JOB" ]; then
+        echo "  Job ID: ${CONVERT_JOB_ID} (depends on: ${DEPENDENCY_JOB})"
+    else
+        echo "  Job ID: ${CONVERT_JOB_ID}"
+    fi
     echo "  Environment: ${ENVIRONMENT}"
     echo ""
+fi
+
+ # if this script was converting based on the experiment path, the actual checkpoint is under $EXPERIMENT_PATH/HF
+EVAL_CP_PATH="$EXPERIMENT_PATH"
+if [ -n "$CONVERT_JOB_ID" ]; then
+    EVAL_CP_PATH="$EVAL_CP_PATH/HF"
 fi
 
 # Launch LM eval jobs
@@ -401,12 +456,6 @@ if [ "$DO_LM_EVAL" = "true" ]; then
             SBATCH_CMD="$SBATCH_CMD --environment=$ENVIRONMENT"
         fi
 
-        # if this script was converting based on the experiment path, the actual checkpoint is under $EXPERIMENT_PATH/HF
-        EVAL_CP_PATH="$EXPERIMENT_PATH"
-        if [ -n "$CONVERT_JOB_ID" ]; then
-            EVAL_CP_PATH="$EVAL_CP_PATH/HF"
-        fi
-
         # Build arguments for the eval script
         EVAL_ARGS="$EVAL_CP_PATH --tasks $TASKS --model-type $MODEL_TYPE --log-subdir $LOG_SUBDIR --group-name $GROUP_NAME"
         
@@ -416,11 +465,18 @@ if [ "$DO_LM_EVAL" = "true" ]; then
         if [ -n "$INSTRUCT_FLAG" ]; then
             EVAL_ARGS="$EVAL_ARGS $INSTRUCT_FLAG"
         fi
-        if [ -n "$BATCH_SIZE" ]; then
-            EVAL_ARGS="$EVAL_ARGS --batch-size $BATCH_SIZE"
-        fi
+        EVAL_ARGS="$EVAL_ARGS --batch-size $LM_BATCH_SIZE"
         if [ -n "$TOKENIZER" ]; then
             EVAL_ARGS="$EVAL_ARGS --tokenizer $TOKENIZER"
+        fi
+        if [ "$WANDB_ENABLED" = "false" ]; then
+            EVAL_ARGS="$EVAL_ARGS --no-wandb"
+        fi
+        if [ -n "$WANDB_PROJECT" ]; then
+            EVAL_ARGS="$EVAL_ARGS --wandb-project $WANDB_PROJECT"
+        fi
+        if [ "$OFFLINE_DATASETS" = "false" ]; then
+            EVAL_ARGS="$EVAL_ARGS --no-offline-datasets"
         fi
 
         # Submit job
@@ -464,23 +520,10 @@ if [ "$DO_MLLM_EVAL" = "true" ]; then
             SBATCH_CMD="$SBATCH_CMD --environment=$ENVIRONMENT"
         fi
 
-        # if this script was converting based on the experiment path, the actual checkpoint is under $EXPERIMENT_PATH/HF
-        EVAL_CP_PATH="$EXPERIMENT_PATH"
-        if [ -n "$CONVERT_JOB_ID" ]; then
-            EVAL_CP_PATH="$EVAL_CP_PATH/HF"
-        fi
-
         # Build arguments for the eval script
-        EVAL_ARGS="$EVAL_CP_PATH --tasks $TASKS --model-type $MODEL_TYPE --log-subdir $LOG_SUBDIR --group-name $GROUP_NAME"
-        
-        # Add --no-convert flag if conversion job was not launched
-        if [ -z "$CONVERT_JOB_ID" ]; then
-            EVAL_ARGS="$EVAL_ARGS --no-convert"
-        fi
+        EVAL_ARGS="$EVAL_CP_PATH --no-convert --tasks $TASKS --model-type $MODEL_TYPE --log-subdir $LOG_SUBDIR --group-name $GROUP_NAME"
 
-        if [ -n "$BATCH_SIZE" ]; then
-            EVAL_ARGS="$EVAL_ARGS --batch-size $BATCH_SIZE"
-        fi
+        EVAL_ARGS="$EVAL_ARGS --batch-size $MLLM_BATCH_SIZE"
         if [ -n "$TOKENIZER" ]; then
             EVAL_ARGS="$EVAL_ARGS --tokenizer $TOKENIZER"
         fi
@@ -490,7 +533,15 @@ if [ "$DO_MLLM_EVAL" = "true" ]; then
         if [ "$DEBUG" = "true" ]; then
             EVAL_ARGS="$EVAL_ARGS --debug"
         fi
-
+        if [ "$WANDB_ENABLED" = "false" ]; then
+            EVAL_ARGS="$EVAL_ARGS --no-wandb"
+        fi
+        if [ -n "$WANDB_PROJECT" ]; then
+            EVAL_ARGS="$EVAL_ARGS --wandb-project $WANDB_PROJECT"
+        fi
+        if [ "$OFFLINE_DATASETS" = "false" ]; then
+            EVAL_ARGS="$EVAL_ARGS --no-offline-datasets"
+        fi
         # Submit job
         JOB_OUTPUT=$(eval "$SBATCH_CMD ${SCRIPT_DIR}/submit-convert-and-mllm-eval.slurm $EVAL_ARGS")
         JOB_ID=$(echo "$JOB_OUTPUT" | grep -oP '\d+$')

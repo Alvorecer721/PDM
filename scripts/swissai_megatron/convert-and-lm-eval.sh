@@ -17,6 +17,8 @@ DEFAULT_MAX_LENGTH=""  # Empty means no max_length constraint
 DEFAULT_APPLY_CHAT_TEMPLATE="false"
 DEFAULT_OFFLINE_DATASETS="true"
 DEFAULT_NO_CONVERT="false"
+DEFAULT_WANDB_ENABLED="true"
+DEFAULT_WANDB_PROJECT="lm-eval"
 
 # Parse arguments
 if [ "$#" -lt 1 ]; then
@@ -37,6 +39,9 @@ if [ "$#" -lt 1 ]; then
     echo "  --apply-chat-template         Apply chat template to inputs (default: ${DEFAULT_APPLY_CHAT_TEMPLATE})"
     echo "  --no-offline-datasets         Disable offline mode for HF datasets (default: offline mode enabled)"
     echo "  --no-convert                  Skip model conversion (expects HF directory to exist)"
+    echo "  --no-wandb                    Disable wandb logging (default: enabled)"
+    echo "  --wandb-project PROJECT       Wandb project name (default: ${DEFAULT_WANDB_PROJECT})"
+    echo "  --group-name NAME             Group name for wandb run naming and tags"
     exit 1
 fi
 
@@ -52,6 +57,9 @@ MAX_LENGTH="${DEFAULT_MAX_LENGTH}"
 APPLY_CHAT_TEMPLATE="${DEFAULT_APPLY_CHAT_TEMPLATE}"
 OFFLINE_DATASETS="${DEFAULT_OFFLINE_DATASETS}"
 NO_CONVERT="${DEFAULT_NO_CONVERT}"
+WANDB_ENABLED="${DEFAULT_WANDB_ENABLED}"
+WANDB_PROJECT="${DEFAULT_WANDB_PROJECT}"
+GROUP_NAME=""
 TOKENIZER_EXPLICITLY_SET="false"
 
 # Parse optional arguments
@@ -89,6 +97,18 @@ while [[ $# -gt 0 ]]; do
         --no-convert)
             NO_CONVERT="true"
             shift
+            ;;
+        --no-wandb)
+            WANDB_ENABLED="false"
+            shift
+            ;;
+        --wandb-project)
+            WANDB_PROJECT="$2"
+            shift 2
+            ;;
+        --group-name)
+            GROUP_NAME="$2"
+            shift 2
             ;;
         *)
             echo "Unknown option: $1"
@@ -148,6 +168,9 @@ echo "Max length:           ${MAX_LENGTH:-no limit}"
 echo "Apply chat template:  ${APPLY_CHAT_TEMPLATE}"
 echo "Offline datasets:     ${OFFLINE_DATASETS}"
 echo "No convert:           ${NO_CONVERT}"
+echo "Wandb enabled:        ${WANDB_ENABLED}"
+echo "Wandb project:        ${WANDB_PROJECT}"
+echo "Group name:           ${GROUP_NAME}"
 echo "Num GPU:              ${NUM_GPUS}"
 echo "========================================"
 echo ""
@@ -163,7 +186,10 @@ if [ "$IS_HF_IDENTIFIER" = "true" ]; then
     # Replace slashes with double underscores for HF identifiers
     EXPR_NAME=$(echo "${EXPR_PATH}" | sed 's/\//__/g')
 else
-    EXPR_NAME=$(basename ${EXPR_PATH})
+    # Strip trailing /HF or /HF/ so result dir uses the actual experiment name
+    CLEAN_PATH="${EXPR_PATH%/}"    # remove trailing slash
+    CLEAN_PATH="${CLEAN_PATH%/HF}" # remove trailing /HF
+    EXPR_NAME=$(basename ${CLEAN_PATH})
 fi
 RES_PATH="/iopsstor/scratch/cscs/$USER/PDM/results/lm_eval/${EXPR_NAME}"
 
@@ -230,6 +256,12 @@ echo "📦 Pinning PEFT to compatible version..."
 pip install "peft==0.13.2"
 pip install --upgrade "transformers>=4.56,<5.0.0"
 
+# Install wandb extra if wandb logging is enabled
+if [ "$WANDB_ENABLED" = "true" ]; then
+    echo "📦 Installing wandb support for lm-eval..."
+    pip install "lm_eval[wandb]"
+fi
+
 # Install optional dependencies for each task
 echo "📦 Installing optional task dependencies..."
 IFS=',' read -ra TASK_ARRAY <<< "$TASKS"
@@ -272,11 +304,44 @@ else
     unset HF_DATASETS_OFFLINE
 fi
 
-accelerate launch -m lm_eval --model hf \
+# Build wandb arguments if enabled
+WANDB_FLAG=""
+if [ "$WANDB_ENABLED" = "true" ]; then
+    # Build run name: {EXPR_NAME}_{GROUP_NAME} or just {EXPR_NAME}
+    if [ -n "$GROUP_NAME" ]; then
+        WANDB_RUN_NAME="${EXPR_NAME}_${GROUP_NAME}"
+    else
+        WANDB_RUN_NAME="${EXPR_NAME}"
+    fi
+
+    # Build tags via WANDB_TAGS env var (wandb reads this natively as comma-separated list)
+    # Cannot pass tags in --wandb_args because commas in tags conflict with the key=value,key=value format
+    # Note: wandb tags must be <= 64 characters each, so we use short tags only (group name + task names)
+    export WANDB_TAGS=""
+    if [ -n "$GROUP_NAME" ]; then
+        export WANDB_TAGS="${GROUP_NAME}"
+    fi
+    # Add individual task names as tags
+    IFS=',' read -ra TAG_TASKS <<< "$TASKS"
+    for t in "${TAG_TASKS[@]}"; do
+        if [ -n "$WANDB_TAGS" ]; then
+            export WANDB_TAGS="${WANDB_TAGS},${t}"
+        else
+            export WANDB_TAGS="${t}"
+        fi
+    done
+
+    WANDB_FLAG="--wandb_args project=${WANDB_PROJECT},name=${WANDB_RUN_NAME}"
+    echo "Wandb run name: ${WANDB_RUN_NAME}"
+    echo "Wandb tags (env): ${WANDB_TAGS}"
+fi
+
+accelerate launch ${PDM_DIR}/scripts/swissai_megatron/wandb_guard_launcher.py -m lm_eval --model hf \
    --model_args "${MODEL_ARGS}" \
    --tasks "${TASKS}" \
    --batch_size "${BATCH_SIZE}" \
    --output_path "${RES_PATH}" \
-   ${APPLY_CHAT}
+   ${APPLY_CHAT} \
+   ${WANDB_FLAG}
 
 echo "Evaluation completed. Results saved to: ${RES_PATH}"

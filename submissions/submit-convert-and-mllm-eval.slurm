@@ -8,6 +8,7 @@
 #SBATCH --time=12:00:00
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
+#SBATCH --reservation=PA-2338-RL
 
 set -e  # Exit immediately if any command fails
 set -x  # Print commands for debugging
@@ -22,8 +23,11 @@ DEFAULT_MAX_LENGTH=""
 DEFAULT_OFFLINE_DATASETS="true"
 DEFAULT_LOG_SUBDIR="log/eval"
 DEFAULT_GROUP_NAME="default"
-DEFAULT_EMU3_MIN_PIXELS=""
-DEFAULT_EMU3_MAX_PIXELS=""
+DEFAULT_EMU_MIN_PIXELS=""
+DEFAULT_EMU_MAX_PIXELS=""
+WANDB_ENABLED="true"
+WANDB_PROJECT=""
+WANDB_RUN_ID=""
 
 # Parse arguments
 if [ "$#" -lt 1 ]; then
@@ -38,12 +42,14 @@ if [ "$#" -lt 1 ]; then
     echo "  --tasks TASKS                 Comma-separated list of tasks (default: ${DEFAULT_TASKS})"
     echo "  --batch-size SIZE             Batch size for evaluation (default: ${DEFAULT_BATCH_SIZE})"
     echo "  --max-length LENGTH           Maximum sequence length (default: no limit)"
-    echo "  --emu3-min-pixels PIXELS      Minimum pixels for EMU3 vision encoder (e.g., 262144 for 512*512)"
-    echo "  --emu3-max-pixels PIXELS      Maximum pixels for EMU3 vision encoder (e.g., 1048576 for 1024*1024)"
+    echo "  --emu-min-pixels PIXELS      Minimum pixels for EMU vision encoder (e.g., 262144 for 512*512)"
+    echo "  --emu-max-pixels PIXELS      Maximum pixels for EMU vision encoder (e.g., 1048576 for 1024*1024)"
     echo "  --no-offline-datasets         Disable offline mode for HF datasets (default: offline mode enabled)"
     echo "  --no-convert                  Skip model conversion (expects HF directory to exist)"
     echo "  --log-subdir SUBDIR           Log subdirectory relative to PDM root (default: ${DEFAULT_LOG_SUBDIR})"
     echo "  --group-name NAME             Group name for organizing logs (default: ${DEFAULT_GROUP_NAME})"
+    echo "  --no-wandb                    Disable wandb logging (default: enabled)"
+    echo "  --wandb-project PROJECT       Wandb project name (default: lmms-eval)"
     echo "  --debug                       Add debug params to llmms eval run, prints 1st 5 samples with debug info"
     exit 1
 fi
@@ -63,8 +69,8 @@ NO_CONVERT="false"
 TOKENIZER_EXPLICITLY_SET="false"
 LOG_SUBDIR="${DEFAULT_LOG_SUBDIR}"
 GROUP_NAME="${DEFAULT_GROUP_NAME}"
-EMU3_MIN_PIXELS="${DEFAULT_EMU3_MIN_PIXELS}"
-EMU3_MAX_PIXELS="${DEFAULT_EMU3_MAX_PIXELS}"
+EMU_MIN_PIXELS="${DEFAULT_EMU_MIN_PIXELS}"
+EMU_MAX_PIXELS="${DEFAULT_EMU_MAX_PIXELS}"
 DEBUG=""
 
 # Parse optional arguments
@@ -99,12 +105,12 @@ while [[ $# -gt 0 ]]; do
             MAX_LENGTH="$2"
             shift 2
             ;;
-        --emu3-min-pixels)
-            EMU3_MIN_PIXELS="$2"
+        --emu-min-pixels)
+            EMU_MIN_PIXELS="$2"
             shift 2
             ;;
-        --emu3-max-pixels)
-            EMU3_MAX_PIXELS="$2"
+        --emu-max-pixels)
+            EMU_MAX_PIXELS="$2"
             shift 2
             ;;
         --no-offline-datasets)
@@ -121,6 +127,18 @@ while [[ $# -gt 0 ]]; do
             ;;
         --group-name)
             GROUP_NAME="$2"
+            shift 2
+            ;;
+        --no-wandb)
+            WANDB_ENABLED="false"
+            shift
+            ;;
+        --wandb-project)
+            WANDB_PROJECT="$2"
+            shift 2
+            ;;
+        --wandb-run-id)
+            WANDB_RUN_ID="$2"
             shift 2
             ;;
         *)
@@ -155,6 +173,10 @@ echo "Batch size:           ${BATCH_SIZE}"
 echo "Max length:           ${MAX_LENGTH:-no limit}"
 echo "Offline datasets:     ${OFFLINE_DATASETS}"
 echo "No convert:           ${NO_CONVERT}"
+echo "Wandb enabled:        ${WANDB_ENABLED}"
+if [ -n "$WANDB_PROJECT" ]; then
+    echo "Wandb project:        ${WANDB_PROJECT}"
+fi
 echo "========================================"
 echo ""
 
@@ -178,11 +200,11 @@ fi
 if [ -n "$MAX_LENGTH" ]; then
     EVAL_ARGS="$EVAL_ARGS --max-length $MAX_LENGTH"
 fi
-if [ -n "$EMU3_MIN_PIXELS" ]; then
-    EVAL_ARGS="$EVAL_ARGS --emu3-min-pixels $EMU3_MIN_PIXELS"
+if [ -n "$EMU_MIN_PIXELS" ]; then
+    EVAL_ARGS="$EVAL_ARGS --emu-min-pixels $EMU_MIN_PIXELS"
 fi
-if [ -n "$EMU3_MAX_PIXELS" ]; then
-    EVAL_ARGS="$EVAL_ARGS --emu3-max-pixels $EMU3_MAX_PIXELS"
+if [ -n "$EMU_MAX_PIXELS" ]; then
+    EVAL_ARGS="$EVAL_ARGS --emu-max-pixels $EMU_MAX_PIXELS"
 fi
 if [ "$OFFLINE_DATASETS" = "false" ]; then
     EVAL_ARGS="$EVAL_ARGS --no-offline-datasets"
@@ -192,6 +214,18 @@ if [ "$NO_CONVERT" = "true" ]; then
 fi
 if [ "$DEBUG" = "true" ]; then
     EVAL_ARGS="$EVAL_ARGS --debug"
+fi
+if [ "$WANDB_ENABLED" = "false" ]; then
+    EVAL_ARGS="$EVAL_ARGS --no-wandb"
+fi
+if [ -n "$WANDB_PROJECT" ]; then
+    EVAL_ARGS="$EVAL_ARGS --wandb-project $WANDB_PROJECT"
+fi
+if [ -n "$GROUP_NAME" ]; then
+    EVAL_ARGS="$EVAL_ARGS --group-name $GROUP_NAME"
+fi
+if [ -n "$WANDB_RUN_ID" ]; then
+    EVAL_ARGS="$EVAL_ARGS --wandb-run-id $WANDB_RUN_ID"
 fi
 
 # Execute the script inside the compute node using srun
