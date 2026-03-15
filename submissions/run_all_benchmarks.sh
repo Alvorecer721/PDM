@@ -1,0 +1,11 @@
+# FOR NOW MLLM BENCHMARKS
+
+MLLM_GROUPS_FILE="/users/rkreft/PDM/config/mllm_eval_task_groups_grouped_2.json"
+
+./run_benchmarks.sh /users/rkreft/megatron-repo/logs/Meg-Runs/apertus_image_extension/apertus-8b-img-SFT-64nodes-gbs512-mbs1-steps8030-seqlen8192-S2ImgWeight1-s2BlipExt-imW0/HF --model-type apertus --tokenizer /capstor/store/cscs/swissai/infra01/MLLM/tokenizer/apertus_emu3.5_instruct --lmms-eval --mllm-task-groups $MLLM_GROUPS_FILE --model apertus_emu3p5 --no-offline-datasets
+./run_benchmarks.sh /users/rkreft/megatron-repo/logs/Meg-Runs/apertus_image_extension/apertus-8b-img-SFT-64nodes-gbs512-mbs1-steps8030-seqlen8192-S2ImgWeight0-s2BlipExt-imW0/HF --model-type apertus --tokenizer /capstor/store/cscs/swissai/infra01/MLLM/tokenizer/apertus_emu3.5_instruct --lmms-eval --mllm-task-groups $MLLM_GROUPS_FILE --model apertus_emu3p5 --no-offline-datasets
+./run_benchmarks.sh BAAI/Emu3.5 --lmms-eval --model emu3p5 --mllm-task-groups $MLLM_GROUPS_FILE --mllm-batch-size 1 --no-offline-datasets
+./run_benchmarks.sh BAAI/Emu3-Chat --lmms-eval --model emu3 --mllm-task-groups $MLLM_GROUPS_FILE --mllm-batch-size 1 --no-offline-datasets
+./run_benchmarks.sh /users/rkreft/megatron-repo/logs/Meg-Runs/apertus_image_extension/apertus-8b-img-SFT-32nodes-gbs512-mbs1-steps8030-img-text-seqlen8192-s2onlytxtloss/HF --model-type apertus --tokenizer /capstor/store/cscs/swissai/infra01/MLLM/tokenizer/apertus_emu3.5_instruct --lmms-eval --mllm-task-groups $MLLM_GROUPS_FILE --model apertus_emu3p5 --no-offline-datasets
+./run_benchmarks.sh /users/rkreft/megatron-repo/logs/Meg-Runs/apertus_image_extension/apertus-8b-img-SFT-64nodes-gbs512-mbs1-steps8030-img-text-seqlen8192/HF --model-type apertus --tokenizer /capstor/store/cscs/swissai/infra01/MLLM/tokenizer/apertus_emu3.5_instruct --lmms-eval --mllm-task-groups $MLLM_GROUPS_FILE --model apertus_emu3p5 --no-offline-datasets
+./run_benchmarks.sh /users/rkreft/megatron-repo/logs/Meg-Runs/apertus_image_extension/apertus-8b-img-SFT-64nodes-gbs512-mbs1-steps8030-img-text-seqlen8192-s2onlytxtloss-S2ImgWeight0.1/HF --model-type apertus --tokenizer /capstor/store/cscs/swissai/infra01/MLLM/tokenizer/apertus_emu3.5_instruct --lmms-eval --mllm-task-groups $MLLM_GROUPS_FILE --model apertus_emu3p5 --no-offline-datasets

@@ -1,0 +1,8 @@
+[
+  {"name": "mmlu", "tasks": "mmlu"},
+  {"name": "gsm8k", "tasks": "gsm8k"},
+  {"name": "ifeval", "tasks": "ifeval"},
+  {"name": "truthfulqa_mc2", "tasks": "truthfulqa_mc2"},
+  {"name": "bbh", "tasks": "bbh"},
+  {"name": "hellaswag", "tasks": "hellaswag"}
+]

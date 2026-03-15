@@ -1,0 +1,10 @@
+[
+  {"name": "hellaswag", "tasks": "hellaswag"},
+  {"name": "mmlu", "tasks": "mmlu"},
+  {"name": "winogrande", "tasks": "winogrande"},
+  {"name": "wikitext", "tasks": "wikitext"},
+  {"name": "arc_easy", "tasks": "arc_easy"},
+  {"name": "arc_challenge", "tasks": "arc_challenge"},
+  {"name": "piqa", "tasks": "piqa"},
+  {"name": "commonsense_qa", "tasks": "commonsense_qa"}
+]
