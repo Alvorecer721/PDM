@@ -50,6 +50,13 @@ usage() {
     echo "                                 (default: \${experiment_path}/checkpoints/3B) -> MUST define for apertus model!!"
     echo "  --debug                         Adds debug prints to the first 5 processed samples of each spawned eval task for mllm eval"
     echo ""
+    echo "Conversion Options:"
+    echo "  --old-megatron                 Use legacy pretrain_gpt model_provider (deprecated)"
+    echo "  --logits-test                  Run logits comparison after HF conversion (requires --convert)"
+    echo "                                 Auto-compares converted HF model against source Megatron checkpoint"
+    echo "  --logits-test-ref SPEC         Override reference checkpoint for logits comparison"
+    echo "                                 (e.g. hf:/path/to/ref or meg:/path/to/ckpt)"
+    echo ""
     echo "Evaluation Options:"
     echo "  --instruct                     Use instruct mode for LM eval (sets chat template)"
     echo "  --lm-batch-size SIZE           Batch size for LM evaluation (default: 6)"
@@ -234,6 +241,9 @@ WANDB_ENABLED="true"
 WANDB_PROJECT=""
 ENVIRONMENT="/iopsstor/scratch/cscs/ahernnde/ncg_new_v2.toml"
 DEPENDENCY_JOB=""
+OLD_MEGATRON="false"
+LOGITS_TEST="false"
+LOGITS_TEST_REF=""
 #ENVIRONMENT="/capstor/store/cscs/swissai/infra01/containers/nemo.toml"
 
 # Parse optional arguments
@@ -305,6 +315,18 @@ while [[ $# -gt 0 ]]; do
             ;;
         --environment)
             ENVIRONMENT="$2"
+            shift 2
+            ;;
+        --old-megatron)
+            OLD_MEGATRON="true"
+            shift
+            ;;
+        --logits-test)
+            LOGITS_TEST="true"
+            shift
+            ;;
+        --logits-test-ref)
+            LOGITS_TEST_REF="$2"
             shift 2
             ;;
         --dependency)
@@ -389,29 +411,38 @@ if [ "$DO_CONVERT" = "true" ]; then
     echo -e "${GREEN}[${CURRENT_JOB}/${TOTAL_JOBS}] Launching conversion job...${NC}"
 
     # Build conversion arguments
-    CONVERT_ARGS="$EXPERIMENT_PATH --model-type $MODEL_TYPE --log-subdir $LOG_SUBDIR"
+    CONVERT_ARGS=("$EXPERIMENT_PATH" --model-type "$MODEL_TYPE" --log-subdir "$LOG_SUBDIR")
     if [ -n "$CHECKPOINT_PATH" ]; then
-        CONVERT_ARGS="$CONVERT_ARGS --checkpoint-path $CHECKPOINT_PATH"
+        CONVERT_ARGS+=(--checkpoint-path "$CHECKPOINT_PATH")
     fi
     if [ -n "$TOKENIZER" ]; then
-        CONVERT_ARGS="$CONVERT_ARGS --tokenizer $TOKENIZER"
+        CONVERT_ARGS+=(--tokenizer "$TOKENIZER")
+    fi
+    if [ "$OLD_MEGATRON" = "true" ]; then
+        CONVERT_ARGS+=(--old-megatron)
+    fi
+    if [ "$LOGITS_TEST" = "true" ]; then
+        CONVERT_ARGS+=(--logits-test)
+    fi
+    if [ -n "$LOGITS_TEST_REF" ]; then
+        CONVERT_ARGS+=(--logits-test-ref "$LOGITS_TEST_REF")
     fi
 
     # Build sbatch command
-    SBATCH_CMD="sbatch"
+    SBATCH_CMD=(sbatch)
 
     # Add dependency if specified
     if [ -n "$DEPENDENCY_JOB" ]; then
-        SBATCH_CMD="$SBATCH_CMD --dependency=afterany:${DEPENDENCY_JOB}"
+        SBATCH_CMD+=(--dependency="afterany:${DEPENDENCY_JOB}")
     fi
 
     # Add environment if specified
     if [ -n "$ENVIRONMENT" ]; then
-        SBATCH_CMD="$SBATCH_CMD --environment=$ENVIRONMENT"
+        SBATCH_CMD+=(--environment="$ENVIRONMENT")
     fi
 
     # Submit job
-    JOB_OUTPUT=$(eval "$SBATCH_CMD ${SCRIPT_DIR}/submit-convert.slurm $CONVERT_ARGS")
+    JOB_OUTPUT=$("${SBATCH_CMD[@]}" "${SCRIPT_DIR}/submit-convert.slurm" "${CONVERT_ARGS[@]}")
     CONVERT_JOB_ID=$(echo "$JOB_OUTPUT" | grep -oP '\d+$')
 
     if [ -n "$DEPENDENCY_JOB" ]; then
@@ -444,43 +475,43 @@ if [ "$DO_LM_EVAL" = "true" ]; then
         echo "  Environment: ${ENVIRONMENT}"
 
         # Build sbatch command
-        SBATCH_CMD="sbatch"
+        SBATCH_CMD=(sbatch)
 
         # Add dependency if conversion job was launched
         if [ -n "$CONVERT_JOB_ID" ]; then
-            SBATCH_CMD="$SBATCH_CMD --dependency=afterok:${CONVERT_JOB_ID}"
+            SBATCH_CMD+=(--dependency="afterok:${CONVERT_JOB_ID}")
         fi
 
         # Add environment if specified
         if [ -n "$ENVIRONMENT" ]; then
-            SBATCH_CMD="$SBATCH_CMD --environment=$ENVIRONMENT"
+            SBATCH_CMD+=(--environment="$ENVIRONMENT")
         fi
 
         # Build arguments for the eval script
-        EVAL_ARGS="$EVAL_CP_PATH --tasks $TASKS --model-type $MODEL_TYPE --log-subdir $LOG_SUBDIR --group-name $GROUP_NAME"
-        
+        EVAL_ARGS=("$EVAL_CP_PATH" --tasks "$TASKS" --model-type "$MODEL_TYPE" --log-subdir "$LOG_SUBDIR" --group-name "$GROUP_NAME")
+
         # never convert as this is done by this script potentially if needed
-        EVAL_ARGS="$EVAL_ARGS --no-convert"
+        EVAL_ARGS+=(--no-convert)
 
         if [ -n "$INSTRUCT_FLAG" ]; then
-            EVAL_ARGS="$EVAL_ARGS $INSTRUCT_FLAG"
+            EVAL_ARGS+=($INSTRUCT_FLAG)
         fi
-        EVAL_ARGS="$EVAL_ARGS --batch-size $LM_BATCH_SIZE"
+        EVAL_ARGS+=(--batch-size "$LM_BATCH_SIZE")
         if [ -n "$TOKENIZER" ]; then
-            EVAL_ARGS="$EVAL_ARGS --tokenizer $TOKENIZER"
+            EVAL_ARGS+=(--tokenizer "$TOKENIZER")
         fi
         if [ "$WANDB_ENABLED" = "false" ]; then
-            EVAL_ARGS="$EVAL_ARGS --no-wandb"
+            EVAL_ARGS+=(--no-wandb)
         fi
         if [ -n "$WANDB_PROJECT" ]; then
-            EVAL_ARGS="$EVAL_ARGS --wandb-project $WANDB_PROJECT"
+            EVAL_ARGS+=(--wandb-project "$WANDB_PROJECT")
         fi
         if [ "$OFFLINE_DATASETS" = "false" ]; then
-            EVAL_ARGS="$EVAL_ARGS --no-offline-datasets"
+            EVAL_ARGS+=(--no-offline-datasets)
         fi
 
         # Submit job
-        JOB_OUTPUT=$(eval "$SBATCH_CMD ${SCRIPT_DIR}/submit-convert-and-lm-eval.slurm $EVAL_ARGS")
+        JOB_OUTPUT=$("${SBATCH_CMD[@]}" "${SCRIPT_DIR}/submit-convert-and-lm-eval.slurm" "${EVAL_ARGS[@]}")
         JOB_ID=$(echo "$JOB_OUTPUT" | grep -oP '\d+$')
         LM_EVAL_JOB_IDS+=("$JOB_ID")
 
@@ -508,42 +539,42 @@ if [ "$DO_MLLM_EVAL" = "true" ]; then
         echo "  Environment: ${ENVIRONMENT}"
 
         # Build sbatch command
-        SBATCH_CMD="sbatch"
+        SBATCH_CMD=(sbatch)
 
         # Add dependency if conversion job was launched
         if [ -n "$CONVERT_JOB_ID" ]; then
-            SBATCH_CMD="$SBATCH_CMD --dependency=afterok:${CONVERT_JOB_ID}"
+            SBATCH_CMD+=(--dependency="afterok:${CONVERT_JOB_ID}")
         fi
 
         # Add environment if specified
         if [ -n "$ENVIRONMENT" ]; then
-            SBATCH_CMD="$SBATCH_CMD --environment=$ENVIRONMENT"
+            SBATCH_CMD+=(--environment="$ENVIRONMENT")
         fi
 
         # Build arguments for the eval script
-        EVAL_ARGS="$EVAL_CP_PATH --no-convert --tasks $TASKS --model-type $MODEL_TYPE --log-subdir $LOG_SUBDIR --group-name $GROUP_NAME"
+        EVAL_ARGS=("$EVAL_CP_PATH" --no-convert --tasks "$TASKS" --model-type "$MODEL_TYPE" --log-subdir "$LOG_SUBDIR" --group-name "$GROUP_NAME")
 
-        EVAL_ARGS="$EVAL_ARGS --batch-size $MLLM_BATCH_SIZE"
+        EVAL_ARGS+=(--batch-size "$MLLM_BATCH_SIZE")
         if [ -n "$TOKENIZER" ]; then
-            EVAL_ARGS="$EVAL_ARGS --tokenizer $TOKENIZER"
+            EVAL_ARGS+=(--tokenizer "$TOKENIZER")
         fi
         if [ -n "$MODEL" ]; then
-            EVAL_ARGS="$EVAL_ARGS --model $MODEL"
+            EVAL_ARGS+=(--model "$MODEL")
         fi
         if [ "$DEBUG" = "true" ]; then
-            EVAL_ARGS="$EVAL_ARGS --debug"
+            EVAL_ARGS+=(--debug)
         fi
         if [ "$WANDB_ENABLED" = "false" ]; then
-            EVAL_ARGS="$EVAL_ARGS --no-wandb"
+            EVAL_ARGS+=(--no-wandb)
         fi
         if [ -n "$WANDB_PROJECT" ]; then
-            EVAL_ARGS="$EVAL_ARGS --wandb-project $WANDB_PROJECT"
+            EVAL_ARGS+=(--wandb-project "$WANDB_PROJECT")
         fi
         if [ "$OFFLINE_DATASETS" = "false" ]; then
-            EVAL_ARGS="$EVAL_ARGS --no-offline-datasets"
+            EVAL_ARGS+=(--no-offline-datasets)
         fi
         # Submit job
-        JOB_OUTPUT=$(eval "$SBATCH_CMD ${SCRIPT_DIR}/submit-convert-and-mllm-eval.slurm $EVAL_ARGS")
+        JOB_OUTPUT=$("${SBATCH_CMD[@]}" "${SCRIPT_DIR}/submit-convert-and-mllm-eval.slurm" "${EVAL_ARGS[@]}")
         JOB_ID=$(echo "$JOB_OUTPUT" | grep -oP '\d+$')
         MLLM_EVAL_JOB_IDS+=("$JOB_ID")
 
@@ -574,20 +605,23 @@ if [ ${#ALL_JOB_IDS[@]} -gt 0 ]; then
 fi
 
 # Build summary job arguments
-SUMMARY_ARGS="$LOG_SUBDIR"
+SUMMARY_ARGS=("$LOG_SUBDIR")
 if [ -n "$CONVERT_JOB_ID" ]; then
-    SUMMARY_ARGS="$SUMMARY_ARGS --convert $CONVERT_JOB_ID"
+    SUMMARY_ARGS+=(--convert "$CONVERT_JOB_ID")
 fi
 if [ ${#LM_EVAL_JOB_IDS[@]} -gt 0 ]; then
-    SUMMARY_ARGS="$SUMMARY_ARGS --lm-eval ${LM_EVAL_JOB_IDS[*]}"
+    SUMMARY_ARGS+=(--lm-eval "${LM_EVAL_JOB_IDS[@]}")
 fi
 if [ ${#MLLM_EVAL_JOB_IDS[@]} -gt 0 ]; then
-    SUMMARY_ARGS="$SUMMARY_ARGS --mllm-eval ${MLLM_EVAL_JOB_IDS[*]}"
+    SUMMARY_ARGS+=(--mllm-eval "${MLLM_EVAL_JOB_IDS[@]}")
 fi
 
 # Submit summary job
-SUMMARY_CMD="sbatch $DEPENDENCY_STRING"
-SUMMARY_OUTPUT=$(eval "$SUMMARY_CMD ${SCRIPT_DIR}/submit-job-summary.slurm $SUMMARY_ARGS")
+SUMMARY_CMD=(sbatch)
+if [ -n "$DEPENDENCY_STRING" ]; then
+    SUMMARY_CMD+=("$DEPENDENCY_STRING")
+fi
+SUMMARY_OUTPUT=$("${SUMMARY_CMD[@]}" "${SCRIPT_DIR}/submit-job-summary.slurm" "${SUMMARY_ARGS[@]}")
 SUMMARY_JOB_ID=$(echo "$SUMMARY_OUTPUT" | grep -oP '\d+$')
 
 echo "  Summary Job ID: ${SUMMARY_JOB_ID}"

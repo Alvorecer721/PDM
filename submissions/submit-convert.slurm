@@ -39,6 +39,9 @@ if [ "$#" -lt 1 ]; then
     echo "  --checkpoint-path PATH   Direct path to torch distributed checkpoint"
     echo "                           (default: \${experiment_path}/checkpoints/3B)"
     echo "  --tokenizer TOKENIZER    HuggingFace tokenizer path or identifier"
+    echo "  --old-megatron           Use legacy pretrain_gpt model_provider (deprecated)"
+    echo "  --logits-test            Run logits comparison after HF conversion"
+    echo "  --logits-test-ref SPEC   Reference checkpoint for logits comparison"
     echo "  --log-subdir SUBDIR      Log subdirectory relative to PDM root"
     echo ""
     echo "Example:"
@@ -64,7 +67,7 @@ while [[ $# -gt 0 ]]; do
             LOG_SUBDIR="$2"
             shift 2
             ;;
-        --model-type|--checkpoint-path|--tokenizer)
+        --model-type|--checkpoint-path|--tokenizer|--logits-test-ref)
             CONVERT_ARGS="$CONVERT_ARGS $1 $2"
             shift 2
             ;;

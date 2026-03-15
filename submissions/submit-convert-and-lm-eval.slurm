@@ -55,6 +55,7 @@ if [ "$#" -lt 1 ]; then
     echo "  --no-convert                  Skip model conversion (expects HF directory to exist)"
     echo "  --log-subdir SUBDIR           Log subdirectory relative to PDM root (default: ${DEFAULT_LOG_SUBDIR})"
     echo "  --group-name NAME             Group name for organizing logs (default: ${DEFAULT_GROUP_NAME})"
+    echo "  --old-megatron                Use legacy pretrain_gpt model_provider for conversion (deprecated)"
     echo "  --no-wandb                    Disable wandb logging (default: enabled)"
     echo "  --wandb-project PROJECT       Wandb project name (default: lm-eval)"
     exit 1
@@ -74,6 +75,7 @@ OFFLINE_DATASETS="${DEFAULT_OFFLINE_DATASETS}"
 INSTRUCT_MODE="false"
 TOKENIZER_EXPLICITLY_SET="false"
 NO_CONVERT="false"
+OLD_MEGATRON="false"
 LOG_SUBDIR="${DEFAULT_LOG_SUBDIR}"
 GROUP_NAME="${DEFAULT_GROUP_NAME}"
 WANDB_ENABLED="true"
@@ -130,6 +132,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-convert)
             NO_CONVERT="true"
+            shift
+            ;;
+        --old-megatron)
+            OLD_MEGATRON="true"
             shift
             ;;
         --log-subdir)
@@ -217,6 +223,9 @@ if [ "$OFFLINE_DATASETS" = "false" ]; then
 fi
 if [ "$NO_CONVERT" = "true" ]; then
     EVAL_ARGS="$EVAL_ARGS --no-convert"
+fi
+if [ "$OLD_MEGATRON" = "true" ]; then
+    EVAL_ARGS="$EVAL_ARGS --old-megatron"
 fi
 if [ "$WANDB_ENABLED" = "false" ]; then
     EVAL_ARGS="$EVAL_ARGS --no-wandb"

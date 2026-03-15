@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e  # Exit on error
 
 # Clones lm-eval if not exists to scratch, updates the repo and installs it.
 # For local Megatron checkpoints: converts to torch dist and HF checkpoints if not already done.
@@ -39,6 +40,7 @@ if [ "$#" -lt 1 ]; then
     echo "  --apply-chat-template         Apply chat template to inputs (default: ${DEFAULT_APPLY_CHAT_TEMPLATE})"
     echo "  --no-offline-datasets         Disable offline mode for HF datasets (default: offline mode enabled)"
     echo "  --no-convert                  Skip model conversion (expects HF directory to exist)"
+    echo "  --old-megatron                Use legacy pretrain_gpt model_provider for conversion (deprecated)"
     echo "  --no-wandb                    Disable wandb logging (default: enabled)"
     echo "  --wandb-project PROJECT       Wandb project name (default: ${DEFAULT_WANDB_PROJECT})"
     echo "  --group-name NAME             Group name for wandb run naming and tags"
@@ -61,6 +63,7 @@ WANDB_ENABLED="${DEFAULT_WANDB_ENABLED}"
 WANDB_PROJECT="${DEFAULT_WANDB_PROJECT}"
 GROUP_NAME=""
 TOKENIZER_EXPLICITLY_SET="false"
+OLD_MEGATRON="false"
 
 # Parse optional arguments
 while [[ $# -gt 0 ]]; do
@@ -96,6 +99,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-convert)
             NO_CONVERT="true"
+            shift
+            ;;
+        --old-megatron)
+            OLD_MEGATRON="true"
             shift
             ;;
         --no-wandb)
@@ -189,7 +196,7 @@ else
     # Strip trailing /HF or /HF/ so result dir uses the actual experiment name
     CLEAN_PATH="${EXPR_PATH%/}"    # remove trailing slash
     CLEAN_PATH="${CLEAN_PATH%/HF}" # remove trailing /HF
-    EXPR_NAME=$(basename ${CLEAN_PATH})
+    EXPR_NAME=$(basename "${CLEAN_PATH}")
 fi
 RES_PATH="/iopsstor/scratch/cscs/$USER/PDM/results/lm_eval/${EXPR_NAME}"
 
@@ -232,12 +239,15 @@ else
     echo "Running checkpoint conversion..."
 
     # Build conversion arguments
-    CONVERT_ARGS="${EXPR_PATH} --model-type ${MODEL_TYPE}"
+    CONVERT_ARGS=("${EXPR_PATH}" --model-type "${MODEL_TYPE}")
     if [ "$TOKENIZER_EXPLICITLY_SET" = "true" ]; then
-        CONVERT_ARGS="${CONVERT_ARGS} --tokenizer ${TOKENIZER}"
+        CONVERT_ARGS+=(--tokenizer "${TOKENIZER}")
+    fi
+    if [ "$OLD_MEGATRON" = "true" ]; then
+        CONVERT_ARGS+=(--old-megatron)
     fi
 
-    bash ${PDM_DIR}/scripts/swissai_megatron/convert.sh ${CONVERT_ARGS}
+    bash "${PDM_DIR}/scripts/swissai_megatron/convert.sh" "${CONVERT_ARGS[@]}"
 
     # Check if the conversion was successful
     if [ $? -ne 0 ]; then

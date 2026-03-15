@@ -1,0 +1,3 @@
+[
+  {"name": "mmvet+mathvista_testmini_cot+hallusion_bench_image", "tasks": "mmvet,mathvista_testmini_cot,hallusion_bench_image"}
+]

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e  # Exit on error
 
 # Clones lmms-eval if not exists to scratch, updates the repo and installs it.
 # For local Megatron checkpoints: converts to torch dist and HF checkpoints if not already done.
@@ -14,7 +15,7 @@ unset SSL_CERT_FILE
 
 # Default values (current as-is status)
 DEFAULT_MODEL_TYPE="llama3"
-DEFAULT_MODEL="llama_emu3"
+DEFAULT_MODEL="llama_emu3p5"
 DEFAULT_TASKS="ai2d"
 DEFAULT_BATCH_SIZE="1"
 DEFAULT_MAX_LENGTH=""  # Empty means no max_length constraint
@@ -42,6 +43,7 @@ if [ "$#" -lt 1 ]; then
     echo "  --emu-max-pixels PIXELS      Maximum pixels for EMU vision encoder (e.g., 1048576 for 1024*1024)"
     echo "  --no-offline-datasets         Disable offline mode for HF datasets (default: offline mode enabled)"
     echo "  --no-convert                  Skip model conversion (expects HF directory to exist)"
+    echo "  --old-megatron                Use legacy pretrain_gpt model_provider for conversion (deprecated)"
     echo "  --no-wandb                    Disable wandb logging (default: enabled)"
     echo "  --wandb-project PROJECT       Wandb project name (default: ${DEFAULT_WANDB_PROJECT})"
     echo "  --group-name NAME             Group name for wandb tags"
@@ -64,6 +66,7 @@ NO_CONVERT="${DEFAULT_NO_CONVERT}"
 EMU_MIN_PIXELS="${DEFAULT_EMU_MIN_PIXELS}"
 EMU_MAX_PIXELS="${DEFAULT_EMU_MAX_PIXELS}"
 TOKENIZER_EXPLICITLY_SET="false"
+OLD_MEGATRON="false"
 DEBUG=""
 WANDB_ENABLED="${DEFAULT_WANDB_ENABLED}"
 WANDB_PROJECT="${DEFAULT_WANDB_PROJECT}"
@@ -115,6 +118,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-convert)
             NO_CONVERT="true"
+            shift
+            ;;
+        --old-megatron)
+            OLD_MEGATRON="true"
             shift
             ;;
         --no-wandb)
@@ -201,7 +208,7 @@ else
     # Strip trailing /HF or /HF/ so result dir uses the actual experiment name
     CLEAN_PATH="${EXPR_PATH%/}"    # remove trailing slash
     CLEAN_PATH="${CLEAN_PATH%/HF}" # remove trailing /HF
-    EXPR_NAME=$(basename ${CLEAN_PATH})
+    EXPR_NAME=$(basename "${CLEAN_PATH}")
 fi
 RES_PATH="/iopsstor/scratch/cscs/$USER/PDM/results/lmms_eval/${EXPR_NAME}"
 
@@ -249,12 +256,15 @@ else
     echo "Running checkpoint conversion..."
 
     # Build conversion arguments
-    CONVERT_ARGS="${EXPR_PATH} --model-type ${MODEL_TYPE}"
+    CONVERT_ARGS=("${EXPR_PATH}" --model-type "${MODEL_TYPE}")
     if [ "$TOKENIZER_EXPLICITLY_SET" = "true" ]; then
-        CONVERT_ARGS="${CONVERT_ARGS} --tokenizer ${TOKENIZER}"
+        CONVERT_ARGS+=(--tokenizer "${TOKENIZER}")
+    fi
+    if [ "$OLD_MEGATRON" = "true" ]; then
+        CONVERT_ARGS+=(--old-megatron)
     fi
 
-    bash ${PDM_DIR}/scripts/swissai_megatron/convert.sh ${CONVERT_ARGS}
+    bash "${PDM_DIR}/scripts/swissai_megatron/convert.sh" "${CONVERT_ARGS[@]}"
 
     # Check if the conversion was successful
     if [ $? -ne 0 ]; then
@@ -266,7 +276,7 @@ fi
 # Install/update lmms-eval
 echo "📦 Setting up lmms-eval package..."
 cd "$EVAL_DIR" || exit
-pip uninstall jupyterlab -y  # Uninstall conflicting package
+pip uninstall jupyterlab -y 2>/dev/null || true  # Uninstall conflicting package (may not be installed)
 
 # Install lmms-eval with all dependencies from pyproject.toml
 pip install -e .
@@ -308,7 +318,7 @@ pip install --upgrade \
 # Fix specific version conflicts with NGC container packages
 # The lmms-eval installation may have downgraded antlr4-python3-runtime which breaks hydra-core and omegaconf
 echo "📦 Fixing antlr4-python3-runtime and omegaconf version conflict..."
-pip uninstall antlr4-python3-runtime omegaconf -y
+pip uninstall antlr4-python3-runtime omegaconf -y 2>/dev/null || true
 pip install --force-reinstall --no-cache-dir "antlr4-python3-runtime>=4.9,<5.0" "omegaconf>=2.3.0"
 
 # Pin PEFT to compatible version for transformers in NGC container
@@ -338,12 +348,7 @@ else
     TOKENIZER_PATH="${MODEL_PATH}"
 fi
 
-MODEL_ARGS=""
-if [ "$DEBUG" = "true" ]; then
-    MODEL_ARGS="--debug"
-fi
-
-MODEL_ARGS="${MODEL_ARGS},model_descriptor=${MODEL_PATH},tokenizer_path=${TOKENIZER_PATH}"
+MODEL_ARGS="model_descriptor=${MODEL_PATH},tokenizer_path=${TOKENIZER_PATH}"
 if [ -n "$MAX_LENGTH" ]; then
     MODEL_ARGS="${MODEL_ARGS},max_length=${MAX_LENGTH}"
 fi
@@ -398,12 +403,18 @@ if [ "$WANDB_ENABLED" = "true" ]; then
     echo "Wandb tags (env): ${WANDB_TAGS}"
 fi
 
+DEBUG_FLAG=""
+if [ "$DEBUG" = "true" ]; then
+    DEBUG_FLAG="--debug"
+fi
+
 accelerate launch ${PDM_DIR}/scripts/swissai_megatron/wandb_guard_launcher.py -m lmms_eval \
     --model "${MODEL}" \
     --model_args "${MODEL_ARGS}" \
     --tasks "${TASKS}" \
     --batch_size "${BATCH_SIZE}" \
     --output_path "${RES_PATH}" \
+    ${DEBUG_FLAG} \
     ${WANDB_FLAG}
 
 echo "Evaluation completed. Results saved to: ${RES_PATH}"

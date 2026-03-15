@@ -10,13 +10,15 @@
 #SBATCH --error=/dev/null
 #SBATCH --reservation=PA-2338-RL
 
+export OPENAI_API_KEY="${OPENAI_API_KEY:?OPENAI_API_KEY must be set}"
+
 set -e  # Exit immediately if any command fails
 set -x  # Print commands for debugging
 ulimit -c 0 # no core dumps
 
 # Default values
 DEFAULT_MODEL_TYPE="llama3"
-DEFAULT_MODEL="llama_emu3"
+DEFAULT_MODEL="llama_emu3p5"
 DEFAULT_TASKS="pope,gqa,vqav2_val,mmmu_val_group_img,mme,ai2d,ocrbench_v2,chartqa,docvqa,infovqa"
 DEFAULT_BATCH_SIZE="1"
 DEFAULT_MAX_LENGTH=""
@@ -50,6 +52,7 @@ if [ "$#" -lt 1 ]; then
     echo "  --group-name NAME             Group name for organizing logs (default: ${DEFAULT_GROUP_NAME})"
     echo "  --no-wandb                    Disable wandb logging (default: enabled)"
     echo "  --wandb-project PROJECT       Wandb project name (default: lmms-eval)"
+    echo "  --old-megatron                Use legacy pretrain_gpt model_provider for conversion (deprecated)"
     echo "  --debug                       Add debug params to llmms eval run, prints 1st 5 samples with debug info"
     exit 1
 fi
@@ -66,6 +69,7 @@ BATCH_SIZE="${DEFAULT_BATCH_SIZE}"
 MAX_LENGTH="${DEFAULT_MAX_LENGTH}"
 OFFLINE_DATASETS="${DEFAULT_OFFLINE_DATASETS}"
 NO_CONVERT="false"
+OLD_MEGATRON="false"
 TOKENIZER_EXPLICITLY_SET="false"
 LOG_SUBDIR="${DEFAULT_LOG_SUBDIR}"
 GROUP_NAME="${DEFAULT_GROUP_NAME}"
@@ -119,6 +123,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-convert)
             NO_CONVERT="true"
+            shift
+            ;;
+        --old-megatron)
+            OLD_MEGATRON="true"
             shift
             ;;
         --log-subdir)
@@ -211,6 +219,9 @@ if [ "$OFFLINE_DATASETS" = "false" ]; then
 fi
 if [ "$NO_CONVERT" = "true" ]; then
     EVAL_ARGS="$EVAL_ARGS --no-convert"
+fi
+if [ "$OLD_MEGATRON" = "true" ]; then
+    EVAL_ARGS="$EVAL_ARGS --old-megatron"
 fi
 if [ "$DEBUG" = "true" ]; then
     EVAL_ARGS="$EVAL_ARGS --debug"

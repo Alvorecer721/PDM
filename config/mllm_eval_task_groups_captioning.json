@@ -1,0 +1,5 @@
+[
+  {"name": "coco2017_cap_val+coco_karpathy_test", "tasks": "coco2017_cap_val,coco_karpathy_test"},
+  {"name": "flickr30k_test+nocaps_val+textcaps_val", "tasks": "flickr30k_test,nocaps_val,textcaps_val"},
+  {"name": "detailcaps+coco_cap_chair", "tasks": "detailcaps,coco_cap_chair"}
+]

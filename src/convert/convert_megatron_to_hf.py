@@ -8,7 +8,7 @@ from utils import (
     extract_iteration_number,
 )
 from typing import Dict, Any, Tuple
-from transformers import AutoModelForCausalLM, AutoConfig
+from transformers import AutoModelForCausalLM, AutoConfig, AutoTokenizer
 import torch
 from collections import OrderedDict
 
@@ -192,84 +192,94 @@ def convert_megatron_checkpoint_to_hf(checkpoint_path: str,
         map_location: Device to load the checkpoint to
         
     Returns:
-        The converted HuggingFace model
-        The model's configuration
+        Tuple of (model, config, args): The converted HuggingFace model, its configuration,
+        and the original Megatron checkpoint args (for extracting tokenizer_model, etc.)
     """
     # Load the checkpoint
     checkpoint = torch.load(checkpoint_path, weights_only=False, map_location=map_location)
     args = checkpoint['args']
-    
+
     # Create HF config
     config = create_llama_config(args)
-    
+
     # Convert state dict
     model_dict = checkpoint['model']
     hf_dict = convert_megatron_to_hf_state_dict(model_dict, args)
-    
+
     # Create and load model
     model = AutoModelForCausalLM.from_config(config)
     model.load_state_dict(hf_dict)
-    
+
     # Calculate trainable parameters
     if is_rank_0():
         print(f"Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
-    
-    return model, config
+
+    return model, config, args
 
 
-def convert_and_save_checkpoint(checkpoint_path, output_dir):
+def convert_and_save_checkpoint(checkpoint_path, output_dir, tokenizer_path=None):
     """Convert a checkpoint and save it to the specified output directory."""
     print(f"\nConverting checkpoint from: {checkpoint_path}")
-    model, config = convert_megatron_checkpoint_to_hf(str(checkpoint_path))
-    
+    model, config, ckpt_args = convert_megatron_checkpoint_to_hf(str(checkpoint_path))
+
     # Save model and config
     model.save_pretrained(output_dir)
     config.save_pretrained(output_dir)
-    
+
+    # Save tokenizer: explicit --tokenizer flag takes priority, else use checkpoint args
+    tok_path = tokenizer_path or getattr(ckpt_args, 'tokenizer_model', None)
+    if tok_path:
+        print(f"Saving tokenizer from: {tok_path}")
+        tokenizer = AutoTokenizer.from_pretrained(tok_path)
+        tokenizer.save_pretrained(output_dir)
+    else:
+        print("WARNING: No tokenizer path found (neither --tokenizer flag nor args.tokenizer_model). "
+              "Skipping tokenizer save.")
+
     print(f"Conversion complete!")
     print(f"Model saved to: {output_dir}")
 
     
-def handle_single_checkpoint(checkpoint_path, experiment_path):
+def handle_single_checkpoint(checkpoint_path, experiment_path, tokenizer_path=None):
     """Process a single checkpoint with the original behavior."""
     hf_dir = Path(experiment_path) / "HF"
-    
+
     if is_model_converted(hf_dir):
         print(f"\nHuggingFace model already exists at: {hf_dir}")
         print("Skipping conversion. Delete the HF directory if you want to reconvert.")
         return
-    
+
     clear_and_create_directory(hf_dir)
-    convert_and_save_checkpoint(checkpoint_path, hf_dir)
+    convert_and_save_checkpoint(checkpoint_path, hf_dir, tokenizer_path)
 
 
-def handle_multiple_checkpoints(checkpoint_paths, experiment_path):
+def handle_multiple_checkpoints(checkpoint_paths, experiment_path, tokenizer_path=None):
     """Process multiple checkpoints, saving each to its own iteration directory."""
     print(f"\nFound {len(checkpoint_paths)} checkpoints. Converting each to its own directory...")
-    
+
     # Create base HF directory if it doesn't exist
     base_hf_dir = Path(experiment_path) / "HF"
     if not base_hf_dir.exists():
         os.makedirs(base_hf_dir)
-    
+
     # Process each checkpoint
     for checkpoint_path in sorted(checkpoint_paths):
         iter_num = extract_iteration_number(checkpoint_path)
         if not iter_num:
             print(f"Warning: Could not extract iteration number from {checkpoint_path}, skipping")
             continue
-            
+
         iter_dir = base_hf_dir / f"iter_{iter_num}"
-        
+
         # Check if this iteration has already been converted
         if is_model_converted(iter_dir):
             print(f"\nHuggingFace model for iteration {iter_num} already exists at: {iter_dir}")
             print("Skipping conversion. Delete the directory if you want to reconvert.")
             continue
-        
+
         clear_and_create_directory(iter_dir)
-        convert_and_save_checkpoint(checkpoint_path, iter_dir)
-    
+        convert_and_save_checkpoint(checkpoint_path, iter_dir, tokenizer_path)
+
     print("\nAll checkpoint conversions completed!")
 
 
@@ -280,9 +290,11 @@ if __name__ == "__main__":
     import os
 
     parser = argparse.ArgumentParser(description='Convert SwissAI Megatron checkpoint to HuggingFace')
-    parser.add_argument('--experiment-path', type=str, required=True, 
+    parser.add_argument('--experiment-path', type=str, required=True,
                       help='Path to experiment directory')
-    
+    parser.add_argument('--tokenizer', type=str, default=None,
+                      help='HuggingFace tokenizer path (overrides checkpoint args.tokenizer_model)')
+
     args = parser.parse_args()
 
     # Check if experiment path exists
@@ -299,6 +311,6 @@ if __name__ == "__main__":
     
     # Branch based on number of checkpoints
     if len(checkpoint_paths) == 1:
-        handle_single_checkpoint(checkpoint_paths[0], args.experiment_path)
+        handle_single_checkpoint(checkpoint_paths[0], args.experiment_path, args.tokenizer)
     else:
-        handle_multiple_checkpoints(checkpoint_paths, args.experiment_path)
+        handle_multiple_checkpoints(checkpoint_paths, args.experiment_path, args.tokenizer)
